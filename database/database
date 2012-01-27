@@ -1,0 +1,37 @@
+CREATE TABLE species (
+    id_specie INT NOT NULL AUTO_INCREMENT,
+    specie VARCHAR(50),
+    PRIMARY KEY(id_specie)
+)ENGINE=InnoDB;
+
+CREATE TABLE tags (
+    id_tag INT NOT NULL AUTO_INCREMENT,
+    tag VARCHAR(50) NOT NULL,
+    PRIMARY KEY (id_tag)
+)ENGINE=InnoDB;
+
+CREATE TABLE sequences (
+    id_sequence INT NOT NULL AUTO_INCREMENT,
+    id_specie INT,
+    accession_number VARCHAR(10),
+    alphabet VARCHAR(7),
+    gene_name VARCHAR(20),      #TODO: display_id parsed
+    description VARCHAR(50),
+    length int,
+    PRIMARY KEY (id_sequence),
+    FOREIGN KEY (id_specie) REFERENCES species(id_specie)
+)ENGINE=InnoDB;
+
+#Aqui vai ter a familia e o formato do ficheiro
+CREATE TABLE seq_tags (
+    id_sequence INT NOT NULL,
+    id_tag INT NOT NULL,
+    FOREIGN KEY (id_sequence) REFERENCES sequences(id_sequence),
+    FOREIGN KEY (id_tag) REFERENCES tags(id_tag)
+)ENGINE=InnoDB;
+
+#INSERT INTO sequencias (accession) VALUES ('AC584');
+#INSERT INTO sequencias (accession) VALUES ('AC585');
+#INSERT INTO sequencias (accession) VALUES ('AC586');
+#INSERT INTO sequencias (accession) VALUES ('AC587');
+#INSERT INTO sequencias (accession) VALUES ('AC588');

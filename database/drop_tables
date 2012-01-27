@@ -1,0 +1,4 @@
+DROP TABLE seq_tags;
+DROP TABLE sequences;
+DROP TABLE tags;
+DROP TABLE species;
