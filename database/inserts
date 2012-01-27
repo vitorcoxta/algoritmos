@@ -1,0 +1,16 @@
+insert into tags (tag) values ('fasta');
+insert into tags (tag) values ('genbank');
+insert into tags (tag) values ('swissprot');
+insert into tags (tag) values ('bacteria');
+insert into tags (tag) values ('cianobacteria');
+insert into tags (tag) values ('plantae');
+insert into tags (tag) values ('animalia');
+insert into tags (tag) values ('fungi');
+insert into tags (tag) values ('protista');
+insert into tags (tag) values ('fungus');
+insert into tags (tag) values ('yeast');
+insert into tags (tag) values ('eucaryota');
+insert into tags (tag) values ('mammalia');
+insert into tags (tag) values ('vertebrata');
+insert into tags (tag) values ('primates');
+insert into tags (tag) values ('procaryota');
