@@ -72,10 +72,11 @@ sub insertion {
         #for my $specie (@species){
         #    print "$specie, ";
         #}
-        my $seq_obj = Bio::Seq->new(-seq => $sequence, -alphabet => $alphabet, -authority => $authority, -desc => $description, -display_id => $id, -get_dates => @dates, -is_circular => $is_circular, -keywords => @keywords, -seq_version => $seq_version);#, -species => $species);
-        my $seqio_obj = Bio::SeqIO->new(-file => '>sequence.gb', -format => 'genbank' );
-        $seqio_obj->write_seq($seq_obj);
-        print "\n\n\nCORREU TUDO BEM! :D\n\n\n";
+        #my $seq_obj = Bio::Seq->new(-seq => $sequence, -alphabet => $alphabet, -authority => $authority, -desc => $description, -display_id => $id, -get_dates => @dates, -is_circular => $is_circular, -keywords => @keywords, -seq_version => $seq_version);#, -species => $species);
+        #my $seqio_obj = Bio::SeqIO->new(-file => '>sequence.gb', -format => 'genbank' );
+        #$seqio_obj->write_seq($seq_obj);
+        #print "\n\n\nCORREU TUDO BEM! :D\n\n\n";
+        
     }
     elsif ($option == 2) {print "queres num ficheiro\n"}
 }
