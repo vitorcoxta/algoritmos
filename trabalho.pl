@@ -42,43 +42,40 @@ insertion();
 
 sub insertion {
     my $option = interface("ask_insertion_type");
-    if ($option == 1) {         #TODO: ver se faz sentido perguntar tanta coisa (o que não está comentado. o que está acho que nao faz sentido) -> vitor
-        #my $accession = interface("ask_accession");
+    if ($option == 1) {         #TODO: ver se faz sentido perguntar tanta coisa
         my $alphabet = interface("ask_alphabet");
         my $authority = interface("ask_authority");
         my $description = interface("ask_description");
-        my $id = interface("ask_id");
-        #my $division = interface("ask_division");
-        my @dates = interface("ask_dates");         #ver se dá para meter uma funçao a retornar $ e/ou @
-        #my @secondary_accessions = interface("ask_secondary_accessions");   #   .....//.....
+        my $gene_name = interface("ask_gene_name");
+        my $date = interface("ask_date");
         my $is_circular = interface("ask_is_circular");
-        my @keywords = interface("ask_keywords");                           #   .....//.....
-        #my $length = interface("ask_length");
-        #my $molecule = interface("ask_molecule");
-        #my $namespace = interface("ask_namespace");
+        my @keywords = interface("ask_keywords");
         my $sequence = interface("ask_sequence");
         my $seq_version = interface("ask_seq_version");
-        #my $species = Bio::Species->new(-classification => interface("ask_species"));          #TODO: ver isto das especies. sera que se pode meter tudo na tabela tags, e assim nao precisamos da tabela species???
-        #my @species = interface ("ask_species");
-        #print "\n\nAQUI ESTAO AS RESPOSTAS DADAS:\nalphabet: $alphabet\nauthority: $authority\ndesc: $description\nid: $id\ndates: ";
-        #for my $date (@dates){
-        #    print "$date, ";
-        #}
-        #print"\ncircular: $is_circular\nkeywords: ";
+        my $format = interface("ask_format");
+        my $seq_length = length($sequence);
+        
+        #TODO: fazer para perguntar a especie e mete-la na tabela species
+        #TODO: inserir as tags na tabela
+        
+        #print "\n\nAQUI ESTAO AS RESPOSTAS DADAS:\nalphabet: $alphabet\nauthority: $authority\ndesc: $description\ngene name: $gene_name\ndate: $date\ncircular: $is_circular\nkeywords: ";
         #for my $key (@keywords){
         #    print "$key, ";
         #}
-        #print"\nsequence: $sequence\nseq_version: $seq_version\nspecies: ";#.$species->species;
-        #for my $specie (@species){
-        #    print "$specie, ";
-        #}
+        #print"\nsequence: $sequence\nseq_version: $seq_version\nformat: $format\n";#species: ".$species->species;
+        
         #my $seq_obj = Bio::Seq->new(-seq => $sequence, -alphabet => $alphabet, -authority => $authority, -desc => $description, -display_id => $id, -get_dates => @dates, -is_circular => $is_circular, -keywords => @keywords, -seq_version => $seq_version);#, -species => $species);
         #my $seqio_obj = Bio::SeqIO->new(-file => '>sequence.gb', -format => 'genbank' );
         #$seqio_obj->write_seq($seq_obj);
-        #print "\n\n\nCORREU TUDO BEM! :D\n\n\n";
-        
+
+        my $sql = "INSERT INTO sequences (alphabet, authority, description, gene_name, date, is_circular, length, format, seq_version) VALUES ('"
+                  .$alphabet."', '".$authority."', '".$description."', '".$gene_name."', '".$date."', '".$is_circular."', '$seq_length', '".$format.
+                  "', '".$seq_version."')";
+        my $update = $dbh->do($sql);
+        if($update) {print ("A insercao foi executada com sucesso\n");}
+        else {print ("Ocorreu um erro na insercao\n");}
     }
-    elsif ($option == 2) {print "queres num ficheiro\n"}
+    elsif ($option == 2) {print "queres num ficheiro. depois trato de ti\n"}
 }
 
 #This function will have ALL the interface things
@@ -119,18 +116,17 @@ sub interface {
         chomp $answer;
         return $answer;
     }
-    elsif($type eq "ask_id"){
-        print "Insert the identifier: ";
+    elsif($type eq "ask_gene_name"){
+        print "Insert the gene name: ";
         $answer = <>;
         chomp $answer;
         return $answer;
     }
-    elsif($type eq "ask_dates"){
-        print "Insert the dates (seperated by ','): ";
+    elsif($type eq "ask_date"){
+        print "Insert the date: ";
         $answer = <>;
         chomp $answer;
-        @answer = split /\s*,\s*/, $answer;
-        return @answer;
+        return $answer;
     }
     elsif($type eq "ask_is_circular"){
         print "Is it circular? [yes/no]: ";
@@ -144,21 +140,10 @@ sub interface {
             $answer = 0;
             return $answer;
         }
-        else{interface("ask_is_circular_invalid_option")}
-    }
-    elsif($type eq "ask_is_circular_invalid_option"){
-        print "INVALID OPTION! Please choose a valid one! Is it circular? [yes/no]: ";
-        $answer = <>;
-        chomp $answer;
-        if ($answer eq "yes") {
-            $answer = 1;
-            return $answer;
+        else{
+            print "INVALID OPTION! Please choose a valid one! ";
+            interface("ask_is_circular");
         }
-        elsif ($answer eq "no") {
-            $answer = 0;
-            return $answer;
-        }
-        else{interface("ask_is_circular_invalid_option");}
     }
     elsif($type eq "ask_keywords"){
         print "Insert the keywords (seperated by ','): ";
@@ -185,6 +170,18 @@ sub interface {
         chomp $answer;
         @answer = split /\s*,\s*/, $answer;
         return @answer;
+    }
+    elsif($type eq "ask_format"){
+        print "Insert the format [fasta/genbank/swiss]: ";
+        $answer = <>;
+        chomp $answer;
+        if ($answer eq "fasta" or $answer eq "genbank" or $answer eq "swiss") {
+            return $answer;
+        }
+        else{
+            print "FORMAT NOT SUPORTED! Please choose a suported one! ";
+            interface("ask_format");
+        }
     }
 }
 

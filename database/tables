@@ -1,6 +1,6 @@
 CREATE TABLE species (
     id_specie INT NOT NULL AUTO_INCREMENT,
-    specie VARCHAR(50),
+    specie VARCHAR(50) NOT NULL,
     PRIMARY KEY(id_specie)
 )ENGINE=InnoDB;
 
@@ -15,9 +15,14 @@ CREATE TABLE sequences (
     id_specie INT,
     accession_number VARCHAR(10),
     alphabet VARCHAR(7),
+    authority VARCHAR(20),
+    date VARCHAR(10),
+    is_circular INT,
     gene_name VARCHAR(20),      #TODO: display_id parsed
     description VARCHAR(50),
-    length int,
+    length INT,
+    format VARCHAR(10),
+    seq_version VARCHAR(10),
     PRIMARY KEY (id_sequence),
     FOREIGN KEY (id_specie) REFERENCES species(id_specie)
 )ENGINE=InnoDB;

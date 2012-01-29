@@ -1,6 +1,3 @@
-INSERT INTO tags (tag) VALUES ('fasta');
-INSERT INTO tags (tag) VALUES ('genbank');
-INSERT INTO tags (tag) VALUES ('swissprot');
 INSERT INTO tags (tag) VALUES ('bacteria');
 INSERT INTO tags (tag) VALUES ('cianobacteria');
 INSERT INTO tags (tag) VALUES ('plantae');

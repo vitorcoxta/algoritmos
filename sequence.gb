@@ -1,8 +1,0 @@
-LOCUS       id1                       61 bp    dna     linear   UNK 
-DEFINITION  teste1
-ACCESSION   unknown
-FEATURES             Location/Qualifiers
-ORIGIN      
-        1 actgatcgat cgatcgatcg atcgatcgat gctagctagc tagctactac gactagtcat
-       61 c
-//
