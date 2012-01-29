@@ -5,7 +5,8 @@ use Bio::SeqIO;
 use Bio::Species;
 use strict;
 use warnings;
-use DBI;
+use DBI();
+use DBD::mysql;
 
 my ($Row,$SQL,$Select);
 
@@ -52,10 +53,10 @@ sub insertion {
         my @keywords = interface("ask_keywords");
         my $sequence = interface("ask_sequence");
         my $seq_version = interface("ask_seq_version");
+        my $specie = interface("ask_specie");
         my $format = interface("ask_format");
         my $seq_length = length($sequence);
         
-        #TODO: fazer para perguntar a especie e mete-la na tabela species
         #TODO: inserir as tags na tabela
         
         #print "\n\nAQUI ESTAO AS RESPOSTAS DADAS:\nalphabet: $alphabet\nauthority: $authority\ndesc: $description\ngene name: $gene_name\ndate: $date\ncircular: $is_circular\nkeywords: ";
@@ -67,13 +68,27 @@ sub insertion {
         #my $seq_obj = Bio::Seq->new(-seq => $sequence, -alphabet => $alphabet, -authority => $authority, -desc => $description, -display_id => $id, -get_dates => @dates, -is_circular => $is_circular, -keywords => @keywords, -seq_version => $seq_version);#, -species => $species);
         #my $seqio_obj = Bio::SeqIO->new(-file => '>sequence.gb', -format => 'genbank' );
         #$seqio_obj->write_seq($seq_obj);
-
-        my $sql = "INSERT INTO sequences (alphabet, authority, description, gene_name, date, is_circular, length, format, seq_version) VALUES ('"
-                  .$alphabet."', '".$authority."', '".$description."', '".$gene_name."', '".$date."', '".$is_circular."', '$seq_length', '".$format.
-                  "', '".$seq_version."')";
-        my $update = $dbh->do($sql);
-        if($update) {print ("A insercao foi executada com sucesso\n");}
-        else {print ("Ocorreu um erro na insercao\n");}
+        
+        my $sql = "SELECT id_specie FROM species WHERE specie='".$specie."'";
+        my $result = $dbh->prepare($sql);
+        $result->execute();
+        if(!($result->fetchrow_hashref())){
+            $sql = "INSERT INTO species (specie) VALUES ('".$specie."')";
+            $dbh->do($sql);
+        }
+        
+        #Ineficiente, mas assim funciona... Deve ser porque nao pode fazer o fecth 2 vezes seguidas, por isso tive de voltar a fazer o select...
+        $sql = "SELECT id_specie FROM species WHERE specie='".$specie."'";
+        $result = $dbh->prepare($sql);
+        $result->execute();
+        while(my $row = $result->fetchrow_hashref()){
+            $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, gene_name, date, is_circular, length, format, seq_version)"
+                   ."VALUES ('".$row->{'id_specie'}."', '".$alphabet."', '".$authority."', '".$description."', '".$gene_name."', '".$date."', '"
+                   .$is_circular."', '$seq_length', '".$format."', '".$seq_version."')";
+            my $result2 = $dbh->do($sql);
+            if($result2) {print ("A insercao foi executada com sucesso\n");}
+            else {print ("Ocorreu um erro na insercao\n");}
+        }
     }
     elsif ($option == 2) {print "queres num ficheiro. depois trato de ti\n"}
 }
@@ -164,12 +179,11 @@ sub interface {
         chomp $answer;
         return $answer;
     }
-    elsif($type eq "ask_species"){
-        print "Insert the species (seperated by ','): ";
+    elsif($type eq "ask_specie"){
+        print "Insert the specie: ";
         $answer = <>;
         chomp $answer;
-        @answer = split /\s*,\s*/, $answer;
-        return @answer;
+        return $answer;
     }
     elsif($type eq "ask_format"){
         print "Insert the format [fasta/genbank/swiss]: ";
