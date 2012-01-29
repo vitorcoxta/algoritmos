@@ -10,13 +10,13 @@ use DBD::mysql;
 
 my ($Row,$SQL,$Select);
 
-#DATABASE CONNECTION ON JOAO'S PC!
+#------------------------DATABASE CONNECTION ON JOAO'S PC!-----------------------------
 #my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
 
-#DATABASE CONNECTION ON VITOR'S PC!
+#------------------------DATABASE CONNECTION ON VITOR'S PC!----------------------------
 my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
 
-
+#TODO: Quando a interface estiver terminada, meter na opcao "sair" o close da connection à base de dados
 
 #$SQL = "insert into tags(tag) values(\'Day1\');";
 
@@ -44,6 +44,7 @@ insertion();
 sub insertion {
     my $option = interface("ask_insertion_type");
     if ($option == 1) {         #TODO: ver se faz sentido perguntar tanta coisa
+        #----------Asks user for useful information---------------
         my $alphabet = interface("ask_alphabet");
         my $authority = interface("ask_authority");
         my $description = interface("ask_description");
@@ -57,8 +58,6 @@ sub insertion {
         my $format = interface("ask_format");
         my $seq_length = length($sequence);
         
-        #TODO: inserir as tags na tabela
-        
         #print "\n\nAQUI ESTAO AS RESPOSTAS DADAS:\nalphabet: $alphabet\nauthority: $authority\ndesc: $description\ngene name: $gene_name\ndate: $date\ncircular: $is_circular\nkeywords: ";
         #for my $key (@keywords){
         #    print "$key, ";
@@ -69,6 +68,8 @@ sub insertion {
         #my $seqio_obj = Bio::SeqIO->new(-file => '>sequence.gb', -format => 'genbank' );
         #$seqio_obj->write_seq($seq_obj);
         
+        #-----------------Verifies if the inserted specie already exists on database. If it already exists, doesn't try to insert it---------------
+        my ($row, $id_sequence);
         my $sql = "SELECT id_specie FROM species WHERE specie='".$specie."'";
         my $result = $dbh->prepare($sql);
         $result->execute();
@@ -77,23 +78,53 @@ sub insertion {
             $dbh->do($sql);
         }
         
-        #Ineficiente, mas assim funciona... Deve ser porque nao pode fazer o fecth 2 vezes seguidas, por isso tive de voltar a fazer o select...
+        #-------------------Insert the sequence----------------------
+        #Ineficiente porque faz o mesmo select 2 vezes, mas assim funciona... Deve ser porque nao pode fazer o fecthrow 2 vezes seguidas,
+        #por isso tive de voltar a fazer o select...
         $sql = "SELECT id_specie FROM species WHERE specie='".$specie."'";
         $result = $dbh->prepare($sql);
         $result->execute();
-        while(my $row = $result->fetchrow_hashref()){
+        while($row = $result->fetchrow_hashref()){
             $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, gene_name, date, is_circular, length, format, seq_version)"
                    ."VALUES ('".$row->{'id_specie'}."', '".$alphabet."', '".$authority."', '".$description."', '".$gene_name."', '".$date."', '"
                    .$is_circular."', '$seq_length', '".$format."', '".$seq_version."')";
-            my $result2 = $dbh->do($sql);
-            if($result2) {print ("A insercao foi executada com sucesso\n");}
-            else {print ("Ocorreu um erro na insercao\n");}
+            $dbh->do($sql);
+        }
+        
+        $sql = "SELECT LAST_INSERT_ID()";
+        $result = $dbh->prepare($sql);
+        $result->execute();
+        while (my $row = $result->fetchrow_hashref()){
+            $id_sequence = $row->{'LAST_INSERT_ID()'};
+        }
+        
+        for my $keyword (@keywords){
+            #-------------Verifies if the inserted tags already exist on database. If they already exist, doesn't try to insert them-----------
+            $sql = "SELECT id_tag FROM tags WHERE tag='".$keyword."'";
+            $result = $dbh->prepare($sql);
+            $result->execute();
+            if(!($result->fetchrow_hashref())){
+                $sql = "INSERT INTO tags (tag) VALUES ('".$keyword."')";
+                $dbh->do($sql);
+            }
+            
+            $sql = "SELECT id_tag FROM tags WHERE tag='".$keyword."'";
+            $result = $dbh->prepare($sql);
+            $result->execute();
+            
+            #--------------Insert the tuple id_sequence - id_tag on seq_tags table------------------------
+            while($row = $result->fetchrow_hashref()){
+                $sql = "INSERT INTO seq_tags (id_sequence, id_tag) VALUES ('".$id_sequence."', '".$row->{'id_tag'}."')";
+                my $result2 = $dbh->do($sql);
+                if($result2) {print ("A insercao foi executada com sucesso\n");}
+                else {print ("Ocorreu um erro na insercao\n");}
+            }
         }
     }
     elsif ($option == 2) {print "queres num ficheiro. depois trato de ti\n"}
 }
 
-#This function will have ALL the interface things
+#------------------This function will have ALL the interface things-------------------
 sub interface {
     my ($type) = @_;
     my ($option, $answer);
