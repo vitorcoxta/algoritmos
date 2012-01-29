@@ -58,20 +58,24 @@ sub insertion {
         #my $namespace = interface("ask_namespace");
         my $sequence = interface("ask_sequence");
         my $seq_version = interface("ask_seq_version");
-        #my $species = Bio::Species->new(-classification => interface("ask_species"));
-        my @species = interface ("ask_species");
-        print "\n\nAQUI ESTAO AS RESPOSTAS DADAS:\nalphabet: $alphabet\nauthority: $authority\ndesc: $description\nid: $id\ndates: ";
-        for my $date (@dates){
-            print "$date, ";
-        }
-        print"\ncircular: $is_circular\nkeywords: ";
-        for my $key (@keywords){
-            print "$key, ";
-        }
-        print"\nsequence: $sequence\nseq_version: $seq_version\nspecies: ";#.$species->species;
-        for my $specie (@species){
-            print "$specie, ";
-        }
+        #my $species = Bio::Species->new(-classification => interface("ask_species"));          #TODO: ver isto das especies. sera que se pode meter tudo na tabela tags, e assim nao precisamos da tabela species???
+        #my @species = interface ("ask_species");
+        #print "\n\nAQUI ESTAO AS RESPOSTAS DADAS:\nalphabet: $alphabet\nauthority: $authority\ndesc: $description\nid: $id\ndates: ";
+        #for my $date (@dates){
+        #    print "$date, ";
+        #}
+        #print"\ncircular: $is_circular\nkeywords: ";
+        #for my $key (@keywords){
+        #    print "$key, ";
+        #}
+        #print"\nsequence: $sequence\nseq_version: $seq_version\nspecies: ";#.$species->species;
+        #for my $specie (@species){
+        #    print "$specie, ";
+        #}
+        my $seq_obj = Bio::Seq->new(-seq => $sequence, -alphabet => $alphabet, -authority => $authority, -desc => $description, -display_id => $id, -get_dates => @dates, -is_circular => $is_circular, -keywords => @keywords, -seq_version => $seq_version);#, -species => $species);
+        my $seqio_obj = Bio::SeqIO->new(-file => '>sequence.gb', -format => 'genbank' );
+        $seqio_obj->write_seq($seq_obj);
+        print "\n\n\nCORREU TUDO BEM! :D\n\n\n";
     }
     elsif ($option == 2) {print "queres num ficheiro\n"}
 }
