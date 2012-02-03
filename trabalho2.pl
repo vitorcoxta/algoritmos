@@ -16,10 +16,10 @@ use Error qw(:try);
 my ($Row,$SQL,$Select);
 
 #DATABASE CONNECTION ON JOAO'S PC!
-my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
+#my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
 
 #DATABASE CONNECTION ON VITOR'S PC!
-#my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
+my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
 
 importation();
 

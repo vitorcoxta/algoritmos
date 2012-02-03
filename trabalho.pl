@@ -16,6 +16,9 @@ my ($Row,$SQL,$Select);
 #------------------------DATABASE CONNECTION ON VITOR'S PC!----------------------------
 my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
 
+#------------------------DATABASE CONNECTION ON JOSE'S PC!----------------------------
+#my $dbh = DBI->connect('dbi:mysql:alg','root','') or die "Connection Error: $DBI::errstr\n";
+
 #TODO: Quando a interface estiver terminada, meter na opcao "sair" o close da connection à base de dados
 
 #$SQL = "insert into tags(tag) values(\'Day1\');";
@@ -121,7 +124,44 @@ sub insertion {
             }
         }
     }
-    elsif ($option == 2) {print "queres num ficheiro. depois trato de ti\n"}
+    elsif ($option == 2) {
+        
+        my $path = interface("ask_file_path");              #/home/cof91/Desktop/sequence.fasta
+        my $seqio = Bio::SeqIO->new(-file => $path);
+        my $format ;
+        if (substr $path, -5 eq "fasta") {$format = "fasta";}
+        elsif (substr $path, -5 eq "swiss") {$format = "swiss";}
+        elsif (substr $path, -2 eq "gb") {$format = "genbank";}
+        else {$format = interface("ask_format");}
+        my $seq = $seqio->next_seq;
+        my $alphabet = interface("ask_alphabet");       #Asks the alphabet
+        my $authority = $seq->authority;
+        my $description = $seq->desc;
+        my $gene_name = $seq->display_id;             #This method returns the gene name
+        my $is_circular;
+        if ($seq->is_circular) {$is_circular = 1;}
+        else {$is_circular = 0;}
+        my @keywords = interface("ask_keywords");
+        my $sequence = $seq->seq;
+        my $seq_version;
+        my $date;
+        if($format eq "genbank" or $format eq "swiss"){
+            $seq_version = $seq->seq_version;
+            $date= ($seq->get_dates)[0];
+        }
+        else{
+            $seq_version = interface("ask_seq_version");
+            $date= interface("ask_date");
+        }
+        my $specie = interface("ask_specie");               #Just to ask if the user wants to associate the sequence to any specie
+        my $seq_length = $seq->length;
+        
+        print "\n\nAQUI ESTAO AS RESPOSTAS DADAS:\nalphabet: $alphabet\nauthority: $authority\ndesc: $description\ngene name: $gene_name\ndate: $date\ncircular: $is_circular\nkeywords: ";
+        for my $key (@keywords){
+            print "$key, ";
+        }
+        print"\nsequence: $sequence\nseq_version: $seq_version\nformat: $format\nspecies: $specie\n";
+    }
 }
 
 #------------------This function will have ALL the interface things-------------------
@@ -227,6 +267,13 @@ sub interface {
             print "FORMAT NOT SUPORTED! Please choose a suported one! ";
             interface("ask_format");
         }
+    }
+    elsif($type eq "ask_file_path"){
+        system $^O eq 'MSWin32' ? 'cls' : 'clear';
+        print "Insert the file path: ";
+        $answer = <>;
+        chomp $answer;
+        return $answer;
     }
 }
 
