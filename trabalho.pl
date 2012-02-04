@@ -21,35 +21,14 @@ my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Err
 
 #TODO: Quando a interface estiver terminada, meter na opcao "sair" o close da connection à base de dados
 
-#$SQL = "insert into tags(tag) values(\'Day1\');";
-
-#my $SQL2 = "Delete from tags where tag='Day1' or tag='cenas';";
-
-#my $update = $dbh->do($SQL2);
-
-
-#if($update) {print ("Correu bem!!\n");}
-#else {print ("JA fostes!!!\n");}
-
-
-# $SQL= "select * from Temporario";
-
-#$Select = $dbh->prepare($SQL2);
-#$Select->execute();
-
-#while($Row=$Select->fetchrow_hashref)
-#{
- # print "$Row->{Nome} $Row->{Idade}";
-#}
-
 insertion();
 
 sub insertion {
     my $option = interface("ask_insertion_type");
     if ($option == 1) {         #TODO: ver se faz sentido perguntar tanta coisa
         #----------Asks user for useful information---------------
-        my $alphabet = interface("ask_alphabet");
         my $authority = interface("ask_authority");
+        my $alphabet = interface("ask_alphabet");
         my $description = interface("ask_description");
         my $gene_name = interface("ask_gene_name");
         my $date = interface("ask_date");
@@ -71,73 +50,24 @@ sub insertion {
         #my $seqio_obj = Bio::SeqIO->new(-file => '>sequence.gb', -format => 'genbank' );
         #$seqio_obj->write_seq($seq_obj);
         
-        #-----------------Verifies if the inserted specie already exists on database. If it already exists, doesn't try to insert it---------------
-        my ($row, $id_sequence);
-        my $sql = "SELECT id_specie FROM species WHERE specie='".$specie."'";
-        my $result = $dbh->prepare($sql);
-        $result->execute();
-        if(!($result->fetchrow_hashref())){
-            $sql = "INSERT INTO species (specie) VALUES ('".$specie."')";
-            $dbh->do($sql);
-        }
-        
-        #-------------------Insert the sequence----------------------
-        #Ineficiente porque faz o mesmo select 2 vezes, mas assim funciona... Deve ser porque nao pode fazer o fecthrow 2 vezes seguidas,
-        #por isso tive de voltar a fazer o select...
-        $sql = "SELECT id_specie FROM species WHERE specie='".$specie."'";
-        $result = $dbh->prepare($sql);
-        $result->execute();
-        while($row = $result->fetchrow_hashref()){
-            $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, gene_name, date, is_circular, length, format, seq_version)"
-                   ."VALUES ('".$row->{'id_specie'}."', '".$alphabet."', '".$authority."', '".$description."', '".$gene_name."', '".$date."', '"
-                   .$is_circular."', '$seq_length', '".$format."', '".$seq_version."')";
-            $dbh->do($sql);
-        }
-        
-        $sql = "SELECT LAST_INSERT_ID()";
-        $result = $dbh->prepare($sql);
-        $result->execute();
-        while (my $row = $result->fetchrow_hashref()){
-            $id_sequence = $row->{'LAST_INSERT_ID()'};
-        }
-        
-        for my $keyword (@keywords){
-            #-------------Verifies if the inserted tags already exist on database. If they already exist, doesn't try to insert them-----------
-            $sql = "SELECT id_tag FROM tags WHERE tag='".$keyword."'";
-            $result = $dbh->prepare($sql);
-            $result->execute();
-            if(!($result->fetchrow_hashref())){
-                $sql = "INSERT INTO tags (tag) VALUES ('".$keyword."')";
-                $dbh->do($sql);
-            }
-            
-            $sql = "SELECT id_tag FROM tags WHERE tag='".$keyword."'";
-            $result = $dbh->prepare($sql);
-            $result->execute();
-            
-            #--------------Insert the tuple id_sequence - id_tag on seq_tags table------------------------
-            while($row = $result->fetchrow_hashref()){
-                $sql = "INSERT INTO seq_tags (id_sequence, id_tag) VALUES ('".$id_sequence."', '".$row->{'id_tag'}."')";
-                my $result2 = $dbh->do($sql);
-                if($result2) {print ("A insercao foi executada com sucesso\n");}
-                else {print ("Ocorreu um erro na insercao\n");}
-            }
-        }
+        insert_specie($specie);
+        insert_sequence($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version, "gene_name");
+        insert_tags(@keywords);
     }
     elsif ($option == 2) {
-        
-        my $path = interface("ask_file_path");              #/home/cof91/Desktop/sequence.fasta
-        my $seqio = Bio::SeqIO->new(-file => $path);
+        #----------Gets useful information from the file or asks to user if the file doesn't have it---------------
+        my $path = interface("ask_file_path");
+        my $seqio = Bio::SeqIO->new(-file => $path);                 #TODO: meter um try catch aqui, para ver se o ficheiro existe ou nao!!!!!!
         my $format ;
-        if (substr $path, -5 eq "fasta") {$format = "fasta";}
-        elsif (substr $path, -5 eq "swiss") {$format = "swiss";}
-        elsif (substr $path, -2 eq "gb") {$format = "genbank";}
+        if ((substr ($path, -5)) eq "fasta") {$format = "fasta";}
+        elsif ((substr ($path, -5)) eq "swiss") {$format = "swiss";}
+        elsif ((substr ($path, -2)) eq "gb") {$format = "genbank";}
         else {$format = interface("ask_format");}
         my $seq = $seqio->next_seq;
-        my $alphabet = interface("ask_alphabet");       #Asks the alphabet
+        my $alphabet = interface("ask_alphabet");                       #Asks the alphabet
         my $authority = $seq->authority;
         my $description = $seq->desc;
-        my $gene_name = $seq->display_id;             #This method returns the gene name
+        my $accession_number = $seq->display_id;                     #This method returns the gene name
         my $is_circular;
         if ($seq->is_circular) {$is_circular = 1;}
         else {$is_circular = 0;}
@@ -156,13 +86,107 @@ sub insertion {
         my $specie = interface("ask_specie");               #Just to ask if the user wants to associate the sequence to any specie
         my $seq_length = $seq->length;
         
-        print "\n\nAQUI ESTAO AS RESPOSTAS DADAS:\nalphabet: $alphabet\nauthority: $authority\ndesc: $description\ngene name: $gene_name\ndate: $date\ncircular: $is_circular\nkeywords: ";
-        for my $key (@keywords){
-            print "$key, ";
-        }
-        print"\nsequence: $sequence\nseq_version: $seq_version\nformat: $format\nspecies: $specie\n";
+        #print "\n\nAQUI ESTAO AS RESPOSTAS DADAS:\nalphabet: $alphabet\nauthority: $authority\ndesc: $description\ngene name: $gene_name\ndate: $date\ncircular: $is_circular\nkeywords: ";
+        #for my $key (@keywords){
+        #    print "$key, ";
+        #}
+        #print"\nsequence: $sequence\nseq_version: $seq_version\nformat: $format\nspecies: $specie\n";
+        insert_specie($specie);
+        insert_sequence($specie, $alphabet, $authority, $description, $accession_number, $date, $is_circular, $seq_length, $format, $seq_version, "accession_number");
+        insert_tags(@keywords);
+        
+        
+        #
+        #
+        #
+        #
+        #
+        #       TODO PARA SABADO: VER DMDOPEN (http://perldoc.perl.org/functions/dbmopen.html) E COMECAR A GUARDAR SEQUENCIAS!!!!!!!!!!!!
+        #
+        #
+        #
+        #
+        #
+        
+        
     }
 }
+
+
+#-----------------Verifies if the inserted specie already exists on database. If it already exists, doesn't try to insert it---------------
+sub insert_specie{
+    my ($specie) = @_;
+    my ($row, $id_sequence);
+    my $sql = "SELECT id_specie FROM species WHERE specie='".$specie."'";
+    my $result = $dbh->prepare($sql);
+    $result->execute();
+    if(!($result->fetchrow_hashref())){
+        $sql = "INSERT INTO species (specie) VALUES ('".$specie."')";
+        $dbh->do($sql);
+    }
+}
+
+
+#-------------------Insert the sequence----------------------
+        #Ineficiente porque faz o mesmo select 2 vezes, mas assim funciona... Deve ser porque nao pode fazer o fecthrow 2 vezes seguidas,
+        #por isso tive de voltar a fazer o select...
+        
+        #The last argument tells if it has the accession number (insertion from a file or from a remote DB) or the gene name (manual insertion)
+sub insert_sequence{
+    my ($specie, $alphabet, $authority, $description, $gene_name_or_accession_number, $date, $is_circular, $seq_length, $format, $seq_version, $type) = @_;
+    my $sql = "SELECT id_specie FROM species WHERE specie='".$specie."'";
+    my $result = $dbh->prepare($sql);
+    $result->execute();
+    while(my $row = $result->fetchrow_hashref()){
+        if ($type eq "gene_name") {
+            $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, gene_name, date, is_circular, length, format, seq_version)"
+            ."VALUES ('".$row->{'id_specie'}."', '".$alphabet."', '".$authority."', '".$description."', '".$gene_name_or_accession_number."', '".$date."', '"
+            .$is_circular."', '$seq_length', '".$format."', '".$seq_version."')";
+        }
+        elsif ($type eq "accession_number"){
+            $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, accession_number, date, is_circular, length, format, seq_version)"
+            ."VALUES ('".$row->{'id_specie'}."', '".$alphabet."', '".$authority."', '".$description."', '".$gene_name_or_accession_number."', '".$date."', '"
+            .$is_circular."', '$seq_length', '".$format."', '".$seq_version."')";
+        }
+        $dbh->do($sql);
+    }
+}
+
+#-------------------Insert the tags------------------------------
+sub insert_tags{
+    my (@keywords) = @_;
+    my $id_sequence;
+    my $sql = "SELECT LAST_INSERT_ID()";
+    my $result = $dbh->prepare($sql);
+    $result->execute();
+    while (my $row = $result->fetchrow_hashref()){
+        $id_sequence = $row->{'LAST_INSERT_ID()'};
+    }
+    
+    for my $keyword (@keywords){
+        #-------------Verifies if the inserted tags already exist on database. If they already exist, doesn't try to insert them-----------
+        $sql = "SELECT id_tag FROM tags WHERE tag='".$keyword."'";
+        $result = $dbh->prepare($sql);
+        $result->execute();
+        if(!($result->fetchrow_hashref())){
+            $sql = "INSERT INTO tags (tag) VALUES ('".$keyword."')";
+            $dbh->do($sql);
+        }
+        
+        $sql = "SELECT id_tag FROM tags WHERE tag='".$keyword."'";
+        $result = $dbh->prepare($sql);
+        $result->execute();
+        
+        #--------------Insert the tuple id_sequence - id_tag on seq_tags table------------------------
+        while(my $row = $result->fetchrow_hashref()){
+            $sql = "INSERT INTO seq_tags (id_sequence, id_tag) VALUES ('".$id_sequence."', '".$row->{'id_tag'}."')";
+            my $result2 = $dbh->do($sql);
+            if($result2) {print ("A insercao foi executada com sucesso\n");}
+            else {print ("Ocorreu um erro na insercao\n");}
+        }
+    }
+}
+
 
 #------------------This function will have ALL the interface things-------------------
 sub interface {
@@ -183,15 +207,15 @@ sub interface {
         if ($option == 1 or $option == 2) {return $option;}
         else {interface("ask_insertion_type_invalid_option");}
     }
-    elsif($type eq "ask_alphabet"){
+    elsif($type eq "ask_authority"){
         system $^O eq 'MSWin32' ? 'cls' : 'clear';
-        print "Insert the alphabet: ";
+        print "Insert the authority: ";
         $answer = <>;
         chomp $answer;
         return $answer;
     }
-    elsif($type eq "ask_authority"){
-        print "Insert the authority: ";
+    elsif($type eq "ask_alphabet"){
+        print "Insert the alphabet: ";
         $answer = <>;
         chomp $answer;
         return $answer;
