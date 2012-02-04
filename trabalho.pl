@@ -7,6 +7,8 @@ use strict;
 use warnings;
 use DBI();
 use DBD::mysql;
+use Bio::Root::Exception;
+use Error qw(:try);
 
 #------------------------DATABASE CONNECTIONS ON JOAO'S PC!-----------------------------
 #my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
@@ -29,7 +31,7 @@ insertion();
 
 sub insertion {
     my $option = interface("ask_insertion_type");
-    if ($option == 1) {         #TODO: ver se faz sentido perguntar tanta coisa
+    if ($option == 1) {
         #----------Asks user for useful information---------------
         my $authority = interface("ask_authority");
         my $alphabet = interface("ask_alphabet");
@@ -50,10 +52,6 @@ sub insertion {
         #}
         #print"\nsequence: $sequence\nseq_version: $seq_version\nformat: $format\n";#species: ".$species->species;
         
-        #my $seq_obj = Bio::Seq->new(-seq => $sequence, -alphabet => $alphabet, -authority => $authority, -desc => $description, -display_id => $id, -get_dates => @dates, -is_circular => $is_circular, -keywords => @keywords, -seq_version => $seq_version);#, -species => $species);
-        #my $seqio_obj = Bio::SeqIO->new(-file => '>sequence.gb', -format => 'genbank' );
-        #$seqio_obj->write_seq($seq_obj);
-        
         insert_specie($specie);
         insert_sequence_db($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version, "gene_name");
         my $id_sequence = insert_tags(@keywords);
@@ -61,8 +59,15 @@ sub insertion {
     }
     elsif ($option == 2) {
         #----------Gets useful information from the file or asks to user if the file doesn't have it---------------
-        my $path = interface("ask_file_path");
-        my $seqio = Bio::SeqIO->new(-file => $path);                 #TODO: meter um try catch aqui, para ver se o ficheiro existe ou nao!!!!!!
+        my ($path, $seqio);
+        my $ask_type = 0;
+        do{
+            if ($ask_type == 0) {$path = interface("ask_file_path");}
+            else {$path = interface("ask_file_path_file_not_found");}
+            try{
+                $seqio = Bio::SeqIO->new(-file => $path);
+            } catch Bio::Root::Exception with {$ask_type = 1};
+        } while (!$seqio);
         my $format ;
         if ((substr ($path, -5)) eq "fasta") {$format = "fasta";}
         elsif ((substr ($path, -5)) eq "swiss") {$format = "swiss";}
@@ -100,29 +105,6 @@ sub insertion {
         insert_sequence_db($specie, $alphabet, $authority, $description, $accession_number, $date, $is_circular, $seq_length, $format, $seq_version, "accession_number");
         my $id_sequence = insert_tags(@keywords);
         insert_sequence($id_sequence, $sequence);
-        
-        #      INSERIR COISAS NO DBM
-        #my %seq;
-        #dbmopen(%seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/sequences', 0666);
-        #$seq{1} = "actgatcgatagctagc";
-        #$seq{2} = "ctgatcgatagctagc";
-        #$seq{3} = "tgatcgatagctagc";
-        #$seq{5} = "gatcgatagctagc";
-        #dbmclose(%seq);
-        #print "Pelos vistos correu tudo bem...\n";
-        #
-        #
-        #  LER COISAS NO DBM
-        #
-        #my %seq;
-        #my ($key, $val);
-        #dbmopen(%seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/sequences', 0666);
-        #while(($key, $val) = each %seq) {
-        #    print "$key -> $val\n";
-        #}
-        #dbmclose(%seq);
-        #print "Pelos vistos também correu tudo bem...\n";
-        #
     }
 }
 
@@ -207,7 +189,7 @@ sub insert_tags{
 sub insert_sequence{
     my ($id_sequence, $sequence) = @_;
     $dbm_seq{$id_sequence} = $sequence;
-    print "A insercao foi executada com sucesso\n";
+    print "A insercao foi executada com sucesso\n";             #TODO: depois de a interface estar pronta, ver se sera preciso isto
 }
 
 
@@ -318,6 +300,13 @@ sub interface {
     elsif($type eq "ask_file_path"){
         system $^O eq 'MSWin32' ? 'cls' : 'clear';
         print "Insert the file path: ";
+        $answer = <>;
+        chomp $answer;
+        return $answer;
+    }
+    elsif($type eq "ask_file_path_file_not_found"){
+        system $^O eq 'MSWin32' ? 'cls' : 'clear';
+        print "FILE NOT FOUND! Insert a valid file path: ";
         $answer = <>;
         chomp $answer;
         return $answer;
