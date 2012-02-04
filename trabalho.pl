@@ -27,25 +27,32 @@ dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinform
 
 #TODO: Quando a interface estiver terminada, meter na opcao "sair" o close da connection às base de dados (close $dbh e dbmclose($dmb_seq))
 
-#insertion();
-removal();
+main();
+
+sub main{
+    my $option = interface("welcome", 1, 0);
+    if($option == 1){insertion();}
+    elsif($option == 2){removal();}
+    elsif($option == 3){change();}
+    elsif($option == 9){interface("exit");}
+}
 
 #-----------------------This funtion inserts a sequence in the database: manually, from a file or from a remote database----------------------
 sub insertion {
-    my $option = interface("ask_insertion_type");
+    my $option = interface("ask_insertion_type", 1, 0);
     if($option == 1) {
         #----------Asks user for useful information---------------
-        my $authority = interface("ask_authority");
-        my $alphabet = interface("ask_alphabet");
-        my $description = interface("ask_description");
-        my $gene_name = interface("ask_gene_name");
-        my $date = interface("ask_date");
-        my $is_circular = interface("ask_is_circular");
-        my @keywords = interface("ask_keywords");
-        my $sequence = interface("ask_sequence");
-        my $seq_version = interface("ask_seq_version");
-        my $specie = interface("ask_specie");
-        my $format = interface("ask_format");
+        my $authority = interface("ask_authority",1);
+        my $alphabet = interface("ask_alphabet", 0);
+        my $description = interface("ask_description", 0);
+        my $gene_name = interface("ask_gene_name", 0);
+        my $date = interface("ask_date", 0);
+        my $is_circular = interface("ask_is_circular", 0);
+        my @keywords = interface("ask_keywords", 0);
+        my $sequence = interface("ask_sequence", 0);
+        my $seq_version = interface("ask_seq_version", 0);
+        my $specie = interface("ask_specie", 0);
+        my $format = interface("ask_format", 0);
         my $seq_length = length($sequence);
         
         #print "\n\nAQUI ESTAO AS RESPOSTAS DADAS:\nalphabet: $alphabet\nauthority: $authority\ndesc: $description\ngene name: $gene_name\ndate: $date\ncircular: $is_circular\nkeywords: ";
@@ -62,28 +69,27 @@ sub insertion {
     elsif($option == 2) {
         #----------Gets useful information from the file or asks to user if the file doesn't have it---------------
         my ($path, $seqio);
-        my $ask_type = 0;
+        my $clear = 1;
         do{
-            if($ask_type == 0) {$path = interface("ask_file_path");}
-            else {$path = interface("ask_file_path_file_not_found");}
+            $path = interface("ask_file_path", $clear);
             try{
                 $seqio = Bio::SeqIO->new(-file => $path);
-            } catch Bio::Root::Exception with {$ask_type = 1};
+            } catch Bio::Root::Exception with {$clear = 0};
         } while(!$seqio);
         my $format ;
         if((substr ($path, -5)) eq "fasta") {$format = "fasta";}
         elsif((substr ($path, -5)) eq "swiss") {$format = "swiss";}
         elsif((substr ($path, -2)) eq "gb") {$format = "genbank";}
-        else {$format = interface("ask_format");}
+        else {$format = interface("ask_format", 0);}
         my $seq = $seqio->next_seq;
-        my $alphabet = interface("ask_alphabet");                       #Asks the alphabet
+        my $alphabet = interface("ask_alphabet", 0);                       #Asks the alphabet
         my $authority = $seq->authority;
         my $description = $seq->desc;
         my $accession_number = $seq->display_id;                     #This method returns the gene name
         my $is_circular;
         if($seq->is_circular) {$is_circular = 1;}
         else {$is_circular = 0;}
-        my @keywords = interface("ask_keywords");
+        my @keywords = interface("ask_keywords", 0);
         my $sequence = $seq->seq;
         my $seq_version;
         my $date;
@@ -92,10 +98,10 @@ sub insertion {
             $date= ($seq->get_dates)[0];
         }
         else{
-            $seq_version = interface("ask_seq_version");
-            $date= interface("ask_date");
+            $seq_version = interface("ask_seq_version", 0);
+            $date= interface("ask_date", 0);
         }
-        my $specie = interface("ask_specie");               #Just to ask ifthe user wants to associate the sequence to any specie
+        my $specie = interface("ask_specie", 0);               #Just to ask if the user wants to associate the sequence to any specie
         my $seq_length = $seq->length;
         
         #print "\n\nAQUI ESTAO AS RESPOSTAS DADAS:\nalphabet: $alphabet\nauthority: $authority\ndesc: $description\ngene name: $gene_name\ndate: $date\ncircular: $is_circular\nkeywords: ";
@@ -107,6 +113,9 @@ sub insertion {
         insert_sequence_db($specie, $alphabet, $authority, $description, $accession_number, $date, $is_circular, $seq_length, $format, $seq_version, "accession_number");
         my $id_sequence = insert_tags(@keywords);
         insert_sequence($id_sequence, $sequence);
+    }
+    elsif($option == 3){
+        main();
     }
 }
 
@@ -215,14 +224,17 @@ sub insert_sequence{
 
 #--------------------This function indicates the right path to remove data from the database, depending from the user's decision------------------------------------
 sub removal{
-    my $option = interface("ask_removal_type");
+    my $option = interface("ask_removal_type", 1, 0);
     if($option == 1){
-        my $accession_number = interface("ask_accession_number");
+        my $accession_number = interface("ask_accession_number", 1);
         remove($accession_number, "accession_number");
     }
     elsif($option == 2){
-        my $gene_name = interface("ask_gene_name");
+        my $gene_name = interface("ask_gene_name", 1);
         remove($gene_name, "gene_name");
+    }
+    elsif($option == 3){
+        main();
     }
 }
 
@@ -238,6 +250,7 @@ sub remove{
     my $result = $dbh->prepare($sql);
     $result->execute();
     while(my $row = $result->fetchrow_hashref()){
+        delete $dbm_seq{$row->{'id_sequence'}};             #Deletes the sequence from the Hash Table dbm_seq
         remove_seq_tags($row->{'id_sequence'});
     }
     if($type eq "accession_number"){$sql = "DELETE FROM sequences WHERE accession_number='".$accession_number_or_gene_name."'";}
@@ -255,64 +268,74 @@ sub remove_seq_tags{
     $dbh->do($sql);
 }
 
-#
-#
-#
-# TODO AGORA: METER SE QUEREMOS LIMPAR O ECRA OU NAO!
-#
-#
+
+sub change{
+    
+}
+
+
+
+
 
 #------------------This function will have ALL the interface things-------------------
 sub interface {
-    my ($type) = @_;
+    my ($type, $clear, $invalid) = @_;
     my ($option, $answer);
     my @answer;
-    if($type eq "ask_insertion_type"){
-        system $^O eq 'MSWin32' ? 'cls' : 'clear';
-        print "Do you want to insert the sequence manually, or is the sequence on a file?\n1 - Manually\n2 - In a file\n3 - Go back\n"; #TODO: go back. in the mean time, it is considered an invalid option
+    if($type eq "welcome"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n"}
+        else {print "\t\t\tWELCOME TO CENASSAS. ALGUEM QUE ESCREVA ALGO AQUI, QUE TOU SEM IDEIAS!\n\n";}
+        print "What do you want to do?\n\n1 - Insertion of a sequence\n2 - Removal of a sequence\n3 - Change a sequence\n\n9 - Exit\n";
         $option = <>;
-        if($option == 1 or $option == 2) {return $option;}
-        else {interface("ask_insertion_type_invalid_option");}
+        if($option == 1 or $option == 2 or $option == 3 or $option == 9) {return $option;}
+        else {interface("welcome", 1, 1);}
     }
-    elsif($type eq "ask_insertion_type_invalid_option"){
-        system $^O eq 'MSWin32' ? 'cls' : 'clear';
-        print "INVALID OPTION! Please choose a valid one!\n\nDo you want to insert the sequence manually, or is the sequence on a file?\n1 - Manually\n2 - In a file\n3 - Go back\n"; #TODO: go back. in the mean time, it is considered an invalid option
+    elsif($type eq "ask_insertion_type"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n";}
+        print "Do you want to insert the sequence manually, or is the sequence on a file?\n\n1 - Manually\n2 - In a file\n3 - Go back\n\n";
         $option = <>;
-        if($option == 1 or $option == 2) {return $option;}
-        else {interface("ask_insertion_type_invalid_option");}
+        if($option == 1 or $option == 2 or $option == 3) {return $option;}
+        else {interface("ask_insertion_type", 1, 1);}
     }
     elsif($type eq "ask_authority"){
-        system $^O eq 'MSWin32' ? 'cls' : 'clear';
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Insert the authority: ";
         $answer = <>;
         chomp $answer;
         return $answer;
     }
     elsif($type eq "ask_alphabet"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Insert the alphabet: ";
         $answer = <>;
         chomp $answer;
         return $answer;
     }
     elsif($type eq "ask_description"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Insert the description: ";
         $answer = <>;
         chomp $answer;
         return $answer;
     }
     elsif($type eq "ask_gene_name"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Insert the gene name: ";
         $answer = <>;
         chomp $answer;
         return $answer;
     }
     elsif($type eq "ask_date"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Insert the date: ";
         $answer = <>;
         chomp $answer;
         return $answer;
     }
     elsif($type eq "ask_is_circular"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Is it circular? [yes/no]: ";
         $answer = <>;
         chomp $answer;
@@ -326,10 +349,11 @@ sub interface {
         }
         else{
             print "INVALID OPTION! Please choose a valid one! ";
-            interface("ask_is_circular");
+            interface("ask_is_circular", 0);
         }
     }
     elsif($type eq "ask_keywords"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Insert the keywords (seperated by ','): ";
         $answer = <>;
         chomp $answer;
@@ -337,24 +361,28 @@ sub interface {
         return @answer;
     }
     elsif($type eq "ask_sequence"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Insert the sequence: ";
         $answer = <>;
         chomp $answer;
         return $answer;
     }
     elsif($type eq "ask_seq_version"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Insert the version of this sequence: ";
         $answer = <>;
         chomp $answer;
         return $answer;
     }
     elsif($type eq "ask_specie"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Insert the specie: ";
         $answer = <>;
         chomp $answer;
         return $answer;
     }
     elsif($type eq "ask_format"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Insert the format [fasta/genbank/swiss]: ";
         $answer = <>;
         chomp $answer;
@@ -363,43 +391,36 @@ sub interface {
         }
         else{
             print "FORMAT NOT SUPORTED! Please choose a suported one! ";
-            interface("ask_format");
+            interface("ask_format", 0);
         }
     }
     elsif($type eq "ask_file_path"){
-        system $^O eq 'MSWin32' ? 'cls' : 'clear';
-        print "Insert the file path: ";
-        $answer = <>;
-        chomp $answer;
-        return $answer;
-    }
-    elsif($type eq "ask_file_path_file_not_found"){
-        system $^O eq 'MSWin32' ? 'cls' : 'clear';
-        print "FILE NOT FOUND! Insert a valid file path: ";
+        if($clear) {
+            system $^O eq 'MSWin32' ? 'cls' : 'clear';
+            print "Insert the file path: ";
+        }
+        else {print "FILE NOT FOUND! Insert a valid file path: ";}
         $answer = <>;
         chomp $answer;
         return $answer;
     }
     elsif($type eq "ask_removal_type"){
-        system $^O eq 'MSWin32' ? 'cls' : 'clear';
-        print "Choose a way to remove the sequence:\n\n1 - By an accession number\n2 - By a gene name\n3 - Go back\n"; #TODO: go back. in the mean time, it is considered an invalid option
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n";}
+        print "Choose a way to remove the sequence:\n\n1 - By an accession number\n2 - By a gene name\n3 - Go back\n\n";
         $option = <>;
-        if($option == 1 or $option == 2) {return $option;}
-        else {interface("ask_removal_type_invalid_option");}
-    }
-    elsif($type eq "ask_removal_type_invalid_option"){
-        system $^O eq 'MSWin32' ? 'cls' : 'clear';
-        print "Choose a way to remove the sequence:\n\n1 - By an accession number\n2 - By a gene name\n3 - Go back\n"; #TODO: go back. in the mean time, it is considered an invalid option
-        $option = <>;
-        if($option == 1 or $option == 2) {return $option;}
-        else {interface("ask_removal_type_invalid_option");}
+        if($option == 1 or $option == 2 or $option == 3) {return $option;}
+        else {interface("ask_removal_type",1, 1);}
     }
     elsif($type eq "ask_accession_number"){
-        system $^O eq 'MSWin32' ? 'cls' : 'clear';
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Insert the accession number: ";
         $answer = <>;
         chomp $answer;
         return $answer;
+    }
+    elsif($type eq "exit"){
+        print "METER AQUI AS CENAS DE DESPEDIDA DO JOAO. XAU AI!\n\n";
     }
 }
 
