@@ -8,18 +8,22 @@ use warnings;
 use DBI();
 use DBD::mysql;
 
-my ($Row,$SQL,$Select);
-
-#------------------------DATABASE CONNECTION ON JOAO'S PC!-----------------------------
+#------------------------DATABASE CONNECTIONS ON JOAO'S PC!-----------------------------
 #my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
+#my %dbm_seq;
+#dbmopen(%dbm_seq, 'METER AQUI O CAMINHO DESEJADO PARA A LOCALIZACAO DA HASH COM AS SEQUENCIAS', 0666);
 
-#------------------------DATABASE CONNECTION ON VITOR'S PC!----------------------------
+#------------------------DATABASE CONNECTIONS ON VITOR'S PC!----------------------------
 my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
+my %dbm_seq;
+dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
 
-#------------------------DATABASE CONNECTION ON JOSE'S PC!----------------------------
+#------------------------DATABASE CONNECTIONS ON JOSE'S PC!----------------------------
 #my $dbh = DBI->connect('dbi:mysql:alg','root','') or die "Connection Error: $DBI::errstr\n";
+#my %dbm_seq;
+#dbmopen(%dbm_seq, 'METER AQUI O CAMINHO DESEJADO PARA A LOCALIZACAO DA HASH COM AS SEQUENCIAS', 0666);
 
-#TODO: Quando a interface estiver terminada, meter na opcao "sair" o close da connection à base de dados
+#TODO: Quando a interface estiver terminada, meter na opcao "sair" o close da connection às base de dados (close $dbh e dbmclose($dmb_seq))
 
 insertion();
 
@@ -51,8 +55,9 @@ sub insertion {
         #$seqio_obj->write_seq($seq_obj);
         
         insert_specie($specie);
-        insert_sequence($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version, "gene_name");
-        insert_tags(@keywords);
+        insert_sequence_db($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version, "gene_name");
+        my $id_sequence = insert_tags(@keywords);
+        insert_sequence($id_sequence, $sequence);
     }
     elsif ($option == 2) {
         #----------Gets useful information from the file or asks to user if the file doesn't have it---------------
@@ -92,23 +97,32 @@ sub insertion {
         #}
         #print"\nsequence: $sequence\nseq_version: $seq_version\nformat: $format\nspecies: $specie\n";
         insert_specie($specie);
-        insert_sequence($specie, $alphabet, $authority, $description, $accession_number, $date, $is_circular, $seq_length, $format, $seq_version, "accession_number");
-        insert_tags(@keywords);
+        insert_sequence_db($specie, $alphabet, $authority, $description, $accession_number, $date, $is_circular, $seq_length, $format, $seq_version, "accession_number");
+        my $id_sequence = insert_tags(@keywords);
+        insert_sequence($id_sequence, $sequence);
         
-        
+        #      INSERIR COISAS NO DBM
+        #my %seq;
+        #dbmopen(%seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/sequences', 0666);
+        #$seq{1} = "actgatcgatagctagc";
+        #$seq{2} = "ctgatcgatagctagc";
+        #$seq{3} = "tgatcgatagctagc";
+        #$seq{5} = "gatcgatagctagc";
+        #dbmclose(%seq);
+        #print "Pelos vistos correu tudo bem...\n";
         #
         #
+        #  LER COISAS NO DBM
         #
+        #my %seq;
+        #my ($key, $val);
+        #dbmopen(%seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/sequences', 0666);
+        #while(($key, $val) = each %seq) {
+        #    print "$key -> $val\n";
+        #}
+        #dbmclose(%seq);
+        #print "Pelos vistos também correu tudo bem...\n";
         #
-        #
-        #       TODO PARA SABADO: VER DMDOPEN (http://perldoc.perl.org/functions/dbmopen.html) E COMECAR A GUARDAR SEQUENCIAS!!!!!!!!!!!!
-        #
-        #
-        #
-        #
-        #
-        
-        
     }
 }
 
@@ -132,7 +146,7 @@ sub insert_specie{
         #por isso tive de voltar a fazer o select...
         
         #The last argument tells if it has the accession number (insertion from a file or from a remote DB) or the gene name (manual insertion)
-sub insert_sequence{
+sub insert_sequence_db{
     my ($specie, $alphabet, $authority, $description, $gene_name_or_accession_number, $date, $is_circular, $seq_length, $format, $seq_version, $type) = @_;
     my $sql = "SELECT id_specie FROM species WHERE specie='".$specie."'";
     my $result = $dbh->prepare($sql);
@@ -152,7 +166,7 @@ sub insert_sequence{
     }
 }
 
-#-------------------Insert the tags------------------------------
+#-------------------Insert the tags and returns the $id_sequence------------------------------
 sub insert_tags{
     my (@keywords) = @_;
     my $id_sequence;
@@ -180,11 +194,20 @@ sub insert_tags{
         #--------------Insert the tuple id_sequence - id_tag on seq_tags table------------------------
         while(my $row = $result->fetchrow_hashref()){
             $sql = "INSERT INTO seq_tags (id_sequence, id_tag) VALUES ('".$id_sequence."', '".$row->{'id_tag'}."')";
-            my $result2 = $dbh->do($sql);
-            if($result2) {print ("A insercao foi executada com sucesso\n");}
-            else {print ("Ocorreu um erro na insercao\n");}
+            $dbh->do($sql);#my $result2 = 
+            #if($result2) {print ("A insercao foi executada com sucesso\n");}
+            #else {print ("Ocorreu um erro na insercao\n");}
         }
     }
+    return $id_sequence;
+}
+
+
+#----------------Insert the sequence on a DBM----------------------------------------
+sub insert_sequence{
+    my ($id_sequence, $sequence) = @_;
+    $dbm_seq{$id_sequence} = $sequence;
+    print "A insercao foi executada com sucesso\n";
 }
 
 
