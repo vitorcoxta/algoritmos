@@ -18,7 +18,7 @@ CREATE TABLE sequences (
     authority VARCHAR(20),
     date VARCHAR(10),
     is_circular INT,
-    gene_name VARCHAR(20),      #TODO: display_id parsed
+    gene_name VARCHAR(20),
     description VARCHAR(50),
     length INT,
     format VARCHAR(10),
@@ -33,3 +33,5 @@ CREATE TABLE seq_tags (
     FOREIGN KEY (id_sequence) REFERENCES sequences(id_sequence),
     FOREIGN KEY (id_tag) REFERENCES tags(id_tag)
 )ENGINE=InnoDB;
+
+SET SQL_SAFE_UPDATES=0;                 #Just to allow table updates
