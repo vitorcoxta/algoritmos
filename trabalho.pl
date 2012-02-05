@@ -27,17 +27,19 @@ dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinform
 
 #TODO: Quando a interface estiver terminada, meter na opcao "sair" o close da connection às base de dados (close $dbh e dbmclose($dmb_seq))
 
-main();
+main(1);
 
 sub main{
-    my $option = interface("welcome", 1, 0);
+    my ($clear) = @_;
+    my $option = interface("welcome", $clear, 0);
     if($option == 1){insertion();}
     elsif($option == 2){removal();}
     elsif($option == 3){modification();}
     elsif($option == 9){
         interface("exit");
         dbmclose(%dbm_seq);
-        $dbh->disconnect;
+        #$dbh->disconnect;
+        exit(0);
     }
 }
 
@@ -109,7 +111,7 @@ sub insertion {
         insert_sequence($id_sequence, $sequence);
     }
     elsif($option == 3){
-        main();
+        main(1);
     }
 }
 
@@ -221,7 +223,7 @@ sub removal{
         remove($gene_name, "gene_name");
     }
     elsif($option == 3){
-        main();
+        main(1);
     }
 }
 
@@ -266,7 +268,7 @@ sub modification{
         modify($gene_name, "gene_name");
     }
     elsif($option == 3){
-        main();
+        main(1);
     }
 }
 
@@ -283,6 +285,7 @@ sub modify{
     while(my $row = $result->fetchrow_hashref()){
         $current += 1;
         if($row->{format} eq "genbank") {$format = "gb";}
+        else{$format = $row->{format};}
         create_file($current, $result->rows, $row);
         interface("modify_sequence", 1, 0, $current, $result->rows, $format);
         ($gene_name, $accession_number, $description, $alphabet, $sequence) = fetch_info($current, $result->rows, $format);
@@ -509,8 +512,8 @@ sub interface {
     }
     elsif($type eq "error_file_not_found"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
-        print "\t\t\tABORTED!\n\nAn error occured... The file could not be found...";
-        interface("welcome", 0);
+        print "\t\t\tABORTED!\n\nAn error occured... The file could not be found...\n\n";
+        main(0);
     }
     elsif($type eq "exit"){
         print "METER AQUI AS CENAS DE DESPEDIDA DO JOAO. XAU AI!\n\n";
