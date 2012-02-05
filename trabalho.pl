@@ -33,7 +33,7 @@ sub main{
     my $option = interface("welcome", 1, 0);
     if($option == 1){insertion();}
     elsif($option == 2){removal();}
-    elsif($option == 3){change();}
+    elsif($option == 3){modification();}
     elsif($option == 9){interface("exit");}
 }
 
@@ -62,7 +62,7 @@ sub insertion {
         #print"\nsequence: $sequence\nseq_version: $seq_version\nformat: $format\n";#species: ".$species->species;
         
         insert_specie($specie);
-        insert_sequence_db($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version, "gene_name");
+        insert_sequence_db($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version);
         my $id_sequence = insert_tags(@keywords);
         insert_sequence($id_sequence, $sequence);
     }
@@ -74,7 +74,7 @@ sub insertion {
             $path = interface("ask_file_path", $clear);
             try{
                 $seqio = Bio::SeqIO->new(-file => $path);
-            } catch Bio::Root::Exception with {$clear = 0};
+            } catch Bio::Root::Exception with {$clear = 0;}
         } while(!$seqio);
         my $format ;
         if((substr ($path, -5)) eq "fasta") {$format = "fasta";}
@@ -85,7 +85,8 @@ sub insertion {
         my $alphabet = interface("ask_alphabet", 0);                       #Asks the alphabet
         my $authority = $seq->authority;
         my $description = $seq->desc;
-        my $accession_number = $seq->display_id;                     #This method returns the gene name
+        my $accession_number = $seq->accession_number();
+        my $gene_name = $seq->display_id;                                   #This method returns the gene name
         my $is_circular;
         if($seq->is_circular) {$is_circular = 1;}
         else {$is_circular = 0;}
@@ -110,7 +111,7 @@ sub insertion {
         #}
         #print"\nsequence: $sequence\nseq_version: $seq_version\nformat: $format\nspecies: $specie\n";
         insert_specie($specie);
-        insert_sequence_db($specie, $alphabet, $authority, $description, $accession_number, $date, $is_circular, $seq_length, $format, $seq_version, "accession_number");
+        insert_sequence_db($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version, $accession_number);
         my $id_sequence = insert_tags(@keywords);
         insert_sequence($id_sequence, $sequence);
     }
@@ -147,21 +148,14 @@ sub insert_specie{
         
         #The last argument tells ifit has the accession number (insertion from a file or from a remote DB) or the gene name (manual insertion)
 sub insert_sequence_db{
-    my ($specie, $alphabet, $authority, $description, $gene_name_or_accession_number, $date, $is_circular, $seq_length, $format, $seq_version, $type) = @_;
+    my ($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version, $type, $accession_number) = @_;
     my $sql = "SELECT id_specie FROM species WHERE specie='".$specie."'";
     my $result = $dbh->prepare($sql);
     $result->execute();
     while(my $row = $result->fetchrow_hashref()){
-        if($type eq "gene_name") {
-            $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, gene_name, date, is_circular, length, format, seq_version)"
-            ."VALUES ('".$row->{'id_specie'}."', '".$alphabet."', '".$authority."', '".$description."', '".$gene_name_or_accession_number."', '".$date."', '"
-            .$is_circular."', '$seq_length', '".$format."', '".$seq_version."')";
-        }
-        elsif($type eq "accession_number"){
-            $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, accession_number, date, is_circular, length, format, seq_version)"
-            ."VALUES ('".$row->{'id_specie'}."', '".$alphabet."', '".$authority."', '".$description."', '".$gene_name_or_accession_number."', '".$date."', '"
-            .$is_circular."', '$seq_length', '".$format."', '".$seq_version."')";
-        }
+        $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, accession_number, gene_name, date, is_circular, length, format, seq_version) VALUES ('"
+                   .$row->{'id_specie'}."', '".$alphabet."', '".$authority."', '".$description."', '".$accession_number."', '".$gene_name."', '".$date."', '".$is_circular."', '$seq_length', '"
+                   .$format."', '".$seq_version."')";
         $dbh->do($sql);
     }
 }
@@ -241,20 +235,17 @@ sub removal{
 
 
 
-#-------------------This function deletes a sequence from the database
+#-------------------This function deletes a sequence from the database------------------------------------
 sub remove{
     my ($accession_number_or_gene_name, $type) = @_;
-    my $sql;
-    if($type eq "accession_number"){$sql = "SELECT id_sequence FROM sequences WHERE accession_number='".$accession_number_or_gene_name."'";}
-    elsif($type eq "gene_name"){$sql = "SELECT id_sequence FROM sequences WHERE gene_name='".$accession_number_or_gene_name."'";}
+    my $sql = "SELECT id_sequence FROM sequences WHERE $type='".$accession_number_or_gene_name."'";
     my $result = $dbh->prepare($sql);
     $result->execute();
     while(my $row = $result->fetchrow_hashref()){
         delete $dbm_seq{$row->{'id_sequence'}};             #Deletes the sequence from the Hash Table dbm_seq
         remove_seq_tags($row->{'id_sequence'});
     }
-    if($type eq "accession_number"){$sql = "DELETE FROM sequences WHERE accession_number='".$accession_number_or_gene_name."'";}
-    elsif($type eq "gene_name"){$sql = "DELETE FROM sequences WHERE gene_name='".$accession_number_or_gene_name."'";}
+    $sql = "DELETE FROM sequences WHERE $type='".$accession_number_or_gene_name."'";
     $dbh->do($sql);
 }
 
@@ -269,8 +260,86 @@ sub remove_seq_tags{
 }
 
 
-sub change{
-    
+
+#----------------------This function will modify a sequence saved on the database----------------------
+sub modification{
+    my $option = interface("ask_modification_type", 1, 0);
+    if($option == 1){
+        my $accession_number = interface("ask_accession_number", 1);
+        modify($accession_number, "accession_number");
+    }
+    elsif($option == 2){
+        my $gene_name = interface("ask_gene_name", 1);
+        modify($gene_name, "gene_name");
+    }
+    elsif($option == 3){
+        main();
+    }
+}
+
+
+
+
+sub modify{
+    my ($accession_number_or_gene_name, $type) = @_;
+    my $sql = "SELECT id_sequence, gene_name, accession_number, description, alphabet, format FROM sequences WHERE $type='".$accession_number_or_gene_name."'";
+    my $result = $dbh->prepare($sql);
+    $result->execute();
+    my $current = 0;
+    my ($gene_name, $accession_number, $description, $alphabet, $sequence, $format);
+    while(my $row = $result->fetchrow_hashref()){
+        $current += 1;
+        if($row->{format} eq "genbank") {$format = "gb";}
+        create_file($current, $result->rows, $row);
+        interface("modify_sequence", 1, 0, $current, $result->rows, $format);
+        ($gene_name, $accession_number, $description, $alphabet, $sequence) = fetch_info($current, $result->rows, $format);
+        update_info($gene_name, $accession_number, $description, $alphabet, $sequence, $row->{id_sequence});
+        unlink("sequence".$current."in".$result->rows.".$format");
+    }
+    #if($type eq "accession_number"){$sql = "DELETE FROM sequences WHERE accession_number='".$accession_number_or_gene_name."'";}
+    #elsif($type eq "gene_name"){$sql = "DELETE FROM sequences WHERE gene_name='".$accession_number_or_gene_name."'";}
+    #$dbh->do($sql);
+}
+
+
+
+sub create_file{
+    my($current, $total, $row) = @_;
+    my $seq = Bio::Seq->new(-seq => $dbm_seq{$row->{id_sequence}}, -display_id => $row->{gene_name}, -accession_number => $row->{accession_number}, -desc => $row->{description}, -alphabet => $row->{alphabet});
+    my $seqio;
+    if($row->{format} eq "genbank"){
+        $seqio = Bio::SeqIO->new(-file => ">sequence".$current."in".$total.".gb", -format => "genbank");
+    }
+    else{
+        $seqio = Bio::SeqIO->new(-file => ">sequence".$current."in".$total.".$row->{format}", -format => $row->{format});
+    }
+    $seqio->write_seq($seq);
+}
+
+
+
+sub fetch_info{
+    my ($current, $total, $format) = @_;
+    my $seqio;
+    do{
+        try{
+            $seqio = Bio::SeqIO->new(-file => "sequence".$current."in".$total.".$format");
+        } catch Bio::Root::Exception with {
+            interface("error_file_not_found", 1);
+        }
+    } while(!$seqio);
+    my $seq = $seqio->next_seq;
+    return($seq->display_id, $seq->accession_number, $seq->desc, $seq->alphabet, $seq->seq);
+}
+
+
+
+sub update_info{
+    my ($gene_name, $accession_number, $description, $alphabet, $sequence, $id_sequence) = @_;
+    my $sql = "UPDATE sequences SET gene_name='".$gene_name."', accession_number='".$accession_number."', description='".$description."', alphabet='".$alphabet."', length='".
+                     length($sequence)."' WHERE id_sequence='".$id_sequence."'";
+    $dbh->do($sql);
+    $dbm_seq{$id_sequence} = $sequence;
 }
 
 
@@ -278,15 +347,21 @@ sub change{
 
 
 #------------------This function will have ALL the interface things-------------------
+# - 1st argument: interface type (string)
+# - 2nd argument: clear screen (boolean)
+# - 3rd argument: invalid option (boolean)
+# - 4th argument: current id_sequence of the modifiying sequence (just used for the option "modification")
+# - 5th argument: total of modifying sequences (just used for the option "modification")
+# - 6th argument: format of the file to create (just used for the option "modification")
 sub interface {
-    my ($type, $clear, $invalid) = @_;
+    my ($type, $clear, $invalid, $current, $total, $format) = @_;
     my ($option, $answer);
     my @answer;
     if($type eq "welcome"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n"}
         else {print "\t\t\tWELCOME TO CENASSAS. ALGUEM QUE ESCREVA ALGO AQUI, QUE TOU SEM IDEIAS!\n\n";}
-        print "What do you want to do?\n\n1 - Insertion of a sequence\n2 - Removal of a sequence\n3 - Change a sequence\n\n9 - Exit\n";
+        print "What do you want to do?\n\n1 - Insertion of a sequence\n2 - Removal of a sequence\n3 - Modification of a sequence\n\n9 - Exit\n";
         $option = <>;
         if($option == 1 or $option == 2 or $option == 3 or $option == 9) {return $option;}
         else {interface("welcome", 1, 1);}
@@ -407,7 +482,8 @@ sub interface {
     elsif($type eq "ask_removal_type"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n";}
-        print "Choose a way to remove the sequence:\n\n1 - By an accession number\n2 - By a gene name\n3 - Go back\n\n";
+        print "Choose a way to remove the sequence (ATTENTION! If there are more than 1 sequence with the same accession number or with the same name, ".
+                "all of them will be deleted):\n\n1 - By an accession number\n2 - By a gene name\n3 - Go back\n\n";
         $option = <>;
         if($option == 1 or $option == 2 or $option == 3) {return $option;}
         else {interface("ask_removal_type",1, 1);}
@@ -418,6 +494,30 @@ sub interface {
         $answer = <>;
         chomp $answer;
         return $answer;
+    }
+    elsif($type eq "ask_modification_type"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n";}
+        print "Choose a way to modify the sequence (ATTENTION: If there are more than 1 sequence with the same accession number or with the same name, ".
+                "you can modify whatever you want):\n\n1 - By an accession number\n2 - By a gene name\n3 - Go back\n\n";
+        $option = <>;
+        if($option == 1 or $option == 2 or $option == 3) {return $option;}
+        else {interface("ask_modification_type",1, 1);}
+    }
+    elsif($type eq "modify_sequence"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "Sequence $current in $total sequences ...\n\n";
+        if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n";}
+        print "The file sequence".$current."in".$total.".$format has been created. Go and modify whatever you want to. After all the changes are done, come back and enter \"ok\"".
+                " (without quotes)\n";
+        $answer = <>;
+        chomp $answer;
+        if($answer ne "ok") {interface("modify_sequence", 1, 1, $current, $total, $format);}
+    }
+    elsif($type eq "error_file_not_found"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "\t\t\tABORTED!\n\nAn error occured... The file could not be found...";
+        interface("welcome", 0);
     }
     elsif($type eq "exit"){
         print "METER AQUI AS CENAS DE DESPEDIDA DO JOAO. XAU AI!\n\n";
