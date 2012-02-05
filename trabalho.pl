@@ -34,7 +34,11 @@ sub main{
     if($option == 1){insertion();}
     elsif($option == 2){removal();}
     elsif($option == 3){modification();}
-    elsif($option == 9){interface("exit");}
+    elsif($option == 9){
+        interface("exit");
+        dbmclose(%dbm_seq);
+        $dbh->disconnect;
+    }
 }
 
 #-----------------------This funtion inserts a sequence in the database: manually, from a file or from a remote database----------------------
@@ -54,12 +58,6 @@ sub insertion {
         my $specie = interface("ask_specie", 0);
         my $format = interface("ask_format", 0);
         my $seq_length = length($sequence);
-        
-        #print "\n\nAQUI ESTAO AS RESPOSTAS DADAS:\nalphabet: $alphabet\nauthority: $authority\ndesc: $description\ngene name: $gene_name\ndate: $date\ncircular: $is_circular\nkeywords: ";
-        #for my $key (@keywords){
-        #    print "$key, ";
-        #}
-        #print"\nsequence: $sequence\nseq_version: $seq_version\nformat: $format\n";#species: ".$species->species;
         
         insert_specie($specie);
         insert_sequence_db($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version);
@@ -105,11 +103,6 @@ sub insertion {
         my $specie = interface("ask_specie", 0);               #Just to ask if the user wants to associate the sequence to any specie
         my $seq_length = $seq->length;
         
-        #print "\n\nAQUI ESTAO AS RESPOSTAS DADAS:\nalphabet: $alphabet\nauthority: $authority\ndesc: $description\ngene name: $gene_name\ndate: $date\ncircular: $is_circular\nkeywords: ";
-        #for my $key (@keywords){
-        #    print "$key, ";
-        #}
-        #print"\nsequence: $sequence\nseq_version: $seq_version\nformat: $format\nspecies: $specie\n";
         insert_specie($specie);
         insert_sequence_db($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version, $accession_number);
         my $id_sequence = insert_tags(@keywords);
@@ -148,7 +141,7 @@ sub insert_specie{
         
         #The last argument tells ifit has the accession number (insertion from a file or from a remote DB) or the gene name (manual insertion)
 sub insert_sequence_db{
-    my ($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version, $type, $accession_number) = @_;
+    my ($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version, $accession_number) = @_;
     my $sql = "SELECT id_specie FROM species WHERE specie='".$specie."'";
     my $result = $dbh->prepare($sql);
     $result->execute();
@@ -261,7 +254,7 @@ sub remove_seq_tags{
 
 
 
-#----------------------This function will modify a sequence saved on the database----------------------
+#----------------------This function indicates the right path to modify data from the database, depending from the user's decision----------------------
 sub modification{
     my $option = interface("ask_modification_type", 1, 0);
     if($option == 1){
@@ -279,7 +272,7 @@ sub modification{
 
 
 
-
+#----------------------This function will modify a sequence saved on the database----------------------
 sub modify{
     my ($accession_number_or_gene_name, $type) = @_;
     my $sql = "SELECT id_sequence, gene_name, accession_number, description, alphabet, format FROM sequences WHERE $type='".$accession_number_or_gene_name."'";
@@ -302,7 +295,7 @@ sub modify{
 }
 
 
-
+#------------------------This function will create the file where the user will modify the data-----------------------------
 sub create_file{
     my($current, $total, $row) = @_;
     my $seq = Bio::Seq->new(-seq => $dbm_seq{$row->{id_sequence}}, -display_id => $row->{gene_name}, -accession_number => $row->{accession_number}, -desc => $row->{description}, -alphabet => $row->{alphabet});
@@ -317,7 +310,7 @@ sub create_file{
 }
 
 
-
+#--------------------------This funtion will fetch the new information given by the user----------------------------------
 sub fetch_info{
     my ($current, $total, $format) = @_;
     my $seqio;
@@ -333,7 +326,7 @@ sub fetch_info{
 }
 
 
-
+#------------------------This funtion will update the info in the database and the hash------------------------------------
 sub update_info{
     my ($gene_name, $accession_number, $description, $alphabet, $sequence, $id_sequence) = @_;
     my $sql = "UPDATE sequences SET gene_name='".$gene_name."', accession_number='".$accession_number."', description='".$description."', alphabet='".$alphabet."', length='".
