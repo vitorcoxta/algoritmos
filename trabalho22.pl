@@ -329,7 +329,6 @@ sub interface {
     
     }
     
-<<<<<<< HEAD
     if ($type eq "ask_format"){
         system $^O eq 'MSWin32' ? 'cls' : 'clear';
         print "Select the format of the importation:\n 1-fasta\n 2-genbank\n 3-swissprot\n";    
@@ -339,18 +338,7 @@ sub interface {
             
             if ($option == 1 or $option == 2 or $option==3 or $option eq 9) {return $option;}
             else {print "\nERROR: INVALID OPTION! Please select one of the given options!\n";}    
-=======
-       if ($type eq "ask_format"){
-        system $^O eq 'MSWin32' ? 'cls' : 'clear';
-        print "Select the format of the importation:\n 1-fasta\n 2-genbank\n 3-swissprot\n";    
-        do{     
-        print "Answer: ";
-        $option = <>;
-        
-        if ($option == 1 or $option == 2 or $option==3 or $option eq 9) {return $option;}
-        else {print "\nERROR: INVALID OPTION! Please select one of the given options!\n";}    
-    
->>>>>>> 20723e235e800be293abc7d8b99873d6997065c6
+
         } while(1);     
     }
     
@@ -394,12 +382,8 @@ sub interface {
         
             $answer = <>;
             chomp $answer;
-<<<<<<< HEAD
             if ($answer!=1 and $answer!=2) {$flag=0;}
-=======
-            if ($answer!=1 and $answer!=2) {print"FODEU_SE";$flag=0;}
->>>>>>> 20723e235e800be293abc7d8b99873d6997065c6
-        
+
             }while(!$flag);   
         
         if ($answer==2) {return 0;} ## DONT WANT TO ADD TAG
