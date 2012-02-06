@@ -206,7 +206,6 @@ sub insert_sequence_importation {
          my  $result;
          my @val;
         
-<<<<<<< HEAD
         if ($formato==1) {$form="fasta";}
         elsif ($formato==2){$form ="genbank";}
         else {$form="swiss";}
