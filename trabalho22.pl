@@ -1,5 +1,7 @@
 use strict;
 use Bio::DB::GenBank;
+use Bio::DB::SwissProt;
+use Bio::DB::RefSeq;
 use Bio::Perl;
 use Bio::Seq;
 use Bio::SeqIO;
@@ -15,6 +17,8 @@ use Error qw(:try);
 
 #DATABASE CONNECTION ON JOAO'S PC!
 my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
+my %dbm_seq;
+dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
 
 #DATABASE CONNECTION ON VITOR'S PC!
 #my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
@@ -24,39 +28,44 @@ importation();
 
 sub importation {
     
+#print "\n".$dbm_seq{10}."\n";   
+    
     my $option;    
 
     $option = interface("ask_database");   # Escolher a Base de Dados
        
-    if ($option ==1) { interface("genbank_importation_begin"); genbank_importation(); }    # Escolheu :     GENBANK    
+    if ($option ==1 or $option ==2 or $option ==3) { interface("generic_importation_begin",$option); generic_importation($option); }    # Escolheu :     GENBANK    
 
-    elsif ($option ==2) { interface ("swissprot_importation_begin");}
-        
-    elsif ($option ==3) { interface ("NCBI_importation_begin");}
-        
-    else {print "\t\n\nBioinformatics - \"Fetch the Sequence!\" \n\n Thank you for using our software! \n Have a nice day! :) \n\n\nPROPS PO PESSOAL!!!XD"};  
+        else {print "\t\n\nBioinformatics - \"Fetch the Sequence!\" \n\n Thank you for using our software! \n Have a nice day! :) \n\n\nPROPS PO PESSOAL!!!XD"};  
     
 }    
              
          
-sub genbank_importation{
+sub generic_importation{
     
+        my($base)=@_;
         my ($option2,$formato,$seq,$existe,$option,$gb,$seqio_obj,$result,$sql,$specie,$id_specie,$id_sequence,$id_tag);         
          
-        $option = interface ("ask_genbank_import");   ## Escolher tipo de importação - "Acession Number ou Version Number"
+         if ($base==2) {$option=1;}
+                    else {$option = interface ("ask_import"); }  ## Escolher tipo de importação - "Acession Number ou Version Number"
         
-        $formato = interface ("ask_genbank_format");  ## Escolher Fasta ou Genbank
+        $formato = interface ("ask_format");  ## Escolher Fasta ou Genbank
         
         ### CICLO PARA PROCURAR    
         
         $existe=1;
         
-        $gb = Bio::DB::GenBank->new();        ## Iniciar ligação ao Genbank
+        if ($base==1) {
+            $gb = Bio::DB::GenBank->new();} ## Iniciar ligação ao Genbank
+        
+            elsif ($base==2) {$gb=Bio::DB::SwissProt->new();}
+            
+                else {$gb=Bio::DB::RefSeq->new();}
         
         do {
         
             if (!$existe)  {print "ERROR: Already existing Accession Number in DataBase!!\n\n";<>;}     
-            if ($existe==2) {print "ERROR : Non existing Number in Genbank!!\n\n";<>;}
+            if ($existe==2) {print "ERROR : Non existing Number in Remote DataBase!!\n\n";<>;}
         
         ##### Inserir Number para procura
                 if ($option==1) {
@@ -107,14 +116,14 @@ sub genbank_importation{
      
      ### Tipo de Ficheiro para Gravar###########################################
      
-        if ($formato == 1) {$gb = Bio::DB::GenBank->new(-retrievaltype => 'tempfile' , 
-                                              -format => 'Fasta');
-                            
-                            $seqio_obj = Bio::SeqIO->new(-file => '>sequence.fasta', -format => 'fasta' ); }
-        
-        else {$seqio_obj = Bio::SeqIO->new(-file => '>sequence.gb', -format => 'genbank' );}
-        
-    
+$gb = Bio::DB::GenBank->new(-retrievaltype => 'tempfile' , -format => 'Fasta');     
+     
+                        if ($formato==1) {$seqio_obj = Bio::SeqIO->new(-file => '>sequence.fasta', -format => 'fasta' ); }
+                        
+                        elsif($formato==2) {$seqio_obj = Bio::SeqIO->new(-file => '>sequence.gb', -format => 'genbank' );}                        
+                        
+                        else {$seqio_obj = Bio::SeqIO->new(-file => '>sequence.swiss', -format => 'swiss' );}
+           
     ########################################################################
             
         $seqio_obj->write_seq($seq);
@@ -200,13 +209,13 @@ sub insert_sequence {
             if ($formato==1) {  ## FASTA       
                                                                         
                                     $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, accession_number, gene_name, date, is_circular, length, format, seq_version)
-                                         VALUES ('".$id_specie."', '".$seq->alphabet."', '".$seq->authority."', '".$seq->desc."', '".$seq->accession."', '".$seq->display_name."', '".$seq->get_dates."', '".$seq->is_circular."', '".$seq->length."', 'FASTA', '".$seq->seq_version."');";
+                                         VALUES ('".$id_specie."', '".$seq->alphabet."', '".$seq->authority."', '".$seq->desc."', '".$seq->accession."', '".$seq->display_name."', '".$seq->get_dates."', '".$seq->is_circular."', '".$seq->length."', 'fasta', '".$seq->seq_version."');";
         
             }
              else { #GENBANK
             
                                     $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, accession_number, gene_name, date, is_circular, length, format, seq_version)
-                                          VALUES ('".$id_specie."', '".$seq->alphabet."', '".$seq->authority."', '".$seq->desc."', '".$seq->accession."', '".$seq->display_name."', '".$seq->get_dates."', '".$seq->is_circular."', '".$seq->length."', 'GENBANK', '".$seq->seq_version."');";
+                                          VALUES ('".$id_specie."', '".$seq->alphabet."', '".$seq->authority."', '".$seq->desc."', '".$seq->accession."', '".$seq->display_name."', '".$seq->get_dates."', '".$seq->is_circular."', '".$seq->length."', 'genbank', '".$seq->seq_version."');";
             }
                            
             $dbh->do($sql);  ## INSERCAO NA BASE DADOS;
@@ -215,6 +224,8 @@ sub insert_sequence {
             $result->execute();
         
             @val = $result->fetchrow_array(); ## SELECT DO ID DA SEQUENCIA INSERIADA
+            
+            #$dbm_seq{$val[0]} = $seq;        
   
     return $val[0] ;  
 }
@@ -261,6 +272,8 @@ sub insert_relation{
     
     my ($id_seq,$id_tag)=@_;
     
+    print "----------------$id_seq,$id_tag-----------------";
+    
     my $sql = "INSERT INTO seq_tags (id_sequence,id_tag) VALUES ('".$id_seq."','".$id_tag."');";
     
     $dbh->do($sql);
@@ -279,13 +292,13 @@ sub insert_relation{
 sub interface {
     
     my $var=0;
-    my ($type) = @_;
+    my ($type,$bank) = @_;
     my ($option, $answer,$flag,$size);
     my %id_tags;
     
     if ($type eq "ask_database"){
         system $^O eq 'MSWin32' ? 'cls' : 'clear';
-        print "Which database you want to use to import: \n 1-Genbank\n 2-Swissprot \n 3-NCBI\n\n E-Go back and Exit\n\n";    
+        print "Which database you want to use to import: \n 1-Genbank\n 2-Swissprot \n 3-RefSeq\n\n E-Go back and Exit\n\n";    
         do{     
         print "Answer: ";
         $option = <>;
@@ -298,16 +311,16 @@ sub interface {
     
   ############## GENBANK  
 
-    if ($type eq "genbank_importation_begin"){
+    if ($type eq "generic_importation_begin"){
         
          system $^O eq 'MSWin32' ? 'cls' : 'clear';
-        
-         print "Welcome to the Genbank Importation Interface!!\n";
-          
+        if ($bank==1) {print "Welcome to the GenBank Importation Interface!!\n"; }
+          if($bank==2) {print "Welcome to the SwissProt Importation Interface!!\n";}
+            else {print "Welcome to the RefSeq Importation Interface!!\n";}
     }
     
     
-    if ($type eq "ask_genbank_import"){
+    if ($type eq "ask_import"){
         ##system $^O eq 'MSWin32' ? 'cls' : 'clear';
         print "\n\nSelect the way you want to import:\n 1-Accession Number\n 2-Accession Version\n\n9-Go back\n\n";    
         do{     
@@ -321,14 +334,14 @@ sub interface {
     
     }
     
-       if ($type eq "ask_genbank_format"){
+       if ($type eq "ask_format"){
         system $^O eq 'MSWin32' ? 'cls' : 'clear';
-        print "Select the format of the importation:\n 1-fasta\n 2-genbank\n";    
+        print "Select the format of the importation:\n 1-fasta\n 2-genbank\n 3-swissprot\n";    
         do{     
         print "Answer: ";
         $option = <>;
         
-        if ($option == 1 or $option == 2 or $option eq 9) {return $option;}
+        if ($option == 1 or $option == 2 or $option==3 or $option eq 9) {return $option;}
         else {print "\nERROR: INVALID OPTION! Please select one of the given options!\n";}    
     
         } while(1);     
@@ -363,18 +376,34 @@ sub interface {
     }    
     
     elsif($type eq "ask_tag"){
-        system $^O eq 'MSWin32' ? 'cls' : 'clear';
-        print "Do you want to add a tag  to the sequence?\n 1- Yes, i do.\n 2- No, i don't.\n\nAnswer: ";
-        $answer = <>;
-        chomp $answer;
+        
+      
+        system $^O eq 'MSWin32' ? 'cls' : 'clear';      
+        
+        my $flag;
+        do{
+
+            $flag=1;
+            print "Do you want to add a tag  to the sequence?\n 1- Yes, i do.\n 2- No, i don't.\n\nAnswer: ";
+        
+            $answer = <>;
+            chomp $answer;
+            if ($answer!=1 and $answer!=2) {print"FODEU_SE";$flag=0;}
+        
+            }while(!$flag);   
         
         if ($answer==2) {return 0;} ## DONT WANT TO ADD TAG
         
          system $^O eq 'MSWin32' ? 'cls' : 'clear'; 
          %id_tags=display_tags();
+        
+        do{        
+        $flag =1;       
          print "Do you want to use an existing Tag from the table or add a new one?\n 1- Existing Tag\n 2- New Tag\n\nAnswer: ";
          $answer = <>;
          chomp $answer;
+        if ($answer!=1 and $answer!=2) {$flag=0;}
+        }while(!$flag) ; 
         
         my $resp;
         
