@@ -9,16 +9,17 @@ use DBI();
 use DBD::mysql;
 use Bio::Root::Exception;
 use Error qw(:try);
+use Data::Dumper;
 
 #------------------------DATABASE CONNECTIONS ON JOAO'S PC!-----------------------------
-my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
-my %dbm_seq;
-dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
+#my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
+#my %dbm_seq;
+#dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
 
 #------------------------DATABASE CONNECTIONS ON VITOR'S PC!----------------------------
-#my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
-#my %dbm_seq;
-#dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
+my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
+my %dbm_seq;
+dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
 
 #------------------------DATABASE CONNECTIONS ON JOSE'S PC!----------------------------
 #my $dbh = DBI->connect('dbi:mysql:alg','root','') or die "Connection Error: $DBI::errstr\n";
@@ -30,12 +31,12 @@ dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
 main(1);
 
 sub main{
-    #my ($key, $val);
-    #
-    #while (($key, $val) = each %dbm_seq){
-    #    print "$key - $val";
-    #    print "\n";
-    #}
+    my ($key, $val);
+    
+    while (($key, $val) = each %dbm_seq){
+        print "$key - ".eval($val);
+        print "\n";
+    }
     
     my ($clear) = @_;
     my $option = interface("welcome", $clear, 0);
@@ -152,7 +153,7 @@ sub insertion {
         insert_specie($specie);
         insert_sequence_db($specie, $alphabet, $seq->authority, $seq->desc, $seq->display_id, $date, $is_circular, $seq->length, $format, $seq_version, $seq->accession_number());
         my $id_sequence = insert_tags(@keywords);
-        insert_sequence($id_sequence, $sequence);
+        insert_sequence($id_sequence, $seq);
         interface("successful_insertion", 1);
         main(0);
     }
@@ -251,7 +252,8 @@ sub insert_tags{
 #----------------Insert the sequence on a DBM----------------------------------------
 sub insert_sequence{
     my ($id_sequence, $sequence) = @_;
-    $dbm_seq{$id_sequence} = $sequence;
+    $dbm_seq{$id_sequence} = Dumper($sequence);
+    print Dumper($sequence);
 }
 
 
@@ -937,7 +939,7 @@ sub interface {
     elsif($type eq "exit"){
         system $^O eq 'MSWin32' ? 'cls' : 'clear';
         print "METER AQUI AS CENAS DE DESPEDIDA DO JOAO. XAU AI!\n\n";
-        print "\t\n\nBioinformatics - \"Fetch the Sequence!\" \n\n Thank you for using our software! \n Have a nice day! :) \n\n\nPROPS PO PESSOAL!!!XD";
+        print "\t\n\nBioinformatics - \"Fetch the Sequence!\" \n\n Thank you for using our software! \n Have a nice day! :) \n\n\nPROPS PO PESSOAL!!!XD\n\n";
     }
 }
 
