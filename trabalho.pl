@@ -9,7 +9,6 @@ use DBI();
 use DBD::mysql;
 use Bio::Root::Exception;
 use Error qw(:try);
-use Data::Dumper;
 
 #------------------------DATABASE CONNECTIONS ON JOAO'S PC!-----------------------------
 #my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
@@ -31,12 +30,11 @@ dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinform
 main(1);
 
 sub main{
-    my ($key, $val);
-    
-    while (($key, $val) = each %dbm_seq){
-        print "$key - ".eval($val);
-        print "\n";
-    }
+    #my ($key, $val);
+    #
+    #while (($key, $val) = each %dbm_seq){
+    #    print "$key - $val\n";
+    #}
     
     my ($clear) = @_;
     my $option = interface("welcome", $clear, 0);
@@ -86,13 +84,14 @@ sub insertion {
         elsif($format_opt == 2) {$format = "genbank";}
         elsif($format_opt == 3) {$format = "swiss";}
         my $seq_length = length($sequence);
+        my $seq = Bio::Seq->new(-seq => $sequence, -id => $gene_name, -alphabet => $alphabet, -is_circular => $is_circular);
         
         insert_specie($specie);
         insert_sequence_db($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version);
         my $id_sequence = insert_tags(@keywords);
-        insert_sequence($id_sequence, $sequence);
+        insert_sequence($id_sequence, $seq, $format, 0);
         interface("successful_insertion", 1);
-        main(0);
+        main(1);
     }
     elsif($option == 2) {
         #----------Gets useful information from the file or asks to user if the file doesn't have it---------------
@@ -128,11 +127,11 @@ sub insertion {
         else {$is_circular = 0;}
         my @keywords;
         if($format eq "fasta"){
-            @keywords = interface("ask_keywords", 0);
+            @keywords = interface("ask_tag", 0);
         }
         else{
             my @keywords_file = split /\s*;\s*/, $seq->keywords;
-            @keywords = (@keywords_file, interface("ask_keywords", 0));
+            @keywords = (@keywords_file, interface("ask_tag", 0));
         }
         print "-------------------------------------------------------------------------------------------------------------------------\n";
         my $sequence = $seq->seq;
@@ -153,9 +152,9 @@ sub insertion {
         insert_specie($specie);
         insert_sequence_db($specie, $alphabet, $seq->authority, $seq->desc, $seq->display_id, $date, $is_circular, $seq->length, $format, $seq_version, $seq->accession_number());
         my $id_sequence = insert_tags(@keywords);
-        insert_sequence($id_sequence, $seq);
+        insert_sequence($id_sequence, $seq, $format, 1);
         interface("successful_insertion", 1);
-        main(0);
+        main(1);
     }
     elsif($option == 3){
         my $answer;    
@@ -163,7 +162,7 @@ sub insertion {
         if ($answer ==1 or $answer ==2 or $answer ==3) { interface("generic_importation_begin",$answer); generic_importation($answer); }    # Escolheu :     GENBANK    
         else {insertion();}
         interface("successful_insertion", 1);
-        main(0);
+        main(1);
     }
 }
 
@@ -250,10 +249,20 @@ sub insert_tags{
 
 
 #----------------Insert the sequence on a DBM----------------------------------------
+# 1st argument - sequence id
+# 2nd argument - Bio::Seq object, with the sequence
+# 3rd argument - file format
+# 4rd argument - flag that tells if the name of the file will have the gene_name or the accession_number
 sub insert_sequence{
-    my ($id_sequence, $sequence) = @_;
-    $dbm_seq{$id_sequence} = Dumper($sequence);
-    print Dumper($sequence);
+    my ($id_sequence, $seq, $format, $with_accession) = @_;
+    my ($filename,$seqio, $form);
+    if($format eq "genbank") {$form = "gb";}
+    else {$form = $format;}
+    if($with_accession) {$filename = "sequences/".$seq->accession_number."_".$id_sequence.".".$form;}
+    else {$filename = "sequences/".$seq->display_id."_".$id_sequence.".".$form;}
+    $dbm_seq{$id_sequence} = $filename;
+    $seqio = Bio::SeqIO->new(-file => ">".$filename, -format => $format);
+    $seqio->write_seq($seq);
 }
 
 
@@ -266,10 +275,14 @@ sub removal{
     if($option == 1){
         my $accession_number = interface("ask_accession_number", 1);
         remove($accession_number, "accession_number");
+        interface("successful_removal", 1);
+        main(1);
     }
     elsif($option == 2){
         my $gene_name = interface("ask_gene_name", 1);
         remove($gene_name, "gene_name");
+        interface("successful_removal", 1);
+        main(1);
     }
     elsif($option == 9){
         main(1);
@@ -286,6 +299,7 @@ sub remove{
     my $result = $dbh->prepare($sql);
     $result->execute();
     while(my $row = $result->fetchrow_hashref()){
+        unlink $dbm_seq{$row->{'id_sequence'}};
         delete $dbm_seq{$row->{'id_sequence'}};             #Deletes the sequence from the Hash Table dbm_seq
         remove_seq_tags($row->{'id_sequence'});
     }
@@ -311,10 +325,14 @@ sub modification{
     if($option == 1){
         my $accession_number = interface("ask_accession_number", 1);
         modify($accession_number, "accession_number");
+        interface("successful_modification", 1);
+        main(1);
     }
     elsif($option == 2){
         my $gene_name = interface("ask_gene_name", 1);
         modify($gene_name, "gene_name");
+        interface("successful_modification", 1);
+        main(1);
     }
     elsif($option == 9){
         main(1);
@@ -330,7 +348,8 @@ sub modify{
     my $result = $dbh->prepare($sql);
     $result->execute();
     my $current = 0;
-    my $format;
+    my ($format, $seqio);
+    
     while(my $row = $result->fetchrow_hashref()){
         $current += 1;
         if($row->{format} eq "genbank") {$format = "gb";}
@@ -347,8 +366,8 @@ sub modify{
 #------------------------This function will create the file where the user will modify the data-----------------------------
 sub create_file{
     my($current, $total, $row) = @_;
-    my $seq = Bio::Seq->new(-seq => $dbm_seq{$row->{id_sequence}}, -display_id => $row->{gene_name}, -accession_number => $row->{accession_number}, -desc => $row->{description}, -alphabet => $row->{alphabet});
-    my $seqio;
+    my $seqio = Bio::SeqIO->new(-file => $dbm_seq{$row->{id_sequence}});
+    my $seq = $seqio->next_seq;
     if($row->{format} eq "genbank"){
         $seqio = Bio::SeqIO->new(-file => ">sequence".$current."in".$total.".gb", -format => "genbank");
     }
@@ -381,18 +400,19 @@ sub update_info{
     my $sql = "UPDATE sequences SET gene_name='".$seq->display_id."', accession_number='".$seq->accession_number."', description='".$seq->desc."', alphabet='".
                      $seq->alphabet."', length='".length($seq->seq)."' WHERE id_sequence='".$id_sequence."'";
     $dbh->do($sql);
-    $dbm_seq{$id_sequence} = $seq->seq;
+    my $seqio = Bio::SeqIO->new(-file => ">".$dbm_seq{$id_sequence});
+    $seqio->write_seq($seq);
 }
 
 
 
 sub generic_importation{
     my($base)=@_;
-    my ($option2,$formato,$seq,$existe,$option,$gb,$seqio_obj,$result,$sql,$specie,$id_specie,$id_sequence,$id_tag);         
+    my ($option2, $format, $seq, $existe, $option, $gb, $seqio_obj, $result, $sql, $specie, $id_specie, $id_sequence, $id_tag, $form, $flag);         
     if ($base==2) {$option=1;}
     else {$option = interface ("ask_import"); }  ## Escolher tipo de importação - "Acession Number ou Version Number"
     
-    $formato = interface ("ask_format", 1);  ## Escolher Fasta ou Genbank
+    $format = interface ("ask_format", 1);  ## Escolher Fasta ou Genbank
     
     ### CICLO PARA PROCURAR    
     $existe=1;
@@ -407,7 +427,8 @@ sub generic_importation{
         if ($existe==2) {print "ERROR! Non existing Number in Remote DataBase!!\n\nPress Enter...";<>;$existe=1;}
 
         ##### Inserir Number para procura
-        if ($option==1) {    
+        if ($option==1) {
+            $flag = 1;
             $option2=interface("ask_accession_number", 1);
             print "-------------------------------------------------------------------------------------------------------------------------\n";
             chomp($option2); 
@@ -421,6 +442,7 @@ sub generic_importation{
             }         
         }
         elsif ($option==2) {
+            $flag = 0;
             $option2=interface("ask_version_number", 1);
             print "-------------------------------------------------------------------------------------------------------------------------\n";
             chomp($option2); 
@@ -442,11 +464,15 @@ sub generic_importation{
     $specie = interface("ask_specie");   #pede especie e de seguida grava
     print "-------------------------------------------------------------------------------------------------------------------------\n";
     $id_specie=insert_specie_importation($specie);
-    $id_sequence = insert_sequence_importation($formato,$id_specie,$seq);
+    $id_sequence = insert_sequence_importation($format,$id_specie,$seq);
  
-    interface("ask_tag", 1); #pergunta se quer tag, se quiser pode escolher uma das que já há, ou uma nova.
-     
-    #if ($id_tag){insert_relation($id_sequence,$id_tag);}
+    my @lista = interface("ask_tag", 0); #pergunta se quer tag, se quiser pode escolher uma das que já há, ou uma nova.
+    insert_tags(@lista);
+    if($format == 1) {$form = "fasta";}
+    elsif($format == 2) {$form = "genbank";}
+    else {$form = "swiss";}
+    insert_sequence($id_sequence, $seq, $form, $flag);
+    
  
     #print "INSERCAO FEITA COM SUCESSO!!\n\n\n"; 
 
@@ -454,8 +480,8 @@ sub generic_importation{
  ### Tipo de Ficheiro para Gravar###########################################
  
     $gb = Bio::DB::GenBank->new(-retrievaltype => 'tempfile' , -format => 'Fasta');     
-     if ($formato==1) {$seqio_obj = Bio::SeqIO->new(-file => '>sequence.fasta', -format => 'fasta' ); }
-     elsif($formato==2) {$seqio_obj = Bio::SeqIO->new(-file => '>sequence.gb', -format => 'genbank' );}
+     if ($format==1) {$seqio_obj = Bio::SeqIO->new(-file => '>sequence.fasta', -format => 'fasta' ); }
+     elsif($format==2) {$seqio_obj = Bio::SeqIO->new(-file => '>sequence.gb', -format => 'genbank' );}
      else {$seqio_obj = Bio::SeqIO->new(-file => '>sequence.swiss', -format => 'swiss' );}
            
     ########################################################################
@@ -465,7 +491,7 @@ sub generic_importation{
     #print "---",$seq->length,"CENAS!!";
     
     interface("successful_insertion", 1);
-    main(0);
+    main(1);
 }
 
 
@@ -523,7 +549,7 @@ sub insert_sequence_importation {
                   VALUES ('".$id_specie."', '".$seq->alphabet."', '".$seq->authority."', '".$seq->desc."', '".$seq->accession."', '".$seq->display_name."', '".$seq->get_dates."', '".$seq->is_circular."', '".$seq->length."', '".$form."', '".$seq->seq_version."');";
                   
    $dbh->do($sql);  ## INSERCAO NA BASE DADOS;
-   $sql = "SELECT id_sequence FROM sequences WHERE accession_number='".$seq->accession."';";
+   $sql = "SELECT LAST_INSERT_ID()";
    $result = $dbh->prepare($sql);  ## SELECT DO ID DA ESPECIE INSERIDA
    $result->execute();
 
@@ -767,7 +793,7 @@ sub interface {
         do{     
             $option = <>;
             
-            if ($option == 1 or $option == 2 or $option==3 or $option == 9) {return $option;}
+            if ($option == 1 or $option == 2 or $option==3) {return $option;}
             else {print "INVALID OPTION! Please choose a valid one:  ";}
         } while(1);     
     }
@@ -908,15 +934,33 @@ sub interface {
         else {print "\n\n";}
         display_tags();  
         my @lista = interface('ask_keywords');
-        insert_tags(@lista);
-        return;    
+        #insert_tags(@lista);
+        return @lista;
     }
     
     
     elsif($type eq "successful_insertion"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
-        print "Successful insertion!!!\n\n\n";
+        print "Successful insertion!!!\n\n\nPress Enter...";
+        <>;
     }
+    
+    
+    
+    elsif($type eq "successful_removal"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "Successful removal!!!\n\n\nPress Enter...";
+        <>;
+    }
+    
+    
+    
+    elsif($type eq "successful_modification"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "Successful modification!!!\n\n\nPress Enter...";
+        <>;
+    }
+    
     
     
     elsif($type eq "exit"){

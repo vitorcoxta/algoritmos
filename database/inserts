@@ -1,5 +1,3 @@
-#PARECE-ME QUE ISTO SERA DESNECESSARIO
-
 INSERT INTO tags (tag) VALUES ('bacteria');
 INSERT INTO tags (tag) VALUES ('cianobacteria');
 INSERT INTO tags (tag) VALUES ('plantae');
