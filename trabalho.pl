@@ -11,14 +11,14 @@ use Bio::Root::Exception;
 use Error qw(:try);
 
 #------------------------DATABASE CONNECTIONS ON JOAO'S PC!-----------------------------
-#my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
-#my %dbm_seq;
-#dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
+my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
+my %dbm_seq;
+dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
 
 #------------------------DATABASE CONNECTIONS ON VITOR'S PC!----------------------------
-my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
-my %dbm_seq;
-dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
+#my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
+#my %dbm_seq;
+#dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
 
 #------------------------DATABASE CONNECTIONS ON JOSE'S PC!----------------------------
 #my $dbh = DBI->connect('dbi:mysql:alg','root','') or die "Connection Error: $DBI::errstr\n";
@@ -400,8 +400,10 @@ sub generic_importation{
     elsif ($base==2) {$gb=Bio::DB::SwissProt->new();}
     else {$gb=Bio::DB::RefSeq->new();}
     do {
-        if (!$existe)  {print "ERROR! Already existing Accession Number in DataBase!!\n\nPress Enter...";<>;}     
-        if ($existe==2) {print "ERROR! Non existing Number in Remote DataBase!!\n\nPress Enter...";<>;}
+
+        if (!$existe)  {print "ERROR! Already existing Accession Number in DataBase!!\n\nPress Enter...";<>;$existe=1;}     
+        if ($existe==2) {print "ERROR! Non existing Number in Remote DataBase!!\n\nPress Enter...";<>;$existe=1;}
+
         ##### Inserir Number para procura
         if ($option==1) {    
             $option2=interface("ask_accession_number", 1);
@@ -410,6 +412,7 @@ sub generic_importation{
             $existe = verifica_accession($option2);             #Verifica de o accesion number já existe na Base de Dados                                                
             
              if ($existe==1) {
+
                 try {   
                     $seq = $gb->get_Seq_by_acc($option2) || throw Bio::Root::Exception(print "ERRO: INVALID NUMBER!!");
                 }catch Bio::Root::Exception with {$existe=2};    
@@ -419,13 +422,17 @@ sub generic_importation{
             $option2=interface("ask_version_number", 1);
             print "-------------------------------------------------------------------------------------------------------------------------\n";
             chomp($option2); 
-            $existe = verifica_version_number($option2);             #Verifica de o accesion number já existe na Base de Dados                                        
+        #    $existe = verifica_version_number($option2);             #Verifica de o accesion number já existe na Base de Dados                                        
                                   
             if($existe==1){
                 try {
                     $seq = $gb->get_Seq_by_version($option2) || throw Bio::Root::Exception(print "ERRO: INVALID NUMBER!!") # Vai buscar o number         
                 }catch Bio::Root::Exception with {$existe=2};  
             }
+        }
+        
+        if($option==2 && $existe==1) {
+                $existe=verifica_accession($seq->accession);
         }
         
     }while(!$existe or $existe==2);
@@ -475,26 +482,6 @@ sub verifica_accession{   #### Verifica se o Accession  number já existe na Bas
     }
     return 1;
 }
-
-
-
-sub verifica_version_number{   #### Verifica se o Version number já existe na Base de Dados -----------   Se sim, retorna 0,  senao retorna 1
-    
-    my ($type) = @_;     
-    my ($sql,$result);
-    
-    $sql = "SELECT seq_version FROM sequences WHERE seq_version='".$type."'";
-    $result = $dbh->prepare($sql);
-    $result->execute();
-    
-    if($result->fetchrow_hashref()){
-        return 0;
-    }
-    
-    return 1;
-}
-
-
 
 sub insert_specie_importation{
     my ($specie) = @_;
