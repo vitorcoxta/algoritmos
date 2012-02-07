@@ -30,13 +30,7 @@ dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
 main(1);
 
 sub main{
-    #my ($key, $val);
-    #
-    #while (($key, $val) = each %dbm_seq){
-    #    print "$key - $val";
-    #    print "\n";
-    #}
-    
+
     my ($clear) = @_;
     my $option = interface("welcome", $clear, 0);
     if($option == 1){insertion();}
@@ -439,9 +433,9 @@ sub generic_importation{
  
     $id_sequence = insert_sequence_importation($formato,$id_specie,$seq);
  
-    $id_tag = interface("ask_tag", 1); #pergunta se quer tag, se quiser pode escolher uma das que já há, ou uma nova.
+    interface("ask_tag", 1); #pergunta se quer tag, se quiser pode escolher uma das que já há, ou uma nova.
      
-    if ($id_tag){insert_relation($id_sequence,$id_tag);}
+    #if ($id_tag){insert_relation($id_sequence,$id_tag);}
  
     print "INSERCAO FEITA COM SUCESSO!!\n\n\n"; 
  
@@ -530,7 +524,7 @@ sub insert_sequence_importation {
 
 sub display_tags{
     
-    my ($result,$sql,@val,%n_tags);
+    my ($result,$sql,@val);
 
     $sql = "Select * from tags ORDER BY id_tag;";    
     
@@ -539,15 +533,33 @@ sub display_tags{
     $result = $dbh->prepare($sql);
     $result->execute();
     
-    while(@val=$result->fetchrow_array()){
-    
-        print "   ID = $val[0] \t KEYWORD = $val[1]\n";
-        $n_tags{$val[0]}=$val[1];
+    while(@val=$result->fetchrow_array()){  
+        print "  KEYWORD = $val[1]\n";
     }
 
     print "\n";
-    return %n_tags;
+    return;
 }
+
+sub display_species{
+    
+    my ($sql,$result,@val);
+    
+    $sql = "Select * from species";
+    
+    print "\tSPECIES TABLE\n\n";
+
+    $result = $dbh->prepare($sql);
+    $result->execute();
+
+    while(@val=$result->fetchrow_array()){  
+        print "  KEYWORD = $val[1]\n";
+    }
+    print "\n";
+    return;
+}
+
+
 
 sub insert_tag{
     
@@ -587,9 +599,7 @@ sub interface {
     my ($type, $clear, $invalid, $current, $total, $format) = @_;
     my ($option, $answer);
     my @answer;
-    my %id_tags;
-    
-    
+
     
     if($type eq "welcome"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
@@ -729,6 +739,7 @@ sub interface {
     
     elsif($type eq "ask_specie"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        display_species();
         print "Insert the specie: ";
         $answer = <>;
         chomp $answer;
@@ -873,7 +884,7 @@ sub interface {
         my $flag;
         do{
             $flag=1;
-            print "Do you want to add a tag  to the sequence?\n 1- Yes, i do.\n 2- No, i don't.\n\nAnswer: ";
+            print "Do you want to add a tags to the sequence?\n 1- Yes, i do.\n 2- No, i don't.\n\nAnswer: ";
             $answer = <>;
             chomp $answer;
             if ($answer!=1 and $answer!=2) {$flag=0;}
@@ -883,55 +894,19 @@ sub interface {
         
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         else {print "\n\n";}
-        %id_tags=display_tags();
-        
-        do{        
-        $flag =1;       
-         print "Do you want to use an existing Tag from the table or add a new one?\n 1- Existing Tag\n 2- New Tag\n\nAnswer: ";
-         $answer = <>;
-         chomp $answer;
-        if ($answer!=1 and $answer!=2) {$flag=0;}
-        }while(!$flag) ; 
-        
-        my $resp;
-        
-        if($answer==1){                           ##Escolheu opção de usar tag existente
-            $flag =1;           
-            print "\nChoose the ID of the tag you want to use.\n";
-            
-            do{
-                if(!$flag) {print "\nERROR: Non existing ID!\n"}                      #inseriu numero errado de tag
-                $flag=1;                            
-                print "Answer: "; 
-    
-                $resp = <>;
-                chomp $resp;
-                
-                if(!(exists($id_tags{$resp}))) { $flag=0; }   # vê se a tag que inseriram é válida
-                else {return $resp};
-            }while(!$flag);
-        }
-        
-        print"\nInsert the new Tag:\nAnswer: ";
-        my $ans = <>;
-        chomp $ans;
-        my @lista_keys = keys %id_tags;
-     
-        for my $x (@lista_keys){  # vê se value que o utilizador introduziu já se encontra na tabela
-            if ($id_tags{$x} eq $ans){ return $x;}
-        }
-       return insert_tag($ans);
+        display_tags();  
+        my @lista = interface('ask_keywords');
+        insert_tags(@lista);
+        return;    
     }
     
     
     
     elsif($type eq "exit"){
-        print "METER AQUI AS CENAS DE DESPEDIDA DO JOAO. XAU AI!\n\n";
+       # print "METER AQUI AS CENAS DE DESPEDIDA DO JOAO. XAU AI!\n\n";
         print "\t\n\nBioinformatics - \"Fetch the Sequence!\" \n\n Thank you for using our software! \n Have a nice day! :) \n\n\nPROPS PO PESSOAL!!!XD";
     }
 }
-
-
 
 
 
