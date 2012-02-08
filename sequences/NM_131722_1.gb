@@ -1,0 +1,247 @@
+LOCUS       NM_131722               2287 bp    mRNA    linear   VRT 20-NOV-2011
+DEFINITION  Danio rerio mitogen-activated protein kinase 14a (mapk14a), mRNA.
+ACCESSION   NM_131722
+VERSION     NM_131722.1  GI:18858994
+KEYWORDS    .
+SOURCE      Danio rerio (zebrafish)
+  ORGANISM  Danio rerio
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Actinopterygii; Neopterygii; Teleostei; Ostariophysi;
+            Cypriniformes; Cyprinidae; Danio.
+REFERENCE   1  (bases 1 to 2287)
+  AUTHORS   Hsu,R.J., Lin,C.C., Su,Y.F. and Tsai,H.J.
+  TITLE     dickkopf-3-related gene regulates the expression of zebrafish myf5
+            gene through phosphorylated p38a-dependent Smad4 activity
+  JOURNAL   J. Biol. Chem. 286 (8), 6855-6864 (2011)
+   PUBMED   21159776
+  REMARK    GeneRIF: Dkk3r regulates p38a phosphorylation to maintain Smad4
+            stability, in turn enabling the Smad2.Smad3a.Smad4 complex to form
+            and activate the myf5 promoter.
+REFERENCE   2  (bases 1 to 2287)
+  AUTHORS   Shi,X. and Zhou,B.
+  TITLE     The role of Nrf2 and MAPK pathways in PFOS-induced oxidative
+            stress in zebrafish embryos
+  JOURNAL   Toxicol. Sci. 115 (2), 391-400 (2010)
+   PUBMED   20200220
+REFERENCE   3  (bases 1 to 2287)
+  AUTHORS   Shen,Q., Little,S.C., Xu,M., Haupt,J., Ast,C., Katagiri,T.,
+            Mundlos,S., Seemann,P., Kaplan,F.S., Mullins,M.C. and Shore,E.M.
+  TITLE     The fibrodysplasia ossificans progressiva R206H ACVR1 mutation
+            activates BMP-independent chondrogenesis and zebrafish embryo
+            ventralization
+  JOURNAL   J. Clin. Invest. 119 (11), 3462-3472 (2009)
+   PUBMED   19855136
+REFERENCE   4  (bases 1 to 2287)
+  AUTHORS   Hendricks,M. and Jesuthasan,S.
+  TITLE     PHR regulates growth cone pausing at intermediate targets through
+            microtubule disassembly
+  JOURNAL   J. Neurosci. 29 (20), 6593-6598 (2009)
+   PUBMED   19458229
+REFERENCE   5  (bases 1 to 2287)
+  AUTHORS   Holloway,B.A., Gomez de la Torre Canny,S., Ye,Y., Slusarski,D.C.,
+            Freisinger,C.M., Dosch,R., Chou,M.M., Wagner,D.S. and Mullins,M.C.
+  TITLE     A novel role for MAPKAPK2 in morphogenesis during zebrafish
+            development
+  JOURNAL   PLoS Genet. 5 (3), E1000413 (2009)
+   PUBMED   19282986
+REFERENCE   6  (bases 1 to 2287)
+  AUTHORS   Yonkers,M.A. and Ribera,A.B.
+  TITLE     Molecular components underlying nongenomic thyroid hormone
+            signaling in embryonic zebrafish neurons
+  JOURNAL   Neural Dev 4, 20 (2009)
+   PUBMED   19505305
+  REMARK    Publication Status: Online-Only
+REFERENCE   7  (bases 1 to 2287)
+  AUTHORS   Krens,S.F., He,S., Spaink,H.P. and Snaar-Jagalska,B.E.
+  TITLE     Characterization and expression patterns of the MAPK family in
+            zebrafish
+  JOURNAL   Gene Expr. Patterns 6 (8), 1019-1026 (2006)
+   PUBMED   16774848
+REFERENCE   8  (bases 1 to 2287)
+  AUTHORS   Amali,A.A., Rekha,R.D., Lin,C.J., Wang,W.L., Gong,H.Y., Her,G.M.
+            and Wu,J.L.
+  TITLE     Thioacetamide induced liver damage in zebrafish embryo as a
+            disease model for steatohepatitis
+  JOURNAL   J. Biomed. Sci. 13 (2), 225-232 (2006)
+   PUBMED   16456712
+REFERENCE   9  (bases 1 to 2287)
+  AUTHORS   Ton,C., Hwang,D.M., Dempsey,A.A., Tang,H.C., Yoon,J., Lim,M.,
+            Mably,J.D., Fishman,M.C. and Liew,C.C.
+  TITLE     Identification, characterization, and mapping of expressed
+            sequence tags from an embryonic zebrafish heart cDNA library
+  JOURNAL   Genome Res. 10 (12), 1915-1927 (2000)
+   PUBMED   11116087
+COMMENT     PROVISIONAL REFSEQ: This record has not yet been subject to final
+            NCBI review. The reference sequence was derived from AB030897.1.
+FEATURES             Location/Qualifiers
+     source          1..2287
+                     /mol_type="mRNA"
+                     /map="8"
+                     /db_xref="taxon:7955"
+                     /chromosome="8"
+                     /organism="Danio rerio"
+     gene            1..2287
+                     /db_xref="GeneID:65237"
+                     /db_xref="ZFIN:ZDB-GENE-010202-2"
+                     /gene_synonym="fk28c03; hm:zeh1243; MAPK14; p38; p38a;
+                     wu:fk28c03; zp38a"
+                     /gene="mapk14a"
+                     /note="mitogen-activated protein kinase 14a"
+     CDS             241..1326
+                     /gene_synonym="fk28c03; hm:zeh1243; MAPK14; p38; p38a;
+                     wu:fk28c03; zp38a"
+                     /protein_id="NP_571797.1"
+                     /gene="mapk14a"
+                     /note="MAP kinase p38a; mitogen-activated protein kinase
+                     p38a; MAPK 14A; MAP kinase 14A; etID18993.8; zeh1243"
+                     /db_xref="GI:18858995"
+                     /db_xref="GeneID:65237"
+                     /db_xref="ZFIN:ZDB-GENE-010202-2"
+                     /codon_start=1
+                     /product="mitogen-activated protein kinase 14A"
+                     /translation="MSQKERPTFYRQEVNKTIWEVPVQYQNLSPVGSGAYGSVCSAFD
+                     AKTGFKVAVKKLSRPFQSIIHAKRTYRELRLLKHMRHENVIGLLDVFTPATSLKEFND
+                     VYLVTHLMGADLNNIVKCQKLTDDHVQFLIYQILRGLKYIHSADIIHRDLKPSNLAVN
+                     EDCELKILDFGLARHTDDEMTGYVATRWYRAPEIMLNWMHYNVTVDIWSVGCIMAELL
+                     TGRTLFPGTDHINQLQQIMRLTGTPPSSLISRMPSHEARTYISSLPQMPKRNFADVFI
+                     GANPQAVDLLEKMLVLDTDKRITAAEALAHPYFAQYHDPDDEPEAEPFDQSFESRELD
+                     IEEWKRQTYEEMISFEPPVFDVDEMES"
+     misc_feature    259..1293
+                     /db_xref="CDD:143382"
+                     /gene_synonym="fk28c03; hm:zeh1243; MAPK14; p38; p38a;
+                     wu:fk28c03; zp38a"
+                     /gene="mapk14a"
+                     /note="Catalytic domain of the Serine/Threonine Kinase,
+                     p38alpha Mitogen-Activated Protein Kinase; Region:
+                     STKc_p38alpha_MAPK14; cd07877"
+     misc_feature    313..1167
+                     /db_xref="CDD:197582"
+                     /gene_synonym="fk28c03; hm:zeh1243; MAPK14; p38; p38a;
+                     wu:fk28c03; zp38a"
+                     /gene="mapk14a"
+                     /note="Serine/Threonine protein kinases, catalytic
+                     domain; Region: S_TKc; smart00220"
+     misc_feature    order(331..342,346..348,352..357,394..396,400..402,
+                     451..453,466..468,493..495,499..501,553..555,559..570,
+                     577..579,583..588,691..693,697..699,703..708,712..714,
+                     742..747,751..756,781..783,787..798,802..804,916..918)
+                     /db_xref="CDD:143382"
+                     /gene_synonym="fk28c03; hm:zeh1243; MAPK14; p38; p38a;
+                     wu:fk28c03; zp38a"
+                     /gene="mapk14a"
+                     /note="active site"
+     misc_feature    order(331..336,346..348,352..357,394..396,400..402,
+                     466..468,493..495,499..501,553..555,559..570,577..579,
+                     691..693,697..699,703..708,742..747,751..753)
+                     /db_xref="CDD:143382"
+                     /gene_synonym="fk28c03; hm:zeh1243; MAPK14; p38; p38a;
+                     wu:fk28c03; zp38a"
+                     /gene="mapk14a"
+                     /note="ATP binding site [chemical binding]; other site"
+     misc_feature    order(451..453,583..585,691..693,697..699,754..756,
+                     781..783,787..798,802..804,916..918)
+                     /db_xref="CDD:143382"
+                     /gene_synonym="fk28c03; hm:zeh1243; MAPK14; p38; p38a;
+                     wu:fk28c03; zp38a"
+                     /gene="mapk14a"
+                     /note="substrate binding site [chemical binding]; other
+                     site"
+     misc_feature    order(574..576,589..591,598..603,616..621,628..630,
+                     715..729,1174..1176)
+                     /db_xref="CDD:143382"
+                     /gene_synonym="fk28c03; hm:zeh1243; MAPK14; p38; p38a;
+                     wu:fk28c03; zp38a"
+                     /gene="mapk14a"
+                     /note="KIM docking site [polypeptide binding]; other
+                     site"
+     misc_feature    742..804
+                     /db_xref="CDD:143382"
+                     /gene_synonym="fk28c03; hm:zeh1243; MAPK14; p38; p38a;
+                     wu:fk28c03; zp38a"
+                     /gene="mapk14a"
+                     /note="activation loop (A-loop); other site"
+     misc_feature    781..789
+                     /gene_synonym="fk28c03; hm:zeh1243; MAPK14; p38; p38a;
+                     wu:fk28c03; zp38a"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /gene="mapk14a"
+                     /note="propagated from UniProtKB/Swiss-Prot (Q9DGE2.1);
+                     Region: TXY"
+     misc_feature    781..783
+                     /gene_synonym="fk28c03; hm:zeh1243; MAPK14; p38; p38a;
+                     wu:fk28c03; zp38a"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /gene="mapk14a"
+                     /note="Phosphothreonine; propagated from
+                     UniProtKB/Swiss-Prot (Q9DGE2.1); phosphorylation site"
+     misc_feature    787..789
+                     /gene_synonym="fk28c03; hm:zeh1243; MAPK14; p38; p38a;
+                     wu:fk28c03; zp38a"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /gene="mapk14a"
+                     /note="Phosphotyrosine; propagated from
+                     UniProtKB/Swiss-Prot (Q9DGE2.1); phosphorylation site"
+     misc_feature    order(814..819,826..828,832..834,838..846,949..951,
+                     967..969,979..981,988..990,1018..1020,1114..1125)
+                     /db_xref="CDD:143382"
+                     /gene_synonym="fk28c03; hm:zeh1243; MAPK14; p38; p38a;
+                     wu:fk28c03; zp38a"
+                     /gene="mapk14a"
+                     /note="lipid binding site [chemical binding];
+                     lipid-binding site"
+     STS             673..832
+                     /db_xref="UniSTS:194881"
+                     /gene_synonym="fk28c03; hm:zeh1243; MAPK14; p38; p38a;
+                     wu:fk28c03; zp38a"
+                     /gene="mapk14a"
+                     /standard_name="fd03e12.y1"
+     STS             1390..1664
+                     /db_xref="UniSTS:200746"
+                     /gene_synonym="fk28c03; hm:zeh1243; MAPK14; p38; p38a;
+                     wu:fk28c03; zp38a"
+                     /gene="mapk14a"
+                     /standard_name="fk28c03.y1"
+ORIGIN      
+        1 acccggaatc gagtaacttc cgagcactcg cattccaagc agactaggag ctgcgggcat
+       61 gaaataagct actgcggggg actcgtgctc gagcatccgc gtgcaccgtc gactttttcc
+      121 ctcgttcgtt ttccgttttt gagcgtttgc aagacaactc caccgcctcg aagaagcacg
+      181 ggcggacgag cagggaaagc agaagtctct caactcgcct cgggcgatcg ttctgcaggc
+      241 atgtcgcaga aagaaagacc cactttctat cgacaggagg tcaacaagac gatttgggag
+      301 gtccccgtgc agtatcagaa cttgtctccc gtgggctccg gtgcatacgg atctgtttgc
+      361 tctgcgtttg atgcaaagac aggatttaaa gttgctgtga agaagctctc gaggccattt
+      421 cagtccatca tccatgccaa gcggacctac agggagctga ggctactcaa gcacatgaga
+      481 catgagaatg tgatcggctt gctggatgtt tttacacctg ccacaagtct gaaggagttt
+      541 aatgatgtgt acctggtgac tcaccttatg ggcgctgacc tgaataacat cgtaaagtgt
+      601 cagaaactga ccgacgatca cgtccagttc ctcatttacc agatactgag aggactaaag
+      661 tacatccatt cagctgacat aattcacagg gatttgaaac ccagtaatct ggcagtaaat
+      721 gaagactgtg aactcaagat tcttgacttt ggcttggctc gacacacaga tgatgagatg
+      781 actgggtatg tggccacaag gtggtatcgt gcccctgaga tcatgctcaa ctggatgcac
+      841 tacaacgtga cggtggacat ttggtcagtg ggctgcatca tggctgagct gctgacgggc
+      901 aggactctgt tccctggcac cgatcatata aaccagcttc agcagataat gcgacttaca
+      961 ggaactcctc cttcctctct aataagcagg atgcctagcc atgaggctcg tacttacatc
+     1021 agctcacttc ctcagatgcc caagaggaat tttgcagatg tgtttatcgg ggcaaatcca
+     1081 caagctgtgg acctcttgga gaaaatgctg gttttggaca ctgataagcg gattacagca
+     1141 gcagaggctc tggcacatcc atactttgcc caatatcatg acccggatga tgaacccgaa
+     1201 gcagagcctt ttgaccagag ctttgagagc cgagagctgg atattgagga gtggaaacgt
+     1261 cagacatacg aggagatgat cagttttgag cctccagtct ttgatgtgga tgaaatggag
+     1321 tcttgacctt ttattctgga tggcagtcaa accaactgta ctacttgtac agaaaagctg
+     1381 taatttgcag tattgtaatc agcaagccag tcagctgttt gacttattct tttcatttac
+     1441 agtatatata tatttttcca aatatcgtct tctgggccaa acagaaggaa aagatgtctt
+     1501 agaaaataat tattttactc tgtgaacctc caaaaaatga aattattttt taacagtttg
+     1561 cttggtcagt ttcacaatgt tcgtttatga cattcatgca aggccacatg taattgtaat
+     1621 gtctccctga atattcatac tacttggttg ttcactcttt gtacaatgta tcacacttgc
+     1681 agtatattat attttatttt taaatgttca aaaaacattg ttcatttact ttctgttaaa
+     1741 tatagatata ttttttccaa tcaaatgagc aatgtattta acaattttac agcttctcaa
+     1801 tcattctgat ggatgaagaa tgtaaattgc tgcattggtg atatgttcag gctgtttgta
+     1861 atatatatgc tccattaggc tgatggatct ttacgcattt tatttttgat ctttttccca
+     1921 catatatttg tgtatgtttc ttagggaatg aacatttgat gttgattgtg tgcgtgcgtg
+     1981 cgtgcgtgcg tgcgtgcgtg cgtgcgtgcg tgcgtgtgtg tgtgtgtgtg tgtgtgtgtg
+     2041 tacctgaggt tgctactgtg aactgtatgc gatctgaatg aatgattctg cctccagtag
+     2101 ctgtttttaa aatactatta attgaatgtt caaatatgaa agtagagtaa gatatttata
+     2161 tacagttgag gtggtattta tgaacctgaa aggctgcatc tgtccgcttt agcatctgat
+     2221 atagaaaaca tggactcaaa cacaccattg tttactgaaa ataaaggcca atatttttca
+     2281 aaaaaaa
+//

@@ -1,0 +1,889 @@
+LOCUS       NM_001105               3062 bp    mRNA    linear   PRI 18-DEC-2011
+DEFINITION  Homo sapiens activin A receptor, type I (ACVR1), transcript
+            variant 1, mRNA.
+ACCESSION   NM_001105
+VERSION     NM_001105.4  GI:187169268
+KEYWORDS    .
+SOURCE      Homo sapiens (human)
+  ORGANISM  Homo sapiens
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Euarchontoglires; Primates; Haplorrhini;
+            Catarrhini; Hominidae; Homo.
+REFERENCE   1  (bases 1 to 3062)
+  AUTHORS   Ambrosio,E.P., Drigo,S.A., Bergamo,N.A., Rosa,F.E., Bertonha,F.B.,
+            de Abreu,F.B., Kowalski,L.P. and Rogatto,S.R.
+  TITLE     Recurrent copy number gains of ACVR1 and corresponding transcript
+            overexpression are associated with survival in head and neck
+            squamous cell carcinomas
+  JOURNAL   Histopathology 59 (1), 81-89 (2011)
+   PUBMED   21668474
+  REMARK    GeneRIF: copy number alterations at 2q24 can be involved in ACVR1
+            overexpression, which is associated with longer overall survival
+            in laryngeal carcinomas
+REFERENCE   2  (bases 1 to 3062)
+  AUTHORS   Leikauf,G.D., Concel,V.J., Liu,P., Bein,K., Berndt,A., Ganguly,K.,
+            Jang,A.S., Brant,K.A., Dietsch,M., Pope-Varsalona,H., Dopico,R.A.
+            Jr., Di,Y.P., Li,Q., Vuga,L.J., Medvedovic,M., Kaminski,N., You,M.
+            and Prows,D.R.
+  TITLE     Haplotype association mapping of acute lung injury in mice
+            implicates activin a receptor, type 1
+  JOURNAL   Am. J. Respir. Crit. Care Med. 183 (11), 1499-1509 (2011)
+   PUBMED   21297076
+  REMARK    GeneRIF: ACVR1 is associated with acute lung injury in mice
+REFERENCE   3  (bases 1 to 3062)
+  AUTHORS   Rau,K.M., Chen,Y.J., Sun,M.T. and Kang,H.Y.
+  TITLE     Prognostic effects and regulation of activin A, maspin, and the
+            androgen receptor in upper urinary tract urothelial carcinoma
+  JOURNAL   Anticancer Res. 31 (5), 1713-1720 (2011)
+   PUBMED   21617230
+  REMARK    GeneRIF: Low activin A in the cytosol is associated with upper
+            urinary tract urothelial carcinoma.
+REFERENCE   4  (bases 1 to 3062)
+  AUTHORS   Ohte,S., Shin,M., Sasanuma,H., Yoneyama,K., Akita,M., Ikebuchi,K.,
+            Jimi,E., Maruki,Y., Matsuoka,M., Namba,A., Tomoda,H., Okazaki,Y.,
+            Ohtake,A., Oda,H., Owan,I., Yoda,T., Furuya,H., Kamizono,J.,
+            Kitoh,H., Nakashima,Y., Susami,T., Haga,N., Komori,T. and
+            Katagiri,T.
+  TITLE     A novel mutation of ALK2, L196P, found in the most benign case of
+            fibrodysplasia ossificans progressiva activates BMP-specific
+            intracellular signaling equivalent to a typical mutation, R206H
+  JOURNAL   Biochem. Biophys. Res. Commun. 407 (1), 213-218 (2011)
+   PUBMED   21377447
+  REMARK    GeneRIF: These findings suggest that ALK2(L196P) is an activated
+            BMP receptor equivalent to ALK2(R206H) and that ALK2(L196P)
+            activity may be suppressed in vivo by a novel molecular mechanism
+            in fibrodysplasia ossificans progressiva patients with this
+            mutation.
+REFERENCE   5  (bases 1 to 3062)
+  AUTHORS   Joziasse,I.C., Smith,K.A., Chocron,S., van Dinther,M., Guryev,V.,
+            van de Smagt,J.J., Cuppen,E., Ten Dijke,P., Mulder,B.J.,
+            Maslen,C.L., Reshey,B., Doevendans,P.A. and Bakkers,J.
+  TITLE     ALK2 mutation in a patient with Down's syndrome and a congenital
+            heart defect
+  JOURNAL   Eur. J. Hum. Genet. 19 (4), 389-393 (2011)
+   PUBMED   21248739
+  REMARK    GeneRIF: These data indicate that in the context of a Down's
+            syndrome background, ALK2-mediated reduction of BMP signaling may
+            contribute to congenital heart defects.
+REFERENCE   6  (bases 1 to 3062)
+  AUTHORS   ten Dijke,P., Yamashita,H., Sampath,T.K., Reddi,A.H., Estevez,M.,
+            Riddle,D.L., Ichijo,H., Heldin,C.H. and Miyazono,K.
+  TITLE     Identification of type I receptors for osteogenic protein-1 and
+            bone morphogenetic protein-4
+  JOURNAL   J. Biol. Chem. 269 (25), 16985-16988 (1994)
+   PUBMED   8006002
+REFERENCE   7  (bases 1 to 3062)
+  AUTHORS   Tsuchida,K., Mathews,L.S. and Vale,W.W.
+  TITLE     Cloning and characterization of a transmembrane serine kinase that
+            acts as an activin type I receptor
+  JOURNAL   Proc. Natl. Acad. Sci. U.S.A. 90 (23), 11242-11246 (1993)
+   PUBMED   8248234
+REFERENCE   8  (bases 1 to 3062)
+  AUTHORS   Attisano,L., Carcamo,J., Ventura,F., Weis,F.M., Massague,J. and
+            Wrana,J.L.
+  TITLE     Identification of human activin and TGF beta type I receptors that
+            form heteromeric kinase complexes with type II receptors
+  JOURNAL   Cell 75 (4), 671-680 (1993)
+   PUBMED   8242742
+REFERENCE   9  (bases 1 to 3062)
+  AUTHORS   ten Dijke,P., Ichijo,H., Franzen,P., Schulz,P., Saras,J.,
+            Toyoshima,H., Heldin,C.H. and Miyazono,K.
+  TITLE     Activin receptor-like kinases: a novel subclass of cell-surface
+            receptors with predicted serine/threonine kinase activity
+  JOURNAL   Oncogene 8 (10), 2879-2887 (1993)
+   PUBMED   8397373
+REFERENCE   10  (bases 1 to 3062)
+  AUTHORS   Matsuzaki,K., Xu,J., Wang,F., McKeehan,W.L., Krummen,L. and Kan,M.
+  TITLE     A widely expressed transmembrane serine/threonine kinase that does
+            not bind activin, inhibin, transforming growth factor beta, or
+            bone morphogenic factor
+  JOURNAL   J. Biol. Chem. 268 (17), 12719-12723 (1993)
+   PUBMED   8389764
+COMMENT     REVIEWED REFSEQ: This record has been curated by NCBI staff. The
+            reference sequence was derived from BC033867.1, L02911.1 and
+            AC013731.10. This sequence is a reference standard in the
+            RefSeqGene project. On May 1, 2008 this sequence version replaced
+            gi:166235896. Publication Note: This RefSeq record includes a
+            subset of the publications that are available for this gene.
+            Please see the Gene record to access additional publications.
+            Summary: Activins are dimeric growth and differentiation factors
+            which belong to the transforming growth factor-beta (TGF-beta)
+            superfamily of structurally related signaling proteins. Activins
+            signal through a heteromeric complex of receptor serine kinases
+            which include at least two type I ( I and IB) and two type II (II
+            and IIB) receptors. These receptors are all transmembrane
+            proteins, composed of a ligand-binding extracellular domain with
+            cysteine-rich region, a transmembrane domain, and a cytoplasmic
+            domain with predicted serine/threonine specificity. Type I
+            receptors are essential for signaling; and type II receptors are
+            required for binding ligands and for expression of type I
+            receptors. Type I and II receptors form a stable complex after
+            ligand binding, resulting in phosphorylation of type I receptors
+            by type II receptors. This gene encodes activin A type I receptor
+            which signals a particular transcriptional response in concert
+            with activin type II receptors. Mutations in this gene are
+            associated with fibrodysplasia ossificans progressive. [provided
+            by RefSeq, Jul 2008]. Transcript Variant: This variant (1) is the
+            longer transcript. Both variants 1 and 2 encode the same protein.
+            COMPLETENESS: complete on the 3' end.
+FEATURES             Location/Qualifiers
+     source          1..3062
+                     /mol_type="mRNA"
+                     /map="2q23-q24"
+                     /db_xref="taxon:9606"
+                     /chromosome="2"
+                     /organism="Homo sapiens"
+     gene            1..3062
+                     /db_xref="GeneID:90"
+                     /db_xref="HGNC:171"
+                     /db_xref="HPRD:00021"
+                     /db_xref="MIM:102576"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /note="activin A receptor, type I"
+     exon            1..248
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /number=2
+                     /inference="alignment:Splign"
+                     /gene="ACVR1"
+     exon            249..423
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /number=3
+                     /inference="alignment:Splign"
+                     /gene="ACVR1"
+     variation       complement(267)
+                     /db_xref="dbSNP:181806663"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       340
+                     /db_xref="dbSNP:3754592"
+                     /replace="a"
+                     /replace="c"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(368)
+                     /db_xref="dbSNP:139227733"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(378)
+                     /db_xref="dbSNP:73966130"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     misc_feature    383..385
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /note="upstream in-frame stop codon"
+     variation       418
+                     /db_xref="dbSNP:113455580"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     exon            424..497
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /number=4
+                     /inference="alignment:Splign"
+                     /gene="ACVR1"
+     CDS             431..1960
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /protein_id="NP_001096.1"
+                     /gene="ACVR1"
+                     /note="hydroxyalkyl-protein kinase; TGF-B superfamily
+                     receptor type I; serine/threonine-protein kinase receptor
+                     R1; activin A receptor, type II-like kinase 2; activin
+                     receptor type I; activin receptor-like kinase 2"
+                     /db_xref="GI:4501895"
+                     /db_xref="CCDS:CCDS2206.1"
+                     /db_xref="GeneID:90"
+                     /db_xref="HGNC:171"
+                     /db_xref="HPRD:00021"
+                     /db_xref="MIM:102576"
+                     /codon_start=1
+                     /product="activin receptor type-1 precursor"
+                     /translation="MVDGVMILPVLIMIALPSPSMEDEKPKVNPKLYMCVCEGLSCGN
+                     EDHCEGQQCFSSLSINDGFHVYQKGCFQVYEQGKMTCKTPPSPGQAVECCQGDWCNRN
+                     ITAQLPTKGKSFPGTQNFHLEVGLIILSVVFAVCLLACLLGVALRKFKRRNQERLNPR
+                     DVEYGTIEGLITTNVGDSTLADLLDHSCTSGSGSGLPFLVQRTVARQITLLECVGKGR
+                     YGEVWRGSWQGENVAVKIFSSRDEKSWFRETELYNTVMLRHENILGFIASDMTSRHSS
+                     TQLWLITHYHEMGSLYDYLQLTTLDTVSCLRIVLSIASGLAHLHIEIFGTQGKPAIAH
+                     RDLKSKNILVKKNGQCCIADLGLAVMHSQSTNQLDVGNNPRVGTKRYMAPEVLDETIQ
+                     VDCFDSYKRVDIWAFGLVLWEVARRMVSNGIVEDYKPPFYDVVPNDPSFEDMRKVVCV
+                     DQQRPNIPNRWFSDPTLTSLAKLMKECWYQNPSARLTALRIKKTLTKIDNSLDKLKTD
+                     C"
+     sig_peptide     431..490
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     mat_peptide     491..1957
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /product="activin receptor type-1"
+     misc_feature    527..742
+                     /db_xref="CDD:189827"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /note="Activin types I and II receptor domain; Region:
+                     Activin_recp; pfam01064"
+     misc_feature    800..868
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /inference="non-experimental evidence, no additional
+                     details recorded"
+                     /gene="ACVR1"
+                     /note="propagated from UniProtKB/Swiss-Prot (Q04771.1);
+                     transmembrane region"
+     misc_feature    962..1048
+                     /db_xref="CDD:198745"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /note="Transforming growth factor beta type I GS-motif;
+                     Region: TGF_beta_GS; cl02621"
+     misc_feature    1052..1909
+                     /db_xref="CDD:189373"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /note="Protein kinase domain; Region: Pkinase; pfam00069"
+     misc_feature    1070..1669
+                     /db_xref="CDD:173623"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /note="Catalytic domain of Protein Kinases; Region: PKc;
+                     cd00180"
+     misc_feature    order(1070..1084,1094..1096,1127..1129,1133..1135,
+                     1217..1219,1277..1288,1298..1300,1304..1306,1436..1438,
+                     1442..1444,1448..1453,1457..1459,1490..1492,1499..1501,
+                     1559..1570)
+                     /db_xref="CDD:173623"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /note="active site"
+     misc_feature    order(1070..1084,1094..1096,1127..1129,1133..1135,
+                     1217..1219,1277..1288,1298..1300,1436..1438,1442..1444,
+                     1448..1453,1457..1459,1490..1492)
+                     /db_xref="CDD:173623"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /note="ATP binding site [chemical binding]; other site"
+     misc_feature    order(1082..1084,1298..1300,1304..1306,1436..1438,
+                     1442..1444,1448..1450,1499..1501,1559..1570)
+                     /db_xref="CDD:173623"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /note="substrate binding site [chemical binding]; other
+                     site"
+     misc_feature    1106..1108
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /gene="ACVR1"
+                     /note="Phosphoserine; propagated from
+                     UniProtKB/Swiss-Prot (Q04771.1); phosphorylation site"
+     misc_feature    <1430..1924
+                     /db_xref="CDD:200772"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /note="Protein Kinases, catalytic domain; Region:
+                     PKc_like; cl09925"
+     misc_feature    order(1436..1438,1442..1444,1448..1450,1499..1501,
+                     1556..1567)
+                     /db_xref="CDD:173623"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /note="substrate binding site [chemical binding]; other
+                     site"
+     misc_feature    order(1487..1507,1559..1570)
+                     /db_xref="CDD:173623"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /note="activation loop (A-loop); other site"
+     misc_feature    order(1487..1504,1517..1519,1556..1567)
+                     /db_xref="CDD:173623"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /note="activation loop (A-loop); other site"
+     misc_feature    1931..1933
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /gene="ACVR1"
+                     /note="Phosphoserine; propagated from
+                     UniProtKB/Swiss-Prot (Q04771.1); phosphorylation site"
+     variation       complement(474)
+                     /db_xref="dbSNP:13406336"
+                     /replace="c"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     exon            498..761
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /number=5
+                     /inference="alignment:Splign"
+                     /gene="ACVR1"
+     variation       complement(541..542)
+                     /db_xref="dbSNP:141073095"
+                     /replace=""
+                     /replace="tg"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(552)
+                     /db_xref="dbSNP:55957214"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       557
+                     /db_xref="dbSNP:112489929"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(571)
+                     /db_xref="dbSNP:34056189"
+                     /replace="c"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       604
+                     /db_xref="dbSNP:2228947"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(610)
+                     /db_xref="dbSNP:55728089"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(628)
+                     /db_xref="dbSNP:144682336"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(676..677)
+                     /db_xref="dbSNP:67605879"
+                     /replace=""
+                     /replace="c"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       700
+                     /db_xref="dbSNP:2227861"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     exon            762..973
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /number=6
+                     /inference="alignment:Splign"
+                     /gene="ACVR1"
+     variation       complement(766)
+                     /db_xref="dbSNP:138808563"
+                     /replace="a"
+                     /replace="c"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(787)
+                     /db_xref="dbSNP:147997205"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(797..798)
+                     /db_xref="dbSNP:67456743"
+                     /replace=""
+                     /replace="a"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(825)
+                     /db_xref="dbSNP:74905152"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(829)
+                     /db_xref="dbSNP:140233340"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(874)
+                     /db_xref="dbSNP:71421047"
+                     /replace="a"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(908)
+                     /db_xref="dbSNP:188547477"
+                     /replace="c"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(945)
+                     /db_xref="dbSNP:145150729"
+                     /replace="c"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(954)
+                     /db_xref="dbSNP:67993035"
+                     /replace=""
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     exon            974..1073
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /number=7
+                     /inference="alignment:Splign"
+                     /gene="ACVR1"
+     variation       complement(982)
+                     /db_xref="dbSNP:41265129"
+                     /replace="g"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(990)
+                     /db_xref="dbSNP:146610930"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(1033)
+                     /db_xref="dbSNP:150024683"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       1047
+                     /db_xref="dbSNP:121912678"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     exon            1074..1220
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /number=8
+                     /inference="alignment:Splign"
+                     /gene="ACVR1"
+     variation       1099
+                     /db_xref="dbSNP:17419471"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       1099
+                     /db_xref="dbSNP:1134723"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       1120
+                     /db_xref="dbSNP:1146031"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(1129)
+                     /db_xref="dbSNP:182542928"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(1183)
+                     /db_xref="dbSNP:191459469"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       1204
+                     /db_xref="dbSNP:121912680"
+                     /replace="c"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     exon            1221..1496
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /number=9
+                     /inference="alignment:Splign"
+                     /gene="ACVR1"
+     variation       complement(1258)
+                     /db_xref="dbSNP:144540293"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(1336)
+                     /db_xref="dbSNP:6729964"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(1468)
+                     /db_xref="dbSNP:144048685"
+                     /replace="g"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     exon            1497..1694
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /number=10
+                     /inference="alignment:Splign"
+                     /gene="ACVR1"
+     variation       1497
+                     /db_xref="dbSNP:121912679"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(1516)
+                     /db_xref="dbSNP:149498219"
+                     /replace="a"
+                     /replace="c"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(1561)
+                     /db_xref="dbSNP:56189710"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     exon            1695..1825
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /number=11
+                     /inference="alignment:Splign"
+                     /gene="ACVR1"
+     variation       complement(1720)
+                     /db_xref="dbSNP:143068325"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(1790)
+                     /db_xref="dbSNP:148153887"
+                     /replace="a"
+                     /replace="c"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     exon            1826..3045
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /number=12
+                     /inference="alignment:Splign"
+                     /gene="ACVR1"
+     variation       complement(1833)
+                     /db_xref="dbSNP:145780526"
+                     /replace="c"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(1936)
+                     /db_xref="dbSNP:55788041"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       1943
+                     /db_xref="dbSNP:3738927"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(2002)
+                     /db_xref="dbSNP:144706255"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       2005
+                     /db_xref="dbSNP:12936"
+                     /replace="g"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(2007)
+                     /db_xref="dbSNP:55667327"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     STS             2012..2157
+                     /db_xref="UniSTS:73647"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /standard_name="RH70974"
+     variation       2012
+                     /db_xref="dbSNP:111369903"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       2098
+                     /db_xref="dbSNP:2228948"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     STS             2126..2451
+                     /db_xref="UniSTS:312"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /standard_name="D2S2000"
+     variation       2142
+                     /db_xref="dbSNP:111262123"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       2143
+                     /db_xref="dbSNP:113598201"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(2199)
+                     /db_xref="dbSNP:66769069"
+                     /replace=""
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(2241)
+                     /db_xref="dbSNP:185021658"
+                     /replace="g"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(2243)
+                     /db_xref="dbSNP:192640402"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(2263)
+                     /db_xref="dbSNP:11537712"
+                     /replace="g"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(2274)
+                     /db_xref="dbSNP:140005003"
+                     /replace="a"
+                     /replace="c"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(2318)
+                     /db_xref="dbSNP:79598188"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       2646
+                     /db_xref="dbSNP:12997"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       2722
+                     /db_xref="dbSNP:112908089"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(2734)
+                     /db_xref="dbSNP:55910418"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(2751)
+                     /db_xref="dbSNP:74392193"
+                     /replace="a"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     STS             2754..2912
+                     /db_xref="UniSTS:66551"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+                     /standard_name="RH68903"
+     variation       complement(2838)
+                     /db_xref="dbSNP:188849936"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       complement(2943)
+                     /db_xref="dbSNP:183253908"
+                     /replace="a"
+                     /replace="g"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     variation       2970
+                     /db_xref="dbSNP:113986328"
+                     /replace="c"
+                     /replace="t"
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     polyA_signal    3024..3029
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+     polyA_site      3045
+                     /gene_synonym="ACTRI; ACVR1A; ACVRLK2; ALK2; FOP; SKR1;
+                     TSRI"
+                     /gene="ACVR1"
+ORIGIN      
+        1 gaagagatgt gggcctctgg ggccgctgga ttcagtaact tccgtcgggt tctagactgg
+       61 ctcggctctg tccagtttgt gccagatagt ctcccacccc ctccccaccc ctcctttccc
+      121 ctggagattt gaacgctgct tgcatgggag aaaagctact tagagaagaa aacgttccac
+      181 ttagtaacag aagaaaagtc ttggttaaaa agttgtcatg aatttggctt ttggagagag
+      241 gcagcaagcc tggagcattg gtaagcgtca cactgccaaa gtgagagctg ctggagaact
+      301 cataatccca ggaacgcctc ttctactctc cgagtacccc agtgaccaga gtgagagaag
+      361 ctctgaacga gggcacgcgg cttgaaggac tgtgggcaga tgtgaccaag agcctgcatt
+      421 aagttgtaca atggtagatg gagtgatgat tcttcctgtg cttatcatga ttgctctccc
+      481 ctcccctagt atggaagatg agaagcccaa ggtcaacccc aaactctaca tgtgtgtgtg
+      541 tgaaggtctc tcctgcggta atgaggacca ctgtgaaggc cagcagtgct tttcctcact
+      601 gagcatcaac gatggcttcc acgtctacca gaaaggctgc ttccaggttt atgagcaggg
+      661 aaagatgacc tgtaagaccc cgccgtcccc tggccaagcc gtggagtgct gccaagggga
+      721 ctggtgtaac aggaacatca cggcccagct gcccactaaa ggaaaatcct tccctggaac
+      781 acagaatttc cacttggagg ttggcctcat tattctctct gtagtgttcg cagtatgtct
+      841 tttagcctgc ctgctgggag ttgctctccg aaaatttaaa aggcgcaacc aagaacgcct
+      901 caatccccga gacgtggagt atggcactat cgaagggctc atcaccacca atgttggaga
+      961 cagcacttta gcagatttat tggatcattc gtgtacatca ggaagtggct ctggtcttcc
+     1021 ttttctggta caaagaacag tggctcgcca gattacactg ttggagtgtg tcgggaaagg
+     1081 caggtatggt gaggtgtgga ggggcagctg gcaaggggag aatgttgccg tgaagatctt
+     1141 ctcctcccgt gatgagaagt catggttcag ggaaacggaa ttgtacaaca ctgtgatgct
+     1201 gaggcatgaa aatatcttag gtttcattgc ttcagacatg acatcaagac actccagtac
+     1261 ccagctgtgg ttaattacac attatcatga aatgggatcg ttgtacgact atcttcagct
+     1321 tactactctg gatacagtta gctgccttcg aatagtgctg tccatagcta gtggtcttgc
+     1381 acatttgcac atagagatat ttgggaccca agggaaacca gccattgccc atcgagattt
+     1441 aaagagcaaa aatattctgg ttaagaagaa tggacagtgt tgcatagcag atttgggcct
+     1501 ggcagtcatg cattcccaga gcaccaatca gcttgatgtg gggaacaatc cccgtgtggg
+     1561 caccaagcgc tacatggccc ccgaagttct agatgaaacc atccaggtgg attgtttcga
+     1621 ttcttataaa agggtcgata tttgggcctt tggacttgtt ttgtgggaag tggccaggcg
+     1681 gatggtgagc aatggtatag tggaggatta caagccaccg ttctacgatg tggttcccaa
+     1741 tgacccaagt tttgaagata tgaggaaggt agtctgtgtg gatcaacaaa ggccaaacat
+     1801 acccaacaga tggttctcag acccgacatt aacctctctg gccaagctaa tgaaagaatg
+     1861 ctggtatcaa aatccatccg caagactcac agcactgcgt atcaaaaaga ctttgaccaa
+     1921 aattgataat tccctcgaca aattgaaaac tgactgttga cattttcata gtgtcaagaa
+     1981 ggaagatttg acgttgttgt cattgtccag ctgggaccta atgctggcct gactggttgt
+     2041 cagaatggaa tccatctgtc tccctcccca aatggctgct ttgacaaggc agacgtcgta
+     2101 cccagccatg tgttggggag acatcaaaac caccctaacc tcgctcgatg actgtgaact
+     2161 gggcatttca cgaactgttc acactgcaga gactaatgtt ggacagacac tgttgcaaag
+     2221 gtagggactg gaggaacaca gagaaatcct aaaagagatc tgggcattaa gtcagtggct
+     2281 ttgcatagct ttcacaagtc tcctagacac tccccacggg aaactcaagg aggtggtgaa
+     2341 tttttaatca gcaatattgc ctgtgcttct cttctttatt gcactaggaa ttctttgcat
+     2401 tccttacttg cactgttact cttaatttta aagacccaac ttgccaaaat gttggctgcg
+     2461 tactccactg gtctgtcttt ggataatagg aattcaattt ggcaaaacaa aatgtaatgt
+     2521 cagactttgc tgcattttac acatgtgctg atgtttacaa tgatgccgaa cattaggaat
+     2581 tgtttataca caactttgca aattatttat tacttgtgca cttagtagtt tttacaaaac
+     2641 tgctttgtgc atatgttaaa gcttattttt atgtggtctt atgattttat tacagaaatg
+     2701 tttttaacac tatactctaa aatggacatt ttcttttatt atcagttaaa atcacatttt
+     2761 aagtgcttca catttgtatg tgtgtagact gtaacttttt ttcagttcat atgcagaacg
+     2821 tatttagcca ttacccacgt gacaccaccg aatatattac tgatttagaa gcaaagattt
+     2881 cagtagaatt ttagtcctga acgctacggg gaaaatgcat tttcttcaga attatccatt
+     2941 acgtgcattt aaactctgcc agaaaaaaat aactattttg ttttaatcta ctttttgtat
+     3001 ttagtagtta tttgtataaa ttaaataaac tgttttcaag tcaaaaaaaa aaaaaaaaaa
+     3061 aa
+//
