@@ -12,14 +12,14 @@ use Bio::Tools::Run::RemoteBlast;
 use Error qw(:try);
 
 #------------------------DATABASE CONNECTIONS ON JOAO'S PC!-----------------------------
-my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
-my %dbm_seq;
-dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
+#my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
+#my %dbm_seq;
+#dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
 
 #------------------------DATABASE CONNECTIONS ON VITOR'S PC!----------------------------
-#my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
-#my %dbm_seq;
-#dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
+my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
+my %dbm_seq;
+dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
 
 #------------------------DATABASE CONNECTIONS ON JOSE'S PC!----------------------------
 #my $dbh = DBI->connect('dbi:mysql:alg','root','') or die "Connection Error: $DBI::errstr\n";
@@ -668,32 +668,37 @@ sub blast{
     elsif ($option == 3) {$blast_type = "blastx";}
     elsif ($option == 4) {$blast_type = "tblastn";}
     else {$blast_type = "tblastx";}
-    print "-------------------------------------------------------------------------------------------------------------------------\n";
-    $option = interface("ask_database", 0);
-    if($option == 1) {$db = "genbank";}
-    elsif($option == 2) {$db = "swissprot";}
-    elsif($option == 3) {$db = "refsec";}
     
+    if ($blast_type eq "blastp" or $blast_type eq "blastx") {
+        print "-------------------------------------------------------------------------------------------------------------------------\n";
+        $option = interface("ask_database_protein", 0);
+        if($option == 1) {$db = "refseq_protein";}
+        elsif($option == 2) {$db = "swissprot";}
+    }
+    elsif($blast_type eq "blastn") {$db = "refseq_genomic";}
+    else{$db = "refseq_rna";}
+    
+    my $waiting = 1;
     $blast = Bio::Tools::Run::RemoteBlast->new(-prog => $blast_type, -data => $db);
     $result_blast = $blast->submit_blast($seq);
+    print STDERR "\n\nWaiting" if ($waiting >0);
     while (my @rids = $blast->each_rid){
-        foreach my $rid ( @rids ) {
+        foreach my $rid (@rids) {
             my $rc;
             do {
-                sleep 5; # Vamos esperar pelo r e s u l t a d o
+                print STDERR "." if ($waiting > 0);
+                sleep 2;
             } while (!( $rc = $blast -> retrieve_blast ($rid)));
             my $result = $rc->next_result();
+            if($format eq "genbank") {$filename = substr $filename, 10, -3;}
+            else {$filename = substr $filename, 10, -6;}
+            $filename = "blast_results/$filename"."_".$blast_type."_".$db.".txt";
+            $blast->save_output($filename);
             $blast->remove_rid($rid);
-            while ( my $hit = $result->next_hit ) {
-                print " \thit name is " , $hit->name , "\n" ;
-                while ( my $hsp = $hit -> next_hsp ) {
-                    print " \t\tscore is " , $hsp->score , "\n " ;
-                }
-            }
         }
     }
-    print "ja esta...\n";
-    <>;
+    interface("successful_blast");
+    main(1);
 }
 
 
@@ -945,7 +950,7 @@ sub interface {
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Sequence $current in $total sequences ...\n\n";
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n";}
-        print "The file sequence".$current."in".$total.".$format has been created. Go and modify whatever you want to. After all the changes are done, come back and enter \"ok\"".
+        print "The file sequence".$current."in".$total.".$format has been created in the directory of this program. Go and modify whatever you want to. After all the changes are done, come back and enter \"ok\"".
                 " (without quotes)\n";
         $answer = <>;
         chomp $answer;
@@ -1077,6 +1082,20 @@ sub interface {
     }
     
     
+    elsif ($type eq "ask_database_protein"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "Which database you want to use to import:\n\n 1 - RefSeq\n 2 - Swissprot\n\nAnswer: ";
+        do{
+            $option = <>;
+            
+            if ($option == 1 or $option == 2) {return $option;}
+            else {print "INVALID OPTION! Please choose a valid one: ";}    
+    
+        } while(1);
+    }
+    
+    
+    
     elsif($type eq "successful_insertion"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Successful insertion!!!\n\n\nPress Enter...";
@@ -1096,6 +1115,14 @@ sub interface {
     elsif($type eq "successful_modification"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Successful modification!!!\n\n\nPress Enter...";
+        <>;
+    }
+    
+    
+    
+    elsif($type eq "successful_blast"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "Successful BLAST!!! Go and check the 'blast_results' directory!\n\n\nPress Enter...";
         <>;
     }
     

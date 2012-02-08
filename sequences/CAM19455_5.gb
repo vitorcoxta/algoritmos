@@ -1,0 +1,80 @@
+LOCUS       CAM19455                 130 aa            linear   ROD 15-JAN-2009
+DEFINITION  activin A receptor type 1, partial [Mus musculus].
+ACCESSION   CAM19455
+VERSION     CAM19455.1  GI:123229606
+DBSOURCE    embl accession AL732468
+KEYWORDS    .
+SOURCE      Mus musculus (house mouse)
+  ORGANISM  Mus musculus
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Euarchontoglires; Glires; Rodentia;
+            Sciurognathi; Muroidea; Muridae; Murinae; Mus; Mus.
+REFERENCE   1  (residues 1 to 130)
+  AUTHORS   Wood,J.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (09-JAN-2009) Wellcome Trust Sanger Institute, Hinxton,
+            Cambridgeshire, CB10 1SA, UK. E-mail enquiries: vega@sanger.ac.uk
+            Clone requests: Geneservice (http://www.geneservice.co.uk/) and
+            BACPAC Resources (http://bacpac.chori.org/)
+COMMENT     -------------- Genome Center Center: Wellcome Trust Sanger
+            Institute Center code: SC Web site: http://www.sanger.ac.uk
+            Contact: vega@sanger.ac.uk -------------- This sequence was
+            finished as follows unless otherwise noted: all regions were
+            either double-stranded or sequenced with an alternate chemistry or
+            covered by high quality data (i.e., phred quality >= 30); an
+            attempt was made to resolve all sequencing problems, such as
+            compressions and repeats; all regions were covered by at least one
+            subclone; and the assembly was confirmed by restriction digest,
+            except on the rare occasion of the clone being a YAC. The
+            following abbreviations are used to associate primary accession
+            numbers given in the feature table with their source databases:
+            Em:, EMBL; Sw:, SWISSPROT; Tr:, TREMBL; Wp:, WORMPEP; Information
+            on the WORMPEP database can be found at
+            http://www.sanger.ac.uk/Projects/C_elegans/wormpep Sequence from
+            the Mouse Genome Sequencing Consortium whole genome shotgun may
+            have been used to confirm this sequence. Sequence data from the
+            whole genome shotgun alone has only been used where it has a phred
+            quality of at least 30. IMPORTANT: This sequence is not the entire
+            insert of clone RP23-279F23. It may be shorter because we sequence
+            overlapping sections only once, except for a short overlap. During
+            sequence assembly data is compared from overlapping clones. Where
+            differences are found these are annotated as variations together
+            with a note of the overlapping clone name. Note that the variation
+            annotation may not be found in the sequence submission
+            corresponding to the overlapping clone, as we submit sequences
+            with only a small overlap. The true left end of clone RP23-279F23
+            is at 1 in this sequence. The true left end of clone RP23-149P17
+            is at 55896 in this sequence. The true right end of clone
+            RP23-100B18 is at 5088 in this sequence. RP23-279F23 is from the
+            RPCI-23 Mouse BAC Library constructed by the group of Pieter de
+            Jong. For further details see http://bacpac.chori.org/ VECTOR:
+            pBACe3.6.
+FEATURES             Location/Qualifiers
+     source          1..130
+                     /db_xref="taxon:10090"
+                     /clone="RP23-279F23"
+                     /chromosome="2"
+                     /organism="Mus musculus"
+                     /clone_lib="RPCI-23"
+     Protein         1..>130
+                     /product="activin A receptor type 1"
+     Region          33..104
+                     /db_xref="CDD:189827"
+                     /region_name="Activin_recp"
+                     /note="Activin types I and II receptor domain; pfam01064"
+     CDS             1..130
+                     /locus_tag="RP23-100B18.4-005"
+                     /db_xref="GOA:B1AW87"
+                     /db_xref="InterPro:IPR000472"
+                     /db_xref="MGI:87911"
+                     /db_xref="UniProtKB/TrEMBL:B1AW87"
+                     /gene="Acvr1"
+                     /coded_by="join(complement(AL732468.10:14517..14583),
+                     complement(AL807788.9:49593..49856),
+                     complement(AL807788.9:<47686..47744))"
+                     /standard_name="OTTMUSP00000013694"
+ORIGIN      
+        1 mvdgvmilpv lmmmafpsps vedekpkvnq klymcvcegl scgnedhceg qqcfsslsin
+       61 dgfhvyqkgc fqvyeqgkmt cktppspgqa veccqgdwcn rnitaqlptk gksfpgtqnf
+      121 hlevgliils
+//
