@@ -350,7 +350,7 @@ sub modification{
 #----------------------This function will modify a sequence saved on the database----------------------
 sub modify{
     my ($accession_number_or_gene_name, $type) = @_;
-    my $sql = "SELECT id_sequence, gene_name, accession_number, description, alphabet, format FROM sequences WHERE $type='".$accession_number_or_gene_name."'";
+    my $sql = "SELECT id_sequence, gene_name, accession_number, accession_version,description, alphabet, format FROM sequences WHERE $type='".$accession_number_or_gene_name."'";
     my $result = $dbh->prepare($sql);
     $result->execute();
     my $current = 0;
@@ -437,15 +437,11 @@ sub generic_importation{
             $flag = 1;
             $option2=interface("ask_accession_number", 1);
             print "-------------------------------------------------------------------------------------------------------------------------\n";
-            chomp($option2); 
-            $existe = verifica_accession($option2);             #Verifica de o accesion number já existe na Base de Dados                                                
             
-             if ($existe==1) {
-
                 try {   
                     $seq = $gb->get_Seq_by_acc($option2) || throw Bio::Root::Exception(print "ERRO: INVALID NUMBER!!");
                 }catch Bio::Root::Exception with {$existe=2};    
-            }         
+                    
         }
         elsif ($option==2) {
             $flag = 0;
@@ -461,17 +457,14 @@ sub generic_importation{
             }
         }
         
-        if($option==2 && $existe==1) {
-                $existe=verifica_accession($seq->accession);
-        }
-        
     }while(!$existe or $existe==2);
 
     $specie = interface("ask_specie");   #pede especie e de seguida grava
     print "-------------------------------------------------------------------------------------------------------------------------\n";
     $id_specie=insert_specie_importation($specie);
-    $id_sequence = insert_sequence_importation($format,$id_specie,$seq);
- 
+    if ($option==2) {$id_sequence = insert_sequence_importation($format,$id_specie,$seq,$option2);}
+    else {$id_sequence = insert_sequence_importation($format,$id_specie,$seq);}
+
     my @lista;
     my $bool;
     ($bool, @lista) = interface("ask_tag", 0); #pergunta se quer tag, se quiser pode escolher uma das que já há, ou uma nova.
@@ -491,10 +484,11 @@ sub verifica_accession{   #### Verifica se o Accession  number já existe na Bas
     my ($type) = @_;     
     my ($sql,$result);
     
-    $sql = "SELECT accession_number FROM sequences WHERE accession_number='".$type."'";
+    $sql = "SELECT accession_number FROM sequences WHERE accession_number='".$type."' and accession_version='".$type."';";
     $result = $dbh->prepare($sql);
     $result->execute();
     if($result->fetchrow_hashref()){
+   
         return 0;
     }
     return 1;
@@ -526,7 +520,7 @@ sub insert_specie_importation{
 
 sub insert_sequence_importation {
         
-    my ($formato,$id_specie,$seq)=@_;
+    my ($formato,$id_specie,$seq,$version)=@_;
     my ($sql,$form);        
     my  $result;
     my @val;
@@ -535,9 +529,17 @@ sub insert_sequence_importation {
    elsif ($formato==2){$form ="genbank";}
    else {$form="swiss";}
    
+   if($version) {   
+   
+   $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, accession_number,accession_version, gene_name, date, is_circular, length, format, seq_version)
+                  VALUES ('".$id_specie."', '".$seq->alphabet."', '".$seq->authority."', '".$seq->desc."', '".$seq->accession."','".$version."', '".$seq->display_name."', '".$seq->get_dates."', '".$seq->is_circular."', '".$seq->length."', '".$form."', '".$seq->seq_version."');";
+   }
+   
+   else {
+   
    $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, accession_number, gene_name, date, is_circular, length, format, seq_version)
-                  VALUES ('".$id_specie."', '".$seq->alphabet."', '".$seq->authority."', '".$seq->desc."', '".$seq->accession."', '".$seq->display_name."', '".$seq->get_dates."', '".$seq->is_circular."', '".$seq->length."', '".$form."', '".$seq->seq_version."');";
-                  
+                  VALUES ('".$id_specie."', '".$seq->alphabet."', '".$seq->authority."', '".$seq->desc."', '".$seq->accession."','".$seq->display_name."', '".$seq->get_dates."', '".$seq->is_circular."', '".$seq->length."', '".$form."', '".$seq->seq_version."');";
+   }
    $dbh->do($sql);  ## INSERCAO NA BASE DADOS;
    $sql = "SELECT LAST_INSERT_ID()";
    $result = $dbh->prepare($sql);  ## SELECT DO ID DA ESPECIE INSERIDA
@@ -588,7 +590,6 @@ sub display_species{
 }
 
 
-
 sub insert_tag{
     
     my ($new_tag)=@_;
@@ -606,14 +607,22 @@ sub insert_tag{
     return $val[0];
 }
 
-sub insert_relation{
-    my ($id_seq,$id_tag)=@_;
-    #print "----------------$id_seq,$id_tag-----------------";
-    my $sql = "INSERT INTO seq_tags (id_sequence,id_tag) VALUES ('".$id_seq."','".$id_tag."');";
-    $dbh->do($sql);
+sub verifica_version{
+    
+    my ($version)=@_;
+    my ($flag,$result,$sql,@val);
+    
+    $sql = "Select accession_version from sequences;";    
+    
+    $result = $dbh->prepare($sql);
+    $result->execute();
+    
+    while(@val=$result->fetchrow_array()){  
+        if($version eq $val[0]) {return 0;}
+    }
+
+    return 1;
 }
-
-
 
 
 #------------------This function will have ALL the interface things-------------------
@@ -816,10 +825,16 @@ sub interface {
     
     
     elsif($type eq "ask_accession_number"){
+        my $existe=1;
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        do{
+            
+            if(!$existe) {print "\nERROR: EXISTING ACCESSION NUMBER IN DATABASE!!!\n"}
         print "Insert the accession number: ";
         $answer = <>;
         chomp $answer;
+        $existe = verifica_accession($answer);             #Verifica de o accesion number já existe na Base de Dados                                               
+        }while(!$existe);
         return $answer;
     }
     
@@ -897,8 +912,15 @@ sub interface {
     
     elsif ($type eq "ask_version_number"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
-        print "Please insert the Accession Version Number: ";
+        
+        my $flag=1;
+        do{
+        if (!$flag) {print "ERROR: Existing Accesion Version on DATABASE!\n!";}
+        print "Please insert the Accession Version Number: \nAnswer: ";
         $option = <>;
+        chomp $option;
+        $flag=verifica_version($option);
+        }while(!$flag);
         return $option;
     }
     
