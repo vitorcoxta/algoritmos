@@ -8,6 +8,7 @@ use warnings;
 use DBI();
 use DBD::mysql;
 use Bio::Root::Exception;
+use Bio::Tools::Run::RemoteBlast;
 use Error qw(:try);
 
 #------------------------DATABASE CONNECTIONS ON JOAO'S PC!-----------------------------
@@ -27,7 +28,8 @@ dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinform
 
 #TODO: Quando a interface estiver terminada, meter na opcao "sair" o close da connection às base de dados (close $dbh e dbmclose($dmb_seq))
 
-main(1);
+#main(1);
+blast();
 
 sub main{
     #my ($key, $val);
@@ -162,7 +164,7 @@ sub insertion {
     }
     elsif($option == 3){
         my $answer;    
-        $answer = interface("ask_database");   # Escolher a Base de Dados
+        $answer = interface("ask_database", 1);   # Escolher a Base de Dados
         if ($answer ==1 or $answer ==2 or $answer ==3) { interface("generic_importation_begin",$answer); generic_importation($answer); }    # Escolheu :     GENBANK    
         else {insertion();}
         interface("successful_insertion", 1);
@@ -614,6 +616,94 @@ sub insert_relation{
 }
 
 
+sub verify_gene_name{
+    my ($gene_name) = @_;
+    my $sql = "SELECT gene_name FROM sequences WHERE gene_name = '".$gene_name."'";
+    my $result = $dbh->prepare($sql);
+    $result->execute();    
+    if(!($result->fetchrow_hashref())){
+        return 0;
+    }
+    return 1;
+}
+
+
+sub blast{
+    my $option = interface("ask_choose_type", 1);
+    my ($acc_or_name, $id_sequence, $filename, $format, $seqio, $seq, $blast_type, $db, $blast, $result_blast);
+    if($option == 1) {
+        $acc_or_name = interface("ask_accession_number_no_check", 0);
+        $id_sequence = get_id_sequence($acc_or_name, "accession_number");
+    }
+    else {
+        $acc_or_name = interface("ask_gene_name_no_check", 0);
+        $id_sequence = get_id_sequence($acc_or_name, "gene_name");
+    }
+    print "-------------------------------------------------------------------------------------------------------------------------\n";
+    $filename = $dbm_seq{$id_sequence};
+    if(substr ($filename, -5) eq "fasta") {$format = "fasta";}
+    elsif(substr ($filename, -5) eq "swiss") {$format = "swiss";}
+    elsif(substr ($filename, -2) eq "gb") {$format = "genbank";}
+    else {
+        my $format_opt = interface("ask_format", 0, 0);
+        if($format_opt == 1) {$format = "fasta";}
+        elsif($format_opt == 2) {$format = "genbank";}
+        elsif($format_opt == 3) {$format = "swiss";}
+        print "-------------------------------------------------------------------------------------------------------------------------\n";
+    }
+    $seqio = Bio::SeqIO->new(-file => $filename, -format => $format);
+    $seq = $seqio->next_seq;
+    $option = interface("ask_blast_type", 0);
+    if ($option == 1) {$blast_type = "blastp";}
+    elsif ($option == 2) {$blast_type = "blastn";}
+    elsif ($option == 3) {$blast_type = "blastx";}
+    elsif ($option == 4) {$blast_type = "tblastn";}
+    else {$blast_type = "tblastx";}
+    print "-------------------------------------------------------------------------------------------------------------------------\n";
+    $option = interface("ask_database", 0);
+    if($option == 1) {$db = "genbank";}
+    elsif($option == 2) {$db = "swissprot";}
+    elsif($option == 3) {$db = "refsec";}
+    
+    $blast = Bio::Tools::Run::RemoteBlast->new(-prog => $blast_type, -data => $db);
+    $result_blast = $blast->submit_blast($seq);
+    while (my @rids = $blast->each_rid){
+        foreach my $rid ( @rids ) {
+            my $rc;
+            do {
+                sleep 5; # Vamos esperar pelo r e s u l t a d o
+            } while (!( $rc = $blast -> retrieve_blast ($rid)));
+            my $result = $rc->next_result();
+            $blast->remove_rid($rid);
+            while ( my $hit = $result->next_hit ) {
+                print " \thit name is " , $hit->name , "\n" ;
+                while ( my $hsp = $hit -> next_hsp ) {
+                    print " \t\tscore is " , $hsp->score , "\n " ;
+                }
+            }
+        }
+    }
+    print "ja esta...\n";
+    <>;
+}
+
+
+#-------------------------This function will get the id_sequence in the database----------------------------------------
+sub get_id_sequence{
+    my ($acc_or_name, $type) = @_;
+    my ($sql, $id_sequence);
+    if($type eq "accession_number") {$sql = "SELECT id_sequence FROM sequences WHERE accession_number = '".$acc_or_name."'"}
+    elsif($type eq "gene_name") {$sql = "SELECT id_sequence FROM sequences WHERE gene_name = '".$acc_or_name."'"}
+    my $result = $dbh->prepare($sql);
+    $result->execute();
+    while(my $row = $result->fetchrow_hashref()){
+        $id_sequence = $row->{id_sequence};
+    }
+    return $id_sequence;
+}
+
+
+
 
 
 #------------------This function will have ALL the interface things-------------------
@@ -686,10 +776,12 @@ sub interface {
     
     elsif($type eq "ask_gene_name"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
-        print "Insert the gene name: ";
+        if($invalid) {print "This gene name is already in use! Please choose an unused one: "}
+        else {print "Insert the gene name: ";}
         $answer = <>;
         chomp $answer;
-        return $answer;
+        if (verify_gene_name($answer)) {interface("ask_gene_name", 0, 1);}
+        else {return $answer;}
     }
     
     
@@ -859,7 +951,7 @@ sub interface {
     
     
     elsif ($type eq "ask_database"){
-        system $^O eq 'MSWin32' ? 'cls' : 'clear';
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Which database you want to use to import:\n\n 1 - Genbank\n 2 - Swissprot \n 3 - RefSeq\n\nAnswer: ";    
         do{
             $option = <>;
@@ -926,6 +1018,43 @@ sub interface {
         my @lista = interface('ask_keywords');
         #insert_tags(@lista);
         return (1, @lista);
+    }
+    
+    
+    elsif($type eq "ask_choose_type"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if ($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        else {print "How do you want to choose the sequence?\n\n 1 - By accession number\n 2 - By gene name\n\nAnswer: ";}
+        $option = <>;
+        if($option == 1 or $option == 2) {return $option;}
+        else {interface("ask_choose_type", 0, 1);}
+    }
+    
+    
+    elsif($type eq "ask_accession_number_no_check"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "Insert the accession number: ";
+        $answer = <>;
+        chomp $answer;
+        return $answer;
+    }
+    
+    
+    elsif($type eq "ask_gene_name_no_check"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "Insert the gene name: ";
+        $answer = <>;
+        chomp $answer;
+        return $answer;
+    }
+    
+    elsif($type eq "ask_blast_type"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if ($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        else {print "What kind of BLAST you want to try?\n\n 1 - blastp\n 2 - blastn\n 3 - blastx\n 4 - tblastn\n 5 - tblastx\n\nAnswer: ";}
+        $option = <>;
+        if($option == 1 or $option == 2 or $option == 3 or $option == 4 or $option == 5) {return $option;}
+        else {interface("ask_blast_type", 0, 1);}
     }
     
     
