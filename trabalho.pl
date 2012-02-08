@@ -70,7 +70,9 @@ sub insertion {
         print "-------------------------------------------------------------------------------------------------------------------------\n";
         my $is_circular = interface("ask_is_circular", 0, 0);
         print "-------------------------------------------------------------------------------------------------------------------------\n";
-        my @keywords = interface("ask_tag", 0);
+        my @keywords;
+        my $bool;
+        ($bool, @keywords) = interface("ask_tag", 0);
         print "-------------------------------------------------------------------------------------------------------------------------\n";
         my $sequence = interface("ask_sequence", 0);
         print "-------------------------------------------------------------------------------------------------------------------------\n";
@@ -88,7 +90,7 @@ sub insertion {
         
         insert_specie($specie);
         insert_sequence_db($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version);
-        my $id_sequence = insert_tags(@keywords);
+        my $id_sequence = insert_tags($bool, @keywords);
         insert_sequence($id_sequence, $seq, $format, 0);
         interface("successful_insertion", 1);
         main(1);
@@ -125,13 +127,15 @@ sub insertion {
         my $is_circular;
         if($seq->is_circular) {$is_circular = 1;}
         else {$is_circular = 0;}
-        my @keywords;
+        my (@keywords, @keywords_file, @key);
+        my $bool;
         if($format eq "fasta"){
-            @keywords = interface("ask_tag", 0);
+            ($bool, @keywords) = interface("ask_tag", 0);
         }
         else{
             my @keywords_file = split /\s*;\s*/, $seq->keywords;
-            @keywords = (@keywords_file, interface("ask_tag", 0));
+            ($bool, @key) = interface("ask_tag", 0);
+            @keywords = (@keywords_file, @key);
         }
         print "-------------------------------------------------------------------------------------------------------------------------\n";
         my $sequence = $seq->seq;
@@ -151,7 +155,7 @@ sub insertion {
         
         insert_specie($specie);
         insert_sequence_db($specie, $alphabet, $seq->authority, $seq->desc, $seq->display_id, $date, $is_circular, $seq->length, $format, $seq_version, $seq->accession_number());
-        my $id_sequence = insert_tags(@keywords);
+        my $id_sequence = insert_tags($bool, @keywords);
         insert_sequence($id_sequence, $seq, $format, 1);
         interface("successful_insertion", 1);
         main(1);
@@ -209,7 +213,7 @@ sub insert_sequence_db{
 
 #-------------------Insert the tags and returns the $id_sequence------------------------------
 sub insert_tags{
-    my (@keywords) = @_;
+    my ($bool, @keywords) = @_;
     my $id_sequence;
     my $sql = "SELECT LAST_INSERT_ID()";
     my $result = $dbh->prepare($sql);
@@ -218,26 +222,28 @@ sub insert_tags{
         $id_sequence = $row->{'LAST_INSERT_ID()'};
     }
     
-    for my $keyword (@keywords){
-        #-------------Verifies if the inserted tags already exist on database. If they already exist, doesn't try to insert them-----------
-        $sql = "SELECT id_tag FROM tags WHERE tag='".$keyword."'";
-        $result = $dbh->prepare($sql);
-        $result->execute();
-        if(!($result->fetchrow_hashref())){
-            $sql = "INSERT INTO tags (tag) VALUES ('".$keyword."')";
-            $dbh->do($sql);
-        }
-        
-        $sql = "SELECT id_tag FROM tags WHERE tag='".$keyword."'";
-        $result = $dbh->prepare($sql);
-        $result->execute();
-        
-        #--------------Insert the tuple id_sequence - id_tag on seq_tags table------------------------
-        while(my $row = $result->fetchrow_hashref()){
-            $sql = "INSERT INTO seq_tags (id_sequence, id_tag) VALUES ('".$id_sequence."', '".$row->{'id_tag'}."')";
-            $dbh->do($sql);#my $result2 = 
-            #if($result2) {print ("A insercao foi executada com sucesso\n");}
-            #else {print ("Ocorreu um erro na insercao\n");}
+    if ($bool == 1) {
+        for my $keyword (@keywords){
+            #-------------Verifies if the inserted tags already exist on database. If they already exist, doesn't try to insert them-----------
+            $sql = "SELECT id_tag FROM tags WHERE tag='".$keyword."'";
+            $result = $dbh->prepare($sql);
+            $result->execute();
+            if(!($result->fetchrow_hashref())){
+                $sql = "INSERT INTO tags (tag) VALUES ('".$keyword."')";
+                $dbh->do($sql);
+            }
+            
+            $sql = "SELECT id_tag FROM tags WHERE tag='".$keyword."'";
+            $result = $dbh->prepare($sql);
+            $result->execute();
+            
+            #--------------Insert the tuple id_sequence - id_tag on seq_tags table------------------------
+            while(my $row = $result->fetchrow_hashref()){
+                $sql = "INSERT INTO seq_tags (id_sequence, id_tag) VALUES ('".$id_sequence."', '".$row->{'id_tag'}."')";
+                $dbh->do($sql);#my $result2 = 
+                #if($result2) {print ("A insercao foi executada com sucesso\n");}
+                #else {print ("Ocorreu um erro na insercao\n");}
+            }
         }
     }
     return $id_sequence;
@@ -466,30 +472,14 @@ sub generic_importation{
     $id_specie=insert_specie_importation($specie);
     $id_sequence = insert_sequence_importation($format,$id_specie,$seq);
  
-    my @lista = interface("ask_tag", 0); #pergunta se quer tag, se quiser pode escolher uma das que já há, ou uma nova.
-    insert_tags(@lista);
+    my @lista;
+    my $bool;
+    ($bool, @lista) = interface("ask_tag", 0); #pergunta se quer tag, se quiser pode escolher uma das que já há, ou uma nova.
+    insert_tags($bool, @lista);
     if($format == 1) {$form = "fasta";}
     elsif($format == 2) {$form = "genbank";}
     else {$form = "swiss";}
     insert_sequence($id_sequence, $seq, $form, $flag);
-    
- 
-    #print "INSERCAO FEITA COM SUCESSO!!\n\n\n"; 
-
- 
- ### Tipo de Ficheiro para Gravar###########################################
- 
-    $gb = Bio::DB::GenBank->new(-retrievaltype => 'tempfile' , -format => 'Fasta');     
-     if ($format==1) {$seqio_obj = Bio::SeqIO->new(-file => '>sequence.fasta', -format => 'fasta' ); }
-     elsif($format==2) {$seqio_obj = Bio::SeqIO->new(-file => '>sequence.gb', -format => 'genbank' );}
-     else {$seqio_obj = Bio::SeqIO->new(-file => '>sequence.swiss', -format => 'swiss' );}
-           
-    ########################################################################
-            
-    $seqio_obj->write_seq($seq);
-
-    #print "---",$seq->length,"CENAS!!";
-    
     interface("successful_insertion", 1);
     main(1);
 }
@@ -928,14 +918,14 @@ sub interface {
             if ($answer!=1 and $answer!=2) {$flag=0; $flag2=1;}
         }while(!$flag);
         
-        if ($answer==2) {return 0;} ## DONT WANT TO ADD TAG
+        if ($answer==2) {return (0,0);} ## DONT WANT TO ADD TAG
         
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         else {print "\n\n";}
         display_tags();  
         my @lista = interface('ask_keywords');
         #insert_tags(@lista);
-        return @lista;
+        return (1, @lista);
     }
     
     
