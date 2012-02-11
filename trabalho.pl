@@ -28,8 +28,8 @@ dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinform
 
 #TODO: Quando a interface estiver terminada, meter na opcao "sair" o close da connection às base de dados (close $dbh e dbmclose($dmb_seq))
 
-#main(1);
-blast();
+main(1);
+#blast();
 
 sub main{
     #my ($key, $val);
@@ -40,9 +40,8 @@ sub main{
     
     my ($clear) = @_;
     my $option = interface("welcome", $clear, 0);
-    if($option == 1){insertion();}
-    elsif($option == 2){removal();}
-    elsif($option == 3){modification();}
+    if($option == 1){database_operations();}
+    elsif($option == 2){bioinformatics_operations();}
     elsif($option == 9){
         interface("exit");
         dbmclose(%dbm_seq);
@@ -50,6 +49,24 @@ sub main{
         exit(0);
     }
 }
+
+
+sub database_operations{
+    my $option = interface("database_operations", 1, 0);
+    if($option == 1){insertion();}
+    elsif($option == 2){removal();}
+    elsif($option == 3){modification();}
+    elsif($option == 9){main(1);}
+}
+
+
+sub bioinformatics_operations{
+    my $option = interface("bioinformatics_operations", 1, 0);
+    if($option == 1){blast();}
+    elsif($option == 9){main(1);}
+}
+
+
 
 #-----------------------This funtion inserts a sequence in the database: manually, from a file or from a remote database----------------------
 sub insertion {
@@ -94,7 +111,11 @@ sub insertion {
         insert_sequence_db($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version);
         my $id_sequence = insert_tags($bool, @keywords);
         insert_sequence($id_sequence, $seq, $format, 0);
-        interface("successful_insertion", 1);
+        my $see = interface("successful_insertion", 1, 0, $id_sequence);
+        if($see == 1) {
+            print "-------------------------------------------------------------------------------------------------------------------------\n";
+            system "pg ".$dbm_seq{$id_sequence};
+        }
         main(1);
     }
     elsif($option == 2) {
@@ -159,7 +180,11 @@ sub insertion {
         insert_sequence_db($specie, $alphabet, $seq->authority, $seq->desc, $seq->display_id, $date, $is_circular, $seq->length, $format, $seq_version, $seq->accession_number());
         my $id_sequence = insert_tags($bool, @keywords);
         insert_sequence($id_sequence, $seq, $format, 1);
-        interface("successful_insertion", 1);
+        my $see = interface("successful_insertion", 1, 0, $id_sequence);
+        if($see == 1) {
+            print "-------------------------------------------------------------------------------------------------------------------------\n";
+            system "pg ".$dbm_seq{$id_sequence};
+        }
         main(1);
     }
     elsif($option == 3){
@@ -167,7 +192,10 @@ sub insertion {
         $answer = interface("ask_database", 1);   # Escolher a Base de Dados
         if ($answer ==1 or $answer ==2 or $answer ==3) { interface("generic_importation_begin",$answer); generic_importation($answer); }    # Escolheu :     GENBANK    
         else {insertion();}
-        interface("successful_insertion", 1);
+        #interface("successful_insertion", 1);
+        #main(1);
+    }
+    elsif($option == 9){
         main(1);
     }
 }
@@ -330,16 +358,19 @@ sub remove_seq_tags{
 #----------------------This function indicates the right path to modify data from the database, depending from the user's decision----------------------
 sub modification{
     my $option = interface("ask_modification_type", 1, 0);
+    my %modified;
     if($option == 1){
         my $accession_number = interface("ask_accession_number", 1);
-        modify($accession_number, "accession_number");
+        %modified = modify($accession_number, "accession_number");
         interface("successful_modification", 1);
+        display_modified(%modified);
         main(1);
     }
     elsif($option == 2){
         my $gene_name = interface("ask_gene_name", 1);
-        modify($gene_name, "gene_name");
+        %modified = modify($gene_name, "gene_name");
         interface("successful_modification", 1);
+        display_modified(%modified);
         main(1);
     }
     elsif($option == 9){
@@ -352,6 +383,7 @@ sub modification{
 #----------------------This function will modify a sequence saved on the database----------------------
 sub modify{
     my ($accession_number_or_gene_name, $type) = @_;
+    my %modified;
     my $sql = "SELECT id_sequence, gene_name, accession_number, accession_version,description, alphabet, format FROM sequences WHERE $type='".$accession_number_or_gene_name."'";
     my $result = $dbh->prepare($sql);
     $result->execute();
@@ -359,15 +391,17 @@ sub modify{
     my ($format, $seqio);
     
     while(my $row = $result->fetchrow_hashref()){
-        $current += 1;
+        $current++;
         if($row->{format} eq "genbank") {$format = "gb";}
         else{$format = $row->{format};}
         create_file($current, $result->rows, $row);
-        interface("modify_sequence", 1, 0, $current, $result->rows, $format);
+        interface("modify_sequence", 1, 0, $row->{id_sequence}, $current, $result->rows, $format);
         my $seq = fetch_info($current, $result->rows, $format);
         update_info($seq, $row->{id_sequence});
         unlink("sequence".$current."in".$result->rows.".$format");
+        $modified{$current} = $row->{id_sequence};
     }
+    return %modified;
 }
 
 
@@ -414,6 +448,30 @@ sub update_info{
 
 
 
+sub display_modified{
+    my (%modified) = @_;
+    my $option = interface("ask_display_modified", 0, 0);
+    my ($key, $answer);
+    do{
+        print "-------------------------------------------------------------------------------------------------------------------------\n";
+        print "\n\tMODIFIED FILES TABLE\n\n";
+        foreach $key (sort {$a <=> $b} (keys %modified)){
+            print " $key - ".(substr $dbm_seq{$modified{$key}}, 10)."\n";
+        }
+        print "\n";
+        $answer = interface("ask_modified_table", 0, 0);
+        while($answer < 1 or $answer > scalar(keys %modified)){
+            $answer = interface("ask_modified_table", 0, 1);
+        }
+        print "-------------------------------------------------------------------------------------------------------------------------\n";
+        chomp $answer;
+        system "pg ".$dbm_seq{$modified{$answer}};
+        $option = interface("ask_display_modified", 1, 0);
+    } while ($option != 2)
+}
+
+
+
 sub generic_importation{
     my($base)=@_;
     my ($option2, $format, $seq, $existe, $option, $gb, $seqio_obj, $result, $sql, $specie, $id_specie, $id_sequence, $id_tag, $form, $flag);         
@@ -450,7 +508,7 @@ sub generic_importation{
             $option2=interface("ask_version_number", 1);
             print "-------------------------------------------------------------------------------------------------------------------------\n";
             chomp($option2); 
-        #    $existe = verifica_version_number($option2);             #Verifica de o accesion number já existe na Base de Dados                                        
+        #    $existe = verify_version_number($option2);             #Verifica de o accesion number já existe na Base de Dados                                        
                                   
             if($existe==1){
                 try {
@@ -475,14 +533,18 @@ sub generic_importation{
     elsif($format == 2) {$form = "genbank";}
     else {$form = "swiss";}
     insert_sequence($id_sequence, $seq, $form, $flag);
-    interface("successful_insertion", 1);
-    main(1);
+    my $see = interface("successful_insertion", 1, 0, $id_sequence);
+        if($see == 1) {
+            print "-------------------------------------------------------------------------------------------------------------------------\n";
+            system "pg ".$dbm_seq{$id_sequence};
+        }
+        main(1);
 }
 
 
 
 
-sub verifica_accession{   #### Verifica se o Accession  number já existe na Base de Dados -----------   Se sim, retorna 0,  senao retorna 1
+sub verify_accession{   #### Verifica se o Accession  number já existe na Base de Dados -----------   Se sim, retorna 0,  senao retorna 1
     my ($type) = @_;     
     my ($sql,$result);
     
@@ -490,11 +552,41 @@ sub verifica_accession{   #### Verifica se o Accession  number já existe na Bas
     $result = $dbh->prepare($sql);
     $result->execute();
     if($result->fetchrow_hashref()){
-   
         return 0;
     }
     return 1;
 }
+
+
+sub verify_accession_in_file{   #### Verifica se o Accession  number já existe na Base de Dados -----------   Se sim, retorna 0,  senao retorna 1
+    my ($file) = @_;     
+    my ($sql,$result, $format);
+    if(substr ($file, -5) eq "fasta") {return 1;}           #won't check because of the "unknown" accession_ numbers
+    elsif(substr ($file, -5) eq "swiss") {$format = "swiss";}
+    elsif(substr ($file, -2) eq "gb") {$format = "genbank";}
+    my $seqio = Bio::SeqIO->new(-file => "$file", -format => $format);
+    my $seq = $seqio->next_seq;
+    $sql = "SELECT accession_number FROM sequences WHERE accession_number='".$seq->accession_number."'";
+    $result = $dbh->prepare($sql);
+    $result->execute();
+    if($result->fetchrow_hashref()){
+        return 0;
+    }
+    return 1;
+}
+
+
+sub verify_gene_name{
+    my ($gene_name) = @_;
+    my $sql = "SELECT gene_name FROM sequences WHERE gene_name = '".$gene_name."'";
+    my $result = $dbh->prepare($sql);
+    $result->execute();    
+    if(!($result->fetchrow_hashref())){
+        return 0;
+    }
+    return 1;
+}
+
 
 sub insert_specie_importation{
     my ($specie) = @_;
@@ -531,7 +623,7 @@ sub insert_sequence_importation {
    elsif ($formato==2){$form ="genbank";}
    else {$form="swiss";}
    
-   if($version) {   
+   if($version) {
    
    $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, accession_number,accession_version, gene_name, date, is_circular, length, format, seq_version)
                   VALUES ('".$id_specie."', '".$seq->alphabet."', '".$seq->authority."', '".$seq->desc."', '".$seq->accession."','".$version."', '".$seq->display_name."', '".$seq->get_dates."', '".$seq->is_circular."', '".$seq->length."', '".$form."', '".$seq->seq_version."');";
@@ -609,7 +701,7 @@ sub insert_tag{
     return $val[0];
 }
 
-sub verifica_version{
+sub verify_version{
     
     my ($version)=@_;
     my ($flag,$result,$sql,@val);
@@ -623,16 +715,6 @@ sub verifica_version{
         if($version eq $val[0]) {return 0;}
     }
 
-    return 1;
-}
-sub verify_gene_name{
-    my ($gene_name) = @_;
-    my $sql = "SELECT gene_name FROM sequences WHERE gene_name = '".$gene_name."'";
-    my $result = $dbh->prepare($sql);
-    $result->execute();    
-    if(!($result->fetchrow_hashref())){
-        return 0;
-    }
     return 1;
 }
 
@@ -697,8 +779,12 @@ sub blast{
             $blast->remove_rid($rid);
         }
     }
-    interface("successful_blast");
-    main(1);
+    my $see = interface("successful_blast", 1, 0, $filename);
+    if($see == 1) {
+        print "-------------------------------------------------------------------------------------------------------------------------\n";
+        system "pg $filename";
+    }
+        main(1);
 }
 
 
@@ -721,23 +807,47 @@ sub get_id_sequence{
 # - 1st argument: interface type (string)
 # - 2nd argument: clear screen (boolean)
 # - 3rd argument: invalid option (boolean)
-# - 4th argument: current id_sequence of the modifiying sequence (just used for the option "modification")
-# - 5th argument: total of modifying sequences (just used for the option "modification")
-# - 6th argument: format of the file to create (just used for the option "modification")
+# - 4th argument: something that might be useful (like id_sequence, a file name, etc.)
+# - 5th argument: current id_sequence of the modifiying sequence (just used for the option "modification")
+# - 6th argument: total of modifying sequences (just used for the option "modification")
+# - 7th argument: format of the file to create (just used for the option "modification")
 sub interface {
-    my ($type, $clear, $invalid, $current, $total, $format) = @_;
+    my ($type, $clear, $invalid, $something, $current, $total, $format) = @_;
     my ($option, $answer);
     my @answer;
 
+    #TODO: METER O HELP NA INTERFACE!
     
     if($type eq "welcome"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n"}
         else {print "\t\t\tWELCOME TO CENASSAS. ALGUEM QUE ESCREVA ALGO AQUI, QUE TOU SEM IDEIAS!\n\n";}
-        print "What do you want to do?\n\n 1 - Insertion of a sequence\n 2 - Removal of a sequence\n 3 - Modification of a sequence\n\n 8 - Help\n 9 - Exit\n\nAnswer: ";
+        print "What do you want to do?\n\n 1 - Database operations\n 2 - Bioinformatics operations\n\n 8 - Help\n 9 - Exit\n\nAnswer: ";
+        $option = <>;
+        if($option == 1 or $option == 2 or $option == 9) {return $option;}
+        else {interface("welcome", 1, 1);}
+    }
+    
+    
+    
+    elsif($type eq "database_operations"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n"}
+        print "What do you want to do?\n\n 1 - Insertion of a sequence\n 2 - Removal of a sequence\n 3 - Modification of a sequence\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
         $option = <>;
         if($option == 1 or $option == 2 or $option == 3 or $option == 9) {return $option;}
-        else {interface("welcome", 1, 1);}
+        else {interface("database_operations", 1, 1);}
+    }
+    
+    
+    
+    elsif($type eq "bioinformatics_operations"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n"}
+        print "What do you want to do?\n\n 1 - Run a BLAST\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
+        $option = <>;
+        if($option == 1 or $option == 9) {return $option;}
+        else {interface("bioinformatics_operations", 1, 1);}
     }
     
     
@@ -745,7 +855,7 @@ sub interface {
     elsif($type eq "ask_insertion_type"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n";}
-        print "Choose a way to insert a sequence: \n\n 1 - Manually\n 2 - From a file\n 3 - From a remote database\n\n 8 - Help\n 9 - Go back\n\nAnswer: ";
+        print "Choose a way to insert a sequence: \n\n 1 - Manually\n 2 - From a file\n 3 - From a remote database\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
         $option = <>;
         if($option == 1 or $option == 2 or $option == 3 or $option == 9) {return $option;}
         else {interface("ask_insertion_type", 1, 1);}
@@ -882,7 +992,7 @@ sub interface {
     
     elsif ($type eq "ask_format"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
-        print "Select the format of the importation:\n\n 1 - Fasta\n 2 - Genbank\n 3 - Swissprot\n\nAnswer: ";    
+        print "Select the format of the sequence:\n\n 1 - Fasta\n 2 - Genbank\n 3 - Swissprot\n\nAnswer: ";    
         do{     
             $option = <>;
             
@@ -898,10 +1008,12 @@ sub interface {
             system $^O eq 'MSWin32' ? 'cls' : 'clear';
             print "Insert the file path: ";
         }
+        elsif(!$clear and $invalid) {print "ERROR: EXISTING ACCESSION NUMBER IN DATABASE!!! Insert the file path: "}
         else {print "FILE NOT FOUND! Insert a valid file path: ";}
         $answer = <>;
         chomp $answer;
-        return $answer;
+        if(!verify_accession_in_file($answer)) {interface("ask_file_path", 0, 1)}
+        else {return $answer;}
     }
     
     
@@ -910,7 +1022,7 @@ sub interface {
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n";}
         print "Choose a way to remove the sequence (ATTENTION! If there are more than 1 sequence with the same accession number or with the same name, ".
-                "all of them will be deleted):\n\n 1 - By an accession number\n 2 - By a gene name\n\n 8 - Help\n 9 - Go back\n\nAnswer: ";
+                "all of them will be deleted):\n\n 1 - By an accession number\n 2 - By a gene name\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
         $option = <>;
         if($option == 1 or $option == 2 or $option == 9) {return $option;}
         else {interface("ask_removal_type",1, 1);}
@@ -927,7 +1039,7 @@ sub interface {
         print "Insert the accession number: ";
         $answer = <>;
         chomp $answer;
-        $existe = verifica_accession($answer);             #Verifica de o accesion number já existe na Base de Dados                                               
+        $existe = verify_accession($answer);             #Verifica de o accesion number já existe na Base de Dados                                               
         }while(!$existe);
         return $answer;
     }
@@ -938,7 +1050,7 @@ sub interface {
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n";}
         print "Choose a way to modify the sequence (ATTENTION: If there are more than 1 sequence with the same accession number or with the same name, ".
-                "you can modify whatever you want):\n\n 1 - By an accession number\n 2 - By a gene name\n\n 8 - Help\n 9 - Go back\n\nAnswer: ";
+                "you can modify whatever you want):\n\n 1 - By an accession number\n 2 - By a gene name\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
         $option = <>;
         if($option == 1 or $option == 2 or $option == 9) {return $option;}
         else {interface("ask_modification_type",1, 1);}
@@ -947,14 +1059,15 @@ sub interface {
     
     
     elsif($type eq "modify_sequence"){
+        #Here, the $something is NOT used
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Sequence $current in $total sequences ...\n\n";
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n";}
-        print "The file sequence".$current."in".$total.".$format has been created in the directory of this program. Go and modify whatever you want to. After all the changes are done, come back and enter \"ok\"".
-                " (without quotes)\n";
+        print "The file sequence".$current."in".$total.".$format has been created in the directory of this program. Go and modify whatever you want to. After all the changes are done".
+                ", come back and enter \"ok\" (without quotes)\n";
         $answer = <>;
         chomp $answer;
-        if($answer ne "ok") {interface("modify_sequence", 1, 1, $current, $total, $format);}
+        if($answer ne "ok") {interface("modify_sequence", 1, 1, $something, $current, $total, $format);}
     }
     
     
@@ -1009,11 +1122,11 @@ sub interface {
         
         my $flag=1;
         do{
-        if (!$flag) {print "ERROR: Existing Accesion Version on DATABASE!\n!";}
-        print "Please insert the Accession Version Number: \nAnswer: ";
+        if (!$flag) {print "ERROR: Existing Accesion Version on DATABASE! ";}
+        print "Please insert the Accession Version Number: ";
         $option = <>;
         chomp $option;
-        $flag=verifica_version($option);
+        $flag=verify_version($option);
         }while(!$flag);
         return $option;
     }
@@ -1097,9 +1210,14 @@ sub interface {
     
     
     elsif($type eq "successful_insertion"){
+        #Here, the $something has the ID_SEQUENCE
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
-        print "Successful insertion!!!\n\n\nPress Enter...";
-        <>;
+        if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        else {print "Successful insertion!!!\n\nThe file ".(substr $dbm_seq{$something}, 10)." has been created on the 'sequences' directory. Do you want to see this file?\n\n 1 - Yes, I do\n 2 - No, I don't"
+                ."\n\nAnswer: ";}
+        $option = <>;
+        if ($option == 1 or $option == 2) {return $option;}
+        else {interface("successful_insertion", 0, 1);}
     }
     
     
@@ -1114,17 +1232,52 @@ sub interface {
     
     elsif($type eq "successful_modification"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
-        print "Successful modification!!!\n\n\nPress Enter...";
-        <>;
+        print "Successful modification!!!\n\n";
     }
+    
+    
+    elsif($type eq "ask_display_modified"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        else {print "Some file(s) was(were) modified in the 'sequences' directory. Do you want to see them?\n\n 1 - Yes, I do\n 2 - No, I don't\n\nAnswer: ";}
+        $option = <>;
+        if($option == 1 or $option == 2) {return $option;}
+        else {interface("ask_display_modified", 0, 1);}
+    }
+    
+    
+    
+    elsif($type eq "ask_modified_table"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        else {print "Select the file you want to see: ";}
+        $option = <>;
+        return $option;
+    }
+    
+    #elsif($type eq "successful_modification"){
+    #    if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+    #    if($invalid) {print "INVALID OPTION121! Please choose a valid one: ";}
+    #    else {print "Successful modification!!!\n\nThe file ".(substr $dbm_seq{$id_sequence}, 10)." has been modified on the 'sequences' directory. Do you want to see this file?\n\n1 - Yes, I do\n2 - No, I don't"
+    #            ."\n\nAnswer: ";}
+    #    $option = <>;
+    #    if ($option == 1 or $option == 2) {return $option;}
+    #    else {interface("successful_modification", 0, 1);}
+    #}
     
     
     
     elsif($type eq "successful_blast"){
+        #Here the $something has the FILE NAME of the file that blast() function created
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
-        print "Successful BLAST!!! Go and check the 'blast_results' directory!\n\n\nPress Enter...";
-        <>;
+        if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        else {print "Successful BLAST!!!\n\n The file ".(substr $something, 14)." has been created on the 'blast_results' directory. Do you want to see this file?\n\n 1 - Yes, I do\n 2 - No, I don't\n\nAnswer: ";}
+        $option = <>;
+        if ($option == 1 or $option == 2) {return $option;}
+        else {interface("successful_blast", 0, 1);}
     }
+    
+    
     
     
     
