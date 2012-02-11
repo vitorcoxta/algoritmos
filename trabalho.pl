@@ -63,6 +63,7 @@ sub database_operations{
 sub bioinformatics_operations{
     my $option = interface("bioinformatics_operations", 1, 0);
     if($option == 1){blast();}
+    elsif($option == 2){motif();}
     elsif($option == 9){main(1);}
 }
 
@@ -129,16 +130,7 @@ sub insertion {
             } catch Bio::Root::Exception with {$clear = 0;}
         } while(!$seqio);
         print "-------------------------------------------------------------------------------------------------------------------------\n";
-        if(substr ($path, -5) eq "fasta") {$format = "fasta";}
-        elsif(substr ($path, -5) eq "swiss") {$format = "swiss";}
-        elsif(substr ($path, -2) eq "gb") {$format = "genbank";}
-        else {
-            my $format_opt = interface("ask_format", 0, 0);
-            if($format_opt == 1) {$format = "fasta";}
-            elsif($format_opt == 2) {$format = "genbank";}
-            elsif($format_opt == 3) {$format = "swiss";}
-            print "-------------------------------------------------------------------------------------------------------------------------\n";
-        }
+        $format = get_format($path);
         
         my $seq = $seqio->next_seq;
         my $alph= interface("ask_alphabet", 0);                       #Asks the alphabet
@@ -199,6 +191,25 @@ sub insertion {
         main(1);
     }
 }
+
+
+#--------------------This function gets the format of a file-----------------------------------
+sub get_format{
+    my ($path) = @_;
+    my $format;
+    if(substr ($path, -5) eq "fasta") {$format = "fasta";}
+    elsif(substr ($path, -5) eq "swiss") {$format = "swiss";}
+    elsif(substr ($path, -2) eq "gb") {$format = "genbank";}
+    else {
+        my $format_opt = interface("ask_format", 0, 0);
+        if($format_opt == 1) {$format = "fasta";}
+        elsif($format_opt == 2) {$format = "genbank";}
+        elsif($format_opt == 3) {$format = "swiss";}
+        print "-------------------------------------------------------------------------------------------------------------------------\n";
+    }
+    return $format;
+}
+
 
 
 #-----------------Verifies if the inserted specie already exists on database. If it already exists, doesn't try to insert it---------------
@@ -452,7 +463,7 @@ sub display_modified{
     my (%modified) = @_;
     my $option = interface("ask_display_modified", 0, 0);
     my ($key, $answer);
-    do{
+    if($option == 1){
         print "-------------------------------------------------------------------------------------------------------------------------\n";
         print "\n\tMODIFIED FILES TABLE\n\n";
         foreach $key (sort {$a <=> $b} (keys %modified)){
@@ -467,7 +478,7 @@ sub display_modified{
         chomp $answer;
         system "pg ".$dbm_seq{$modified{$answer}};
         $option = interface("ask_display_modified", 1, 0);
-    } while ($option != 2)
+    }
 }
 
 
@@ -732,16 +743,8 @@ sub blast{
     }
     print "-------------------------------------------------------------------------------------------------------------------------\n";
     $filename = $dbm_seq{$id_sequence};
-    if(substr ($filename, -5) eq "fasta") {$format = "fasta";}
-    elsif(substr ($filename, -5) eq "swiss") {$format = "swiss";}
-    elsif(substr ($filename, -2) eq "gb") {$format = "genbank";}
-    else {
-        my $format_opt = interface("ask_format", 0, 0);
-        if($format_opt == 1) {$format = "fasta";}
-        elsif($format_opt == 2) {$format = "genbank";}
-        elsif($format_opt == 3) {$format = "swiss";}
-        print "-------------------------------------------------------------------------------------------------------------------------\n";
-    }
+    $format = get_format($filename);
+    
     $seqio = Bio::SeqIO->new(-file => $filename, -format => $format);
     $seq = $seqio->next_seq;
     $option = interface("ask_blast_type", 0);
@@ -803,6 +806,102 @@ sub get_id_sequence{
 }
 
 
+
+sub motif{
+    my $motif = interface("ask_motif", 1);
+    my ($match, $positions) = search_motif($motif);
+    my %match = %$match;
+    my %positions = %$positions;
+    #print "MATCH\n\n";
+    #while(my ($key, $val) = each %match){
+    #    print "$key - $val\n";
+    #}
+    #print "\n\nPOSITIONS\n\n";
+    #while(my ($key, $val) = each %positions){
+    #    print "$key - ";
+    #    for my $pos (@{$val}){
+    #        print "$pos ";
+    #    }
+    #    print "\n";
+    #}
+    #<>;
+    display_match($match, $positions);
+    main(1);
+}
+
+
+
+#----------------------This function will search a motif in all the sequences--------------------------------
+sub search_motif{
+    my ($motif) = @_;
+    my ($key, $val, $seqio, $seq, $insert);
+    my $count = 0;
+    my $found = 1;
+    my (%match, %positions);
+    
+    while (($key, $val) = each %dbm_seq){
+        $insert = 1;
+        if ($found) {$count++;}
+        $found = 0;
+        $seqio = Bio::SeqIO->new(-file => "<".$val, -format => get_format($val));
+        $seq = $seqio->next_seq;
+        $_ = $seq->seq;
+        while(/$motif/g){
+            $found = 1;
+            if ($insert){
+                $match{$count} = $val;
+                $insert = 0;
+            }
+            push @{$positions{$count}}, (length $`);
+        }
+    }
+    return (\%match, \%positions);
+}
+
+
+
+sub display_match{
+    my ($match, $positions) = @_;
+    my %match = %$match;
+    my %positions = %$positions;
+    my ($key, $answer, $option, $pos, $flag);
+    my $size_hash = scalar (keys %match);
+    
+    if ($size_hash == 0){
+        interface("no_match", 1);
+        main(1);
+    }
+    else{
+        do {
+            $flag = 0;
+            print "-------------------------------------------------------------------------------------------------------------------------\n";
+            print "\n\tMATCH TABLE\n\n";
+            foreach $key (sort {$a <=> $b} (keys %match)){
+                print " $key - ".(substr $match{$key}, 10)." - Positions: ";
+                for $pos (@{$positions{$key}}){
+                    print $pos."  ";
+                }
+                print "\n";
+            }
+            print "\n\n";
+            $option = interface("ask_display_match", 0, 0);
+            if($option == 1){
+                do{
+                    $answer = interface("ask_match_table", 0, $flag);
+                    $flag = 1;
+                } while ($answer < 1 or $answer > $size_hash);
+                print "-------------------------------------------------------------------------------------------------------------------------\n";
+                chomp $answer;
+                system "pg ".$match{$answer};
+            }
+            elsif($option == 2){
+                return;
+            }
+        } while (1);
+    }
+}
+
+
 #------------------This function will have ALL the interface things-------------------
 # - 1st argument: interface type (string)
 # - 2nd argument: clear screen (boolean)
@@ -844,9 +943,9 @@ sub interface {
     elsif($type eq "bioinformatics_operations"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n"}
-        print "What do you want to do?\n\n 1 - Run a BLAST\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
+        print "What do you want to do?\n\n 1 - Run a BLAST\n 2 - Search for a motif\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
         $option = <>;
-        if($option == 1 or $option == 9) {return $option;}
+        if($option == 1 or $option == 2 or $option == 9) {return $option;}
         else {interface("bioinformatics_operations", 1, 1);}
     }
     
@@ -1255,15 +1354,27 @@ sub interface {
         return $option;
     }
     
-    #elsif($type eq "successful_modification"){
-    #    if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
-    #    if($invalid) {print "INVALID OPTION121! Please choose a valid one: ";}
-    #    else {print "Successful modification!!!\n\nThe file ".(substr $dbm_seq{$id_sequence}, 10)." has been modified on the 'sequences' directory. Do you want to see this file?\n\n1 - Yes, I do\n2 - No, I don't"
-    #            ."\n\nAnswer: ";}
-    #    $option = <>;
-    #    if ($option == 1 or $option == 2) {return $option;}
-    #    else {interface("successful_modification", 0, 1);}
-    #}
+    
+    
+    elsif($type eq "ask_display_match"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        else {print "This table show the sequences where the motif was found. Do you want to see them?\n\n 1 - Yes, I do\n 2 - No, I don't\n\nAnswer: ";}
+        $option = <>;
+        if($option == 1 or $option == 2) {return $option;}
+        else {interface("ask_display_match", 0, 1);}
+    }
+    
+    
+    
+    elsif($type eq "ask_match_table"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        else {print "Select the file you want to see from the MATCH TABLE: ";}
+        $option = <>;
+        return $option;
+    }
+    
     
     
     
@@ -1278,6 +1389,22 @@ sub interface {
     }
     
     
+    
+    elsif($type eq "ask_motif"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "Insert the motif that you want to find: ";
+        $answer = <>;
+        chomp $answer;
+        return uc($answer);
+    }
+    
+    
+    
+    elsif($type eq "no_match"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "The motif was not found in any sequence on the database!\n\nPress Enter...";
+        <>;
+    }
     
     
     
