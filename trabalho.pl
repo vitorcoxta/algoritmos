@@ -875,18 +875,24 @@ sub display_match{
         do {
             $flag = 0;
             print "-------------------------------------------------------------------------------------------------------------------------\n";
-            print "\n\tMATCH TABLE\n\n";
+            print "\n\tMATCH TABLE AND POSITIONS\n\n";
             foreach $key (sort {$a <=> $b} (keys %match)){
                 print " $key - ".(substr $match{$key}, 10)." - Positions: ";
                 for $pos (@{$positions{$key}}){
                     print $pos."  ";
                 }
-                print "\n";
+                print "\n-----------\n";
             }
             print "\n\n";
             $option = interface("ask_display_match", 0, 0);
             if($option == 1){
                 do{
+                    print "-------------------------------------------------------------------------------------------------------------------------\n";
+                    print "\n\tMATCH TABLE\n\n";
+                    foreach $key (sort {$a <=> $b} (keys %match)){
+                        print " $key - ".(substr $match{$key}, 10)."\n";
+                    }
+                    print "\n";
                     $answer = interface("ask_match_table", 0, $flag);
                     $flag = 1;
                 } while ($answer < 1 or $answer > $size_hash);
@@ -1370,7 +1376,7 @@ sub interface {
     elsif($type eq "ask_match_table"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
-        else {print "Select the file you want to see from the MATCH TABLE: ";}
+        else {print "Select the file you want to see: ";}
         $option = <>;
         return $option;
     }
