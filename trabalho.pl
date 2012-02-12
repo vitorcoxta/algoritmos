@@ -9,6 +9,7 @@ use DBI();
 use DBD::mysql;
 use Bio::Root::Exception;
 use Bio::Tools::Run::RemoteBlast;
+use Bio::Tools::SeqStats;
 use Error qw(:try);
 
 #------------------------DATABASE CONNECTIONS ON JOAO'S PC!-----------------------------
@@ -29,8 +30,10 @@ dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinform
 #TODO: Quando a interface estiver terminada, meter na opcao "sair" o close da connection às base de dados (close $dbh e dbmclose($dmb_seq))
 
 main(1);
-#blast();
 
+
+
+#------------------This is the main function------------------------------------
 sub main{
     #my ($key, $val);
     #
@@ -51,6 +54,7 @@ sub main{
 }
 
 
+#----------------------This funtion will call the functions that operate with the database--------------------------------
 sub database_operations{
     my $option = interface("database_operations", 1, 0);
     if($option == 1){insertion();}
@@ -60,10 +64,13 @@ sub database_operations{
 }
 
 
+
+#----------------------------This function will call the functions that perform a bioinformatics job--------------------------
 sub bioinformatics_operations{
     my $option = interface("bioinformatics_operations", 1, 0);
     if($option == 1){blast();}
     elsif($option == 2){motif();}
+    elsif($option == 3){statistics();}
     elsif($option == 9){main(1);}
 }
 
@@ -133,7 +140,7 @@ sub insertion {
         $format = get_format($path);
         
         my $seq = $seqio->next_seq;
-        my $alph= interface("ask_alphabet", 0);                       #Asks the alphabet
+        my $alph= interface("ask_alphabet", 0);
         my $alphabet;
         if($alph == 1) {$alphabet = "dna";}
         elsif($alph == 2) {$alphabet = "rna";}
@@ -184,8 +191,6 @@ sub insertion {
         $answer = interface("ask_database", 1);   # Escolher a Base de Dados
         if ($answer ==1 or $answer ==2 or $answer ==3) { interface("generic_importation_begin",$answer); generic_importation($answer); }    # Escolheu :     GENBANK    
         else {insertion();}
-        #interface("successful_insertion", 1);
-        #main(1);
     }
     elsif($option == 9){
         main(1);
@@ -231,10 +236,7 @@ sub insert_specie{
 
 
 #-------------------Insert the sequence----------------------
-        #Ineficiente porque faz o mesmo select 2 vezes, mas assim funciona... Deve ser porque nao pode fazer o fecthrow 2 vezes seguidas,
-        #por isso tive de voltar a fazer o select...
-        
-        #The last argument tells ifit has the accession number (insertion from a file or from a remote DB) or the gene name (manual insertion)
+        #The last argument tells if it has the accession number (insertion from a file or from a remote DB) or the gene name (manual insertion)
 sub insert_sequence_db{
     my ($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version, $accession_number) = @_;
     my $sql = "SELECT id_specie FROM species WHERE specie='".$specie."'";
@@ -281,9 +283,7 @@ sub insert_tags{
             #--------------Insert the tuple id_sequence - id_tag on seq_tags table------------------------
             while(my $row = $result->fetchrow_hashref()){
                 $sql = "INSERT INTO seq_tags (id_sequence, id_tag) VALUES ('".$id_sequence."', '".$row->{'id_tag'}."')";
-                $dbh->do($sql);#my $result2 = 
-                #if($result2) {print ("A insercao foi executada com sucesso\n");}
-                #else {print ("Ocorreu um erro na insercao\n");}
+                $dbh->do($sql);
             }
         }
     }
@@ -458,7 +458,7 @@ sub update_info{
 }
 
 
-
+#-----------------------------This funtion displays the modified sequences table, and asks if the user want to see it on the program (with the 'pg' command)----------------------
 sub display_modified{
     my (%modified) = @_;
     my $option = interface("ask_display_modified", 0, 0);
@@ -482,7 +482,7 @@ sub display_modified{
 }
 
 
-
+#-----------------------This funtion inserts the sequence from a remote database----------------------------------
 sub generic_importation{
     my($base)=@_;
     my ($option2, $format, $seq, $existe, $option, $gb, $seqio_obj, $result, $sql, $specie, $id_specie, $id_sequence, $id_tag, $form, $flag);         
@@ -554,8 +554,9 @@ sub generic_importation{
 
 
 
-
-sub verify_accession{   #### Verifica se o Accession  number já existe na Base de Dados -----------   Se sim, retorna 0,  senao retorna 1
+#-----------------------This function verifies if the accession version already exists-----------------------------
+# It returns 0 if it exists, and 1 if it doesn't
+sub verify_accession{
     my ($type) = @_;     
     my ($sql,$result);
     
@@ -569,7 +570,9 @@ sub verify_accession{   #### Verifica se o Accession  number já existe na Base 
 }
 
 
-sub verify_accession_in_file{   #### Verifica se o Accession  number já existe na Base de Dados -----------   Se sim, retorna 0,  senao retorna 1
+#---------------------This funtion verifies the accession version for the importation from a file-------------------------
+# It returns 0 if it exists, and 1 if it doesn't
+sub verify_accession_in_file{
     my ($file) = @_;     
     my ($sql,$result, $format);
     if(substr ($file, -5) eq "fasta") {return 1;}           #won't check because of the "unknown" accession_ numbers
@@ -587,6 +590,8 @@ sub verify_accession_in_file{   #### Verifica se o Accession  number já existe 
 }
 
 
+#------------------This funtion verifies if the gene name already exists on the database----------------------
+# It returns 1 if it exists, and 0 if it doesn't
 sub verify_gene_name{
     my ($gene_name) = @_;
     my $sql = "SELECT gene_name FROM sequences WHERE gene_name = '".$gene_name."'";
@@ -599,6 +604,7 @@ sub verify_gene_name{
 }
 
 
+#--------------------This function inserts the specie for the insertion from remote databases------------------
 sub insert_specie_importation{
     my ($specie) = @_;
     my @val;
@@ -623,6 +629,8 @@ sub insert_specie_importation{
 }
 
 
+
+#--------------------This function inserts the sequence for the insertion from remote databases------------------
 sub insert_sequence_importation {
         
     my ($formato,$id_specie,$seq,$version)=@_;
@@ -657,6 +665,9 @@ sub insert_sequence_importation {
     return $val[0] ;  
 }
 
+
+
+#------------------This funtion displays the keywords table-----------------------------
 sub display_tags{
     
     my ($result,$sql,@val);
@@ -676,6 +687,9 @@ sub display_tags{
     return;
 }
 
+
+
+#--------------------This funtion dysplays the species table-------------------------
 sub display_species{
     
     my ($sql,$result,@val);
@@ -695,6 +709,8 @@ sub display_species{
 }
 
 
+
+#--------------------This funtion inserts the keywords on the database------------------------
 sub insert_tag{
     
     my ($new_tag)=@_;
@@ -712,6 +728,10 @@ sub insert_tag{
     return $val[0];
 }
 
+
+
+
+#---------------------------This funtion verifies the version------------------------------
 sub verify_version{
     
     my ($version)=@_;
@@ -730,6 +750,8 @@ sub verify_version{
 }
 
 
+
+#------------------------This funtion runs a remote blast------------------------------
 sub blast{
     my $option = interface("ask_choose_type", 1);
     my ($acc_or_name, $id_sequence, $filename, $format, $seqio, $seq, $blast_type, $db, $blast, $result_blast);
@@ -806,7 +828,7 @@ sub get_id_sequence{
 }
 
 
-
+#----------------------This funtion gets the motif and calls the right funtions to serch it on the sequences on the database--------------------------
 sub motif{
     my $motif = interface("ask_motif", 1);
     my ($match, $positions) = search_motif($motif);
@@ -859,7 +881,7 @@ sub search_motif{
 }
 
 
-
+#-----------------This funtion displays the match table and the positions where the motif was found, and asks if the user want to see it with the 'pg' command
 sub display_match{
     my ($match, $positions) = @_;
     my %match = %$match;
@@ -886,13 +908,13 @@ sub display_match{
             print "\n\n";
             $option = interface("ask_display_match", 0, 0);
             if($option == 1){
+                print "-------------------------------------------------------------------------------------------------------------------------\n";
+                print "\n\tMATCH TABLE\n\n";
+                foreach $key (sort {$a <=> $b} (keys %match)){
+                    print " $key - ".(substr $match{$key}, 10)."\n";
+                }
+                print "\n";
                 do{
-                    print "-------------------------------------------------------------------------------------------------------------------------\n";
-                    print "\n\tMATCH TABLE\n\n";
-                    foreach $key (sort {$a <=> $b} (keys %match)){
-                        print " $key - ".(substr $match{$key}, 10)."\n";
-                    }
-                    print "\n";
                     $answer = interface("ask_match_table", 0, $flag);
                     $flag = 1;
                 } while ($answer < 1 or $answer > $size_hash);
@@ -905,6 +927,71 @@ sub display_match{
             }
         } while (1);
     }
+}
+
+
+
+#--------------------------This funtion will get the important info to get the statistics--------------------------------
+sub statistics{
+    my $option = interface("ask_choose_type", 1);
+    my ($answer, $type, $id_sequence, $format, $filename, $seqio, $seq, $seq_stats);
+    
+    if($option == 1){
+        $type = "accession_number";
+        $answer = interface("ask_accession_number_no_check", 1);
+    }
+    elsif($option == 2){
+        $type = "gene_name";
+        $answer = interface("ask_gene_name_no_check", 1);
+    }
+    
+    $id_sequence = get_id_sequence($answer, $type);
+    $format = get_format($dbm_seq{$id_sequence});
+    if($format eq "genbank") {$filename = "statistics/".(substr $dbm_seq{$id_sequence}, 10, -2)."txt";}
+    else {$filename = "statistics/".(substr $dbm_seq{$id_sequence}, 10, -5)."txt";;}
+    
+    $seqio = Bio::SeqIO->new(-file => $dbm_seq{$id_sequence}, -format => $format);
+    $seq = $seqio->next_seq;
+    
+    get_statistics_into_file($filename, $seq);
+    my $see = interface("successful_statistics", 1, 0, $filename);
+    if($see == 1) {
+        print "-------------------------------------------------------------------------------------------------------------------------\n";
+        system "pg $filename";
+    }
+    main(1);
+}
+
+
+
+#----------------------------This funtion will get the statistics into a file--------------------------------
+sub get_statistics_into_file{
+    my($filename, $seq) = @_;
+    
+    open FILE, ">".$filename;
+    
+    my $seq_stats = Bio::Tools::SeqStats->new(-seq => $seq);
+    my $monomers = $seq_stats->count_monomers;
+    print FILE "MONOMERS\n\n";
+    foreach my $base (sort keys %$monomers){
+        print FILE "\tThe base $base has ".$$monomers{$base}." monomers\n";
+    }
+    print FILE "-------------------------------------------------------------------------------------------------------------------------\n";
+    if($seq->alphabet eq "dna" or $seq->alphabet eq "rna"){
+        my $codons = $seq_stats->count_codons;
+        print FILE "CODONS\n\n";
+        foreach my $base (sort keys %$codons){
+            print FILE "\tThe base $base has ".$$codons{$base}." codons\n";
+        }
+    }
+    else{
+        my $hyd = $seq_stats->hydropathicity;
+        print FILE "HYDROPATHICITY\n\n\tThe hydropathicity is $hyd\n";
+    }
+    print FILE "-------------------------------------------------------------------------------------------------------------------------\n";
+    my $mol = $seq_stats->get_mol_wt;
+    print FILE "MOLECULAR WEIGHT\n\n\tThe molecular weight is between ".$$mol[0]." mol and ".$$mol[1]." mol\n";
+    close FILE;
 }
 
 
@@ -949,9 +1036,9 @@ sub interface {
     elsif($type eq "bioinformatics_operations"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n"}
-        print "What do you want to do?\n\n 1 - Run a BLAST\n 2 - Search for a motif\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
+        print "What do you want to do?\n\n 1 - Run a BLAST\n 2 - Search for a motif\n 3 - Obtain statistical information about a sequence\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
         $option = <>;
-        if($option == 1 or $option == 2 or $option == 9) {return $option;}
+        if($option == 1 or $option == 2 or $option == 3 or $option == 9) {return $option;}
         else {interface("bioinformatics_operations", 1, 1);}
     }
     
@@ -1388,7 +1475,7 @@ sub interface {
         #Here the $something has the FILE NAME of the file that blast() function created
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
-        else {print "Successful BLAST!!!\n\n The file ".(substr $something, 14)." has been created on the 'blast_results' directory. Do you want to see this file?\n\n 1 - Yes, I do\n 2 - No, I don't\n\nAnswer: ";}
+        else {print "Successful BLAST!!!\n\nThe file ".(substr $something, 14)." has been created on the 'blast_results' directory. Do you want to see this file?\n\n 1 - Yes, I do\n 2 - No, I don't\n\nAnswer: ";}
         $option = <>;
         if ($option == 1 or $option == 2) {return $option;}
         else {interface("successful_blast", 0, 1);}
@@ -1410,6 +1497,19 @@ sub interface {
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "The motif was not found in any sequence on the database!\n\nPress Enter...";
         <>;
+    }
+    
+    
+    
+    
+    elsif($type eq "successful_statistics"){
+        #Here the $something has the FILE NAME of the file that statistics() function created
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        else {print "Statistics created successfully!!!\n\nThe file ".(substr $something, 11)." has been created on the 'statistics' directory. Do you want to see this file?\n\n 1 - Yes, I do\n 2 - No, I don't\n\nAnswer: ";}
+        $option = <>;
+        if ($option == 1 or $option == 2) {return $option;}
+        else {interface("successful_statistics", 0, 1);}
     }
     
     
