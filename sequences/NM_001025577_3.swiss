@@ -1,0 +1,99 @@
+ID   NM_001025577            ROD;             3642 AA.
+AC   NM_001025577; XM_620716;
+DT   21-NOV-2011, integrated into UniProtKB/Swiss-Prot.
+DE   Mus musculus avian musculoaponeurotic fibrosarcoma (v-maf) AS42
+DE   oncogene homolog (Maf), mRNA.
+OS   Mus musculus (house mouse).
+OC   Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+OC   Mammalia; Eutheria; Euarchontoglires; Glires; Rodentia; Sciurognathi;
+OC   Muroidea; Muridae; Murinae; Mus; Mus.
+OX   NCBI_TaxID=10090;
+RN   [1]
+RC   GeneRIF: c-Maf is crucial for definitive erythropoiesis in fetal
+RC   liver, playing an important role in macrophages that constitute
+RC   erythroblastic islands.
+RX   PubMed=21628412;
+RA   Kusakabe,M., Hasegawa,K., Hamada,M., Nakamura,M., Ohsumi,T.,
+RA   Suzuki,H., Tran,M.T., Kudo,T., Uchida,K., Ninomiya,H.,
+RA   Chiba,S. and Takahashi,S.;
+RT   c-Maf plays a crucial role for the definitive erythropoiesis that
+RT   accompanies erythroblastic island formation in the fetal liver;
+RL   Blood 118 (5), 1374-1385 (2011)
+RN   [2]
+RX   PubMed=21795542;
+RA   Lu,C.C., Appler,J.M., Houseman,E.A. and Goodrich,L.V.;
+RT   Developmental profiling of spiral ganglion neurons reveals insights
+RT   into auditory circuit assembly;
+RL   J. Neurosci. 31 (30), 10903-10918 (2011)
+RN   [3]
+RX   PubMed=21504908;
+RA   Wiley,L.A., Rajagopal,R., Dattilo,L.K. and Beebe,D.C.;
+RT   The tumor suppressor gene Trp53 protects the mouse lens against
+RT   posterior subcapsular cataracts and the BMP receptor Acvr1 acts as a
+RT   tumor suppressor in the lens;
+RL   Dis Model Mech 4 (4), 484-495 (2011)
+RN   [4]
+RX   PubMed=21460847;
+RA   Motomura,Y., Kitamura,H., Hijikata,A., Matsunaga,Y., Matsumoto,K.,
+RA   Inoue,H., Atarashi,K., Hori,S., Watarai,H., Zhu,J.,
+RA   Taniguchi,M. and Kubo,M.;
+RT   The transcription factor E4BP4 regulates the production of IL-10 and
+RT   IL-13 in CD4+ T cells;
+RL   Nat. Immunol. 12 (5), 450-459 (2011)
+RN   [5]
+RC   GeneRIF: c-Maf is important for the development of memory Th cells,
+RC   particularly memory Th17 cells and Th1 cells.
+RX   PubMed=21402704;
+RA   Sato,K., Miyoshi,F., Yokota,K., Araki,Y., Asanuma,Y., Akiyama,Y.,
+RA   Yoh,K., Takahashi,S., Aburatani,H. and Mimura,T.;
+RT   Marked induction of c-Maf protein during Th17 cell differentiation and
+RT   its implication in memory Th cell development;
+RL   J. Biol. Chem. 286 (17), 14963-14971 (2011)
+RN   [6]
+RX   PubMed=8617496;
+RA   Pathak,B.G., Shaughnessy,J.D. Jr., Meneton,P., Greeb,J., Shull,G.E.,
+RA   Jenkins,N.A. and Copeland,N.G.;
+RT   Mouse chromosomal location of three epithelial sodium channel subunit
+RT   genes and an apical sodium chloride cotransporter gene;
+RL   Genomics 33 (1), 124-127 (1996)
+RN   [7]
+RX   PubMed=7789972;
+RA   Avraham,K.B., Fletcher,C., Overdier,D.G., Clevidence,D.E., Lai,E.,
+RA   Costa,R.H., Jenkins,N.A. and Copeland,N.G.;
+RT   Murine chromosomal location of eight members of the hepatocyte nuclear
+RT   factor 3/fork head winged helix family of transcription factors;
+RL   Genomics 25 (2), 388-393 (1995)
+RN   [8]
+RX   PubMed=7799931;
+RA   Kurschner,C. and Morgan,J.I.;
+RT   The maf proto-oncogene stimulates transcription from multiple sites in
+RT   a promoter that directs Purkinje neuron-specific gene expression;
+RL   Mol. Cell. Biol. 15 (1), 246-254 (1995)
+RN   [9]
+RX   PubMed=8164679;
+RA   Bae,S.C., Ogawa,E., Maruyama,M., Oka,H., Satake,M., Shigesada,K.,
+RA   Jenkins,N.A., Gilbert,D.J., Copeland,N.G. and Ito,Y.;
+RT   PEBP2 alpha B/mouse AML1 consists of multiple isoforms that possess
+RT   differential transactivation potentials;
+RL   Mol. Cell. Biol. 14 (5), 3242-3252 (1994)
+RN   [10]
+RX   PubMed=8265578;
+RA   Andrews,N.C., Kotkow,K.J., Ney,P.A., Erdjument-Bromage,H.,
+RA   Tempst,P. and Orkin,S.H.;
+RT   The ubiquitous subunit of erythroid transcription factor NF-E2 is a
+RT   small basic-leucine zipper protein related to the v-maf oncogene;
+RL   Proc. Natl. Acad. Sci. U.S.A. 90 (24), 11488-11492 (1993)
+CC   VALIDATED REFSEQ: This record has undergone validation or preliminary revi
+CC   ew. The reference sequence was derived from AC113301.7. On Jul 29, 2005 th
+CC   is sequence version replaced gi:70909316. Publication Note: This RefSeq re
+CC   cord includes a subset of the publications that are available for this gen
+CC   e. Please see the Gene record to access additional publications. 
+FT   source        1   3642
+FT   gene          1   3642       Maf.
+FT   exon          1   3642       Maf.
+FT   CDS          32   1144       Maf.
+FT   misc_fea    287    391       Maf.
+FT   misc_fea    407   1141       Maf.
+FT   misc_fea    803   1081       Maf.
+FT   STS         950   1221       Maf.
+FT   STS        1149   1405       Maf.
