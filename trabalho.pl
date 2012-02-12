@@ -71,6 +71,7 @@ sub bioinformatics_operations{
     if($option == 1){blast();}
     elsif($option == 2){motif();}
     elsif($option == 3){statistics();}
+    elsif($option == 4){features();}
     elsif($option == 9){main(1);}
 }
 
@@ -948,7 +949,7 @@ sub statistics{
     $id_sequence = get_id_sequence($answer, $type);
     $format = get_format($dbm_seq{$id_sequence});
     if($format eq "genbank") {$filename = "statistics/".(substr $dbm_seq{$id_sequence}, 10, -2)."txt";}
-    else {$filename = "statistics/".(substr $dbm_seq{$id_sequence}, 10, -5)."txt";;}
+    else {$filename = "statistics/".(substr $dbm_seq{$id_sequence}, 10, -5)."txt";}
     
     $seqio = Bio::SeqIO->new(-file => $dbm_seq{$id_sequence}, -format => $format);
     $seq = $seqio->next_seq;
@@ -995,6 +996,62 @@ sub get_statistics_into_file{
 }
 
 
+
+sub features{
+    my $option = interface("ask_features", 1, 0);
+    
+    if($option == 1){
+        add_feature();
+    }
+    elsif($option == 2){
+        display_features();
+    }
+    main(1);
+}
+
+
+
+sub add_feature{
+    my $option = interface("ask_choose_type", 1, 0);
+    my ($type, $answer, $id_sequence, $format, $filename, $seqio, $seq);
+    
+    if($option == 1){
+        $type = "accession_number";
+        $answer = interface("ask_accession_number_no_check", 1);
+    }
+    elsif($option == 2){
+        $type = "gene_name";
+        $answer = interface("ask_gene_name_no_check", 1);
+    }
+    $id_sequence = get_id_sequence($answer, $type);
+    $format = get_format($dbm_seq{$id_sequence});
+    
+    if($format eq "genbank") {$filename = "features/".(substr $dbm_seq{$id_sequence}, 10, -2)."txt";}
+    else {$filename = "features/".(substr $dbm_seq{$id_sequence}, 10, -5)."txt";}
+    
+    $seqio = Bio::SeqIO->new(-file => $filename, -format => $format);
+    $seq = $seqio->next_seq;
+    
+    my $start = interface("ask_feature_start", 1);
+    print "-------------------------------------------------------------------------------------------------------------------------\n";
+    my $end = interface("ask_feature_end");
+    print "-------------------------------------------------------------------------------------------------------------------------\n";
+    my $strand = interface("ask_feature_strand");
+    print "-------------------------------------------------------------------------------------------------------------------------\n";
+    my $primary = interface("ask_feature_primary");
+    print "-------------------------------------------------------------------------------------------------------------------------\n";
+    my $source = interface("ask_feature_source");
+    
+    my $see = interface("successful_feature", 1, 0, $filename);
+    if($see == 1) {
+        print "-------------------------------------------------------------------------------------------------------------------------\n";
+        system "pg ".$dbm_seq{$id_sequence};
+    }
+}
+
+
+
+
 #------------------This function will have ALL the interface things-------------------
 # - 1st argument: interface type (string)
 # - 2nd argument: clear screen (boolean)
@@ -1036,7 +1093,7 @@ sub interface {
     elsif($type eq "bioinformatics_operations"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n"}
-        print "What do you want to do?\n\n 1 - Run a BLAST\n 2 - Search for a motif\n 3 - Obtain statistical information about a sequence\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
+        print "What do you want to do?\n\n 1 - Run a BLAST\n 2 - Search for a motif\n 3 - Obtain statistical information about a sequence\n 4 - Features\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
         $option = <>;
         if($option == 1 or $option == 2 or $option == 3 or $option == 9) {return $option;}
         else {interface("bioinformatics_operations", 1, 1);}
@@ -1226,7 +1283,6 @@ sub interface {
         my $existe=1;
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         do{
-            
             if(!$existe) {print "\nERROR: EXISTING ACCESSION NUMBER IN DATABASE!!!\n"}
         print "Insert the accession number: ";
         $answer = <>;
@@ -1510,6 +1566,16 @@ sub interface {
         $option = <>;
         if ($option == 1 or $option == 2) {return $option;}
         else {interface("successful_statistics", 0, 1);}
+    }
+    
+    
+    elsif($type eq "ask_features"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        else {print "What do you want to do?\n\n 1 - Add a new feature\n 2 - See all the features of a sequence\n\nAnswer: ";}
+        $option = <>;
+        if ($option == 1 or $option == 2) {return $option;}
+        else {interface("ask_features", 0, 1);}
     }
     
     
