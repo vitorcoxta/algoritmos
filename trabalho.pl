@@ -1512,7 +1512,7 @@ sub interface {
         else {interface("successful_statistics", 0, 1);}
     }
     
-    
+
     
     elsif($type eq "exit"){
        # print "METER AQUI AS CENAS DE DESPEDIDA DO JOAO. XAU AI!\n\n";
