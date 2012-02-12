@@ -13,21 +13,22 @@ use Bio::Tools::SeqStats;
 use Error qw(:try);
 
 #------------------------DATABASE CONNECTIONS ON JOAO'S PC!-----------------------------
-my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
-my %dbm_seq;
-dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
+#my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
+#my %dbm_seq;
+#dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
 
 #------------------------DATABASE CONNECTIONS ON VITOR'S PC!----------------------------
-#my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
-#my %dbm_seq;
-#dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
+my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
+my %dbm_seq;
+dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
 
 #------------------------DATABASE CONNECTIONS ON JOSE'S PC!----------------------------
 #my $dbh = DBI->connect('dbi:mysql:alg','root','') or die "Connection Error: $DBI::errstr\n";
 #my %dbm_seq;
 #dbmopen(%dbm_seq, 'METER AQUI O CAMINHO DESEJADO PARA A LOCALIZACAO DA HASH COM AS SEQUENCIAS', 0666);
 
-#TODO: Quando a interface estiver terminada, meter na opcao "sair" o close da connection às base de dados (close $dbh e dbmclose($dmb_seq))
+#TODO: METER O HELP NA INTERFACE!
+#TODO: FALAR COM O JOAO SOBRE A CENA DA INSERÇAO REMOTA, DO ACCESSION NUMBER E VERSION
 
 main(1);
 
@@ -71,6 +72,7 @@ sub bioinformatics_operations{
     if($option == 1){blast();}
     elsif($option == 2){motif();}
     elsif($option == 3){statistics();}
+    elsif($option == 4){features();}
     elsif($option == 9){main(1);}
 }
 
@@ -556,11 +558,14 @@ sub generic_importation{
 
 #-----------------------This function verifies if the accession version already exists-----------------------------
 # It returns 0 if it exists, and 1 if it doesn't
+# 1st argument - the accession_number (and the accession version)
+# 2nd argument - tells if it have to search with accession version or not
 sub verify_accession{
-    my ($type) = @_;     
+    my ($type, $with) = @_;     
     my ($sql,$result);
     
-    $sql = "SELECT accession_number FROM sequences WHERE accession_number='".$type."' and accession_version='".$type."';";
+    if($with eq "with") {$sql = "SELECT accession_number FROM sequences WHERE accession_number='".$type."' and accession_version='".$type."';";}
+    elsif($with eq "without") {$sql = "SELECT accession_number FROM sequences WHERE accession_number='".$type."';";}
     $result = $dbh->prepare($sql);
     $result->execute();
     if($result->fetchrow_hashref()){
@@ -948,7 +953,7 @@ sub statistics{
     $id_sequence = get_id_sequence($answer, $type);
     $format = get_format($dbm_seq{$id_sequence});
     if($format eq "genbank") {$filename = "statistics/".(substr $dbm_seq{$id_sequence}, 10, -2)."txt";}
-    else {$filename = "statistics/".(substr $dbm_seq{$id_sequence}, 10, -5)."txt";;}
+    else {$filename = "statistics/".(substr $dbm_seq{$id_sequence}, 10, -5)."txt";}
     
     $seqio = Bio::SeqIO->new(-file => $dbm_seq{$id_sequence}, -format => $format);
     $seq = $seqio->next_seq;
@@ -995,6 +1000,56 @@ sub get_statistics_into_file{
 }
 
 
+
+
+#-------------------This funtion will add a new feature into a sequence-------------------------------
+sub features{
+    my $option = interface("ask_choose_type", 1, 0);
+    my ($type, $answer, $id_sequence, $format, $filename, $seqio_read, $seqio_write, $seq);
+    
+    if($option == 1){
+        $type = "accession_number";
+        $answer = interface("ask_accession_number_no_check", 1);
+    }
+    elsif($option == 2){
+        $type = "gene_name";
+        $answer = interface("ask_gene_name_no_check", 1);
+    }
+    $id_sequence = get_id_sequence($answer, $type);
+    $format = get_format($dbm_seq{$id_sequence});
+    if($format eq "fasta") {interface("error_feature", 1);}
+    else{
+        $seqio_read = Bio::SeqIO->new(-file => "<".$dbm_seq{$id_sequence}, -format => $format);
+        $seq = $seqio_read->next_seq;
+        
+        my $start = interface("ask_feature_start", 1);
+        print "-------------------------------------------------------------------------------------------------------------------------\n";
+        my $end = interface("ask_feature_end");
+        print "-------------------------------------------------------------------------------------------------------------------------\n";
+        my $strand = interface("ask_feature_strand");
+        if($strand == 2) {$strand = -1;}
+        elsif($strand == 3) {$strand = 0;}
+        print "-------------------------------------------------------------------------------------------------------------------------\n";
+        my $primary = interface("ask_feature_primary");
+        print "-------------------------------------------------------------------------------------------------------------------------\n";
+        my $source = interface("ask_feature_source");
+        
+        $seqio_write = Bio::SeqIO->new(-file => ">".$dbm_seq{$id_sequence}, -format => $format);;
+        $seq->add_SeqFeature(new Bio::SeqFeature::Generic(-start => $start, -end => $end, -strand => $strand, -primary => $primary, -source => $source));
+        $seqio_write->write_seq($seq);
+        
+        my $see = interface("successful_feature", 1, 0, (substr $dbm_seq{$id_sequence}, 10));
+        if($see == 1) {
+            print "-------------------------------------------------------------------------------------------------------------------------\n";
+            system "pg ".$dbm_seq{$id_sequence};
+        }
+    }
+    main(1);
+}
+
+
+
+
 #------------------This function will have ALL the interface things-------------------
 # - 1st argument: interface type (string)
 # - 2nd argument: clear screen (boolean)
@@ -1007,8 +1062,6 @@ sub interface {
     my ($type, $clear, $invalid, $something, $current, $total, $format) = @_;
     my ($option, $answer);
     my @answer;
-
-    #TODO: METER O HELP NA INTERFACE!
     
     if($type eq "welcome"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
@@ -1036,9 +1089,9 @@ sub interface {
     elsif($type eq "bioinformatics_operations"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n"}
-        print "What do you want to do?\n\n 1 - Run a BLAST\n 2 - Search for a motif\n 3 - Obtain statistical information about a sequence\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
+        print "What do you want to do?\n\n 1 - Run a BLAST\n 2 - Search for a motif\n 3 - Obtain statistical information about a sequence\n 4 - Add a new feature in a sequence\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
         $option = <>;
-        if($option == 1 or $option == 2 or $option == 3 or $option == 9) {return $option;}
+        if($option == 1 or $option == 2 or $option == 3 or $option == 4 or $option == 9) {return $option;}
         else {interface("bioinformatics_operations", 1, 1);}
     }
     
@@ -1226,12 +1279,11 @@ sub interface {
         my $existe=1;
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         do{
-            
             if(!$existe) {print "\nERROR: EXISTING ACCESSION NUMBER IN DATABASE!!!\n"}
         print "Insert the accession number: ";
         $answer = <>;
         chomp $answer;
-        $existe = verify_accession($answer);             #Verifica de o accesion number já existe na Base de Dados                                               
+        $existe = verify_accession($answer, "with");             #Verifica de o accesion number já existe na Base de Dados
         }while(!$existe);
         return $answer;
     }
@@ -1362,19 +1414,23 @@ sub interface {
     
     elsif($type eq "ask_accession_number_no_check"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
-        print "Insert the accession number: ";
+        if($invalid) {print "The accession number indicated doesn't exists on the database! Choose an existing one: "}
+        else {print "Insert the accession number: ";}
         $answer = <>;
         chomp $answer;
-        return $answer;
+        if(!verify_accession($answer, "without")) {return $answer;}
+        else {interface("ask_accession_number_no_check", 0, 1);}
     }
     
     
     elsif($type eq "ask_gene_name_no_check"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "The gene name indicated doesn't exists on the database! Choose an existing one: "}
         print "Insert the gene name: ";
         $answer = <>;
         chomp $answer;
-        return $answer;
+        if(verify_gene_name($answer)) {return $answer;}
+        else {interface("ask_gene_name_no_check", 0, 1);}
     }
     
     elsif($type eq "ask_blast_type"){
@@ -1514,8 +1570,89 @@ sub interface {
     
 
     
+    elsif($type eq "error_feature"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "ERROR! The sequence selected is in the 'fasta' format, and this format doesn't support features...\n\nPress Enter...";
+        <>;
+    }
+    
+    
+    
+    elsif($type eq "ask_feature_start"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "Insert the number of the start monomer of the feature: ";
+        $answer = <>;
+        chomp $answer;
+        return $answer;
+    }
+    
+    
+    
+    elsif($type eq "ask_feature_end"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "Insert the number of the ending monomer of the feature: ";
+        $answer = <>;
+        chomp $answer;
+        return $answer;
+    }
+    
+    
+    
+    elsif($type eq "ask_feature_end"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "Insert the number of the ending monomer of the feature: ";
+        $answer = <>;
+        chomp $answer;
+        return $answer;
+    }
+    
+    
+    
+    elsif($type eq "ask_feature_strand"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        else {print "The new feature is in which direction?\n\n 1 - 5' -> 3'\n 2 - 3' -> 5'\n 3 - Doesn't matter\n\nAnswer: ";}
+        $option = <>;
+        if ($option == 1 or $option == 2 or $option == 3) {return $option;}
+        else {interface("ask_feature_strand", 0, 1);}
+    }
+    
+    
+    elsif($type eq "ask_feature_primary"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "Insert the primary tag of the feature: ";
+        $answer = <>;
+        chomp $answer;
+        return $answer;
+    }
+    
+    
+    
+    elsif($type eq "ask_feature_source"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "Insert the source tag of the feature: ";
+        $answer = <>;
+        chomp $answer;
+        return $answer;
+    }
+    
+    
+    
+    elsif($type eq "successful_feature"){
+        #Here, the $something has the FILE NAME of the sequence
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        else {print "The new feature was added successfully!!!\n\nThe file $something has been updated on the 'sequences' directory. Do you want to see this file?\n\n 1 - Yes, I do\n 2 - No, I don't"
+                ."\n\nAnswer: ";}
+        $option = <>;
+        if ($option == 1 or $option == 2) {return $option;}
+        else {interface("successful_feature", 0, 1);}
+    }
+    
+    
+    
+    
     elsif($type eq "exit"){
-       # print "METER AQUI AS CENAS DE DESPEDIDA DO JOAO. XAU AI!\n\n";
         system $^O eq 'MSWin32' ? 'cls' : 'clear';
         print "\t\n\nBioinformatics - \"Fetch the Sequence!\" \n\n Thank you for using our software! \n Have a nice day! :) \n\n\nPROPS PO PESSOAL!!!XD\n\n";
 
