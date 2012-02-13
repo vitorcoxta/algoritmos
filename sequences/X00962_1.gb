@@ -1,0 +1,97 @@
+LOCUS       X00962                  2513 bp    mRNA    linear   MAM 18-APR-2005
+DEFINITION  Calf mRNA for beta-subunit of acetylcholine receptor precursor.
+ACCESSION   X00962
+VERSION     X00962.1  GI:45
+KEYWORDS    acetylcholine receptor; signal peptide.
+SOURCE      Bos taurus (cattle)
+  ORGANISM  Bos taurus
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Laurasiatheria; Cetartiodactyla; Ruminantia;
+            Pecora; Bovidae; Bovinae; Bos.
+REFERENCE   1  (bases 1 to 2513)
+  AUTHORS   Tanabe,T., Noda,M., Furutani,Y., Takai,T., Takahashi,H.,
+            Tanaka,K., Hirose,T., Inayama,S. and Numa,S.
+  TITLE     Primary structure of beta subunit precursor of calf muscle
+            acetylcholine receptor deduced from cDNA sequence
+  JOURNAL   Eur. J. Biochem. 144 (1), 11-17 (1984)
+   PUBMED   6548186
+COMMENT     Data kindly reviewed (17-07-1985) by S. Numa.
+FEATURES             Location/Qualifiers
+     source          1..2513
+                     /mol_type="mRNA"
+                     /db_xref="taxon:9913"
+                     /organism="Bos taurus"
+     CDS             35..1552
+                     /db_xref="GI:46"
+                     /db_xref="GOA:P04758"
+                     /db_xref="InterPro:IPR002394"
+                     /db_xref="InterPro:IPR006029"
+                     /db_xref="InterPro:IPR006201"
+                     /db_xref="InterPro:IPR006202"
+                     /db_xref="InterPro:IPR018000"
+                     /db_xref="UniProtKB/Swiss-Prot:P04758"
+                     /codon_start=1
+                     /protein_id="CAA25475.1"
+                     /translation="MTPGALLLLLLGVLGAHLAPGARGSEAEGRLREKLFSGYDSTVR
+                     PAREVGDRVWVSIGLTLAQLISLNEKDEEMSTKVYLDLEWTDYRLSWDPEEHEGIDSL
+                     RISAESVWLPDVVLLNNNDGNFDVALDINVVVSSDGSMRWQPPGIYRSSCSIQVTYFP
+                     FDWQNCTMVFSSYSYDSSEVSLQTGLSPEGQERQEVYIHEGTFIENGQWEIIHKPSRL
+                     IQPSVDPRGGGEGRREEVTFYLIIRRKPLFYLVNVIAPCILITLLAIFVFYLPPDAGE
+                     KMGLSIFALLTLTVFLLLLADKVPETSLSVPIIIKYLMFTMVLVTFSVILSVVVLNLH
+                     HRSPHTHQMPLWVRQIFIHKLPLYLGLKRPKPERDQMQEPPSIAPRDSPGSGWGRGTD
+                     EYFIRKPPNDFLFPKPNRFQPELSAPDLRRFIDGPNRAVGLPPELREVVSSISYIARQ
+                     LQEQEDHDVLKEDWQFVAMVVDRLFLWTFIIFTSVGTLVIFLDATYHLPPADPFP"
+                     /note="unnamed protein product; acetylcholine receptor
+                     beta-subunit precursor"
+     sig_peptide     35..106
+                     /note="pot. signal peptide (aa -24 to -1)"
+     mat_peptide     107..1549
+                     /product="acetylcholine receptor beta subunit (aa 1-481)"
+     misc_feature    2484..2489
+                     /note="pot. polyadenylation signal"
+     polyA_site      2513
+                     /note="polyadenylation site"
+ORIGIN      
+        1 acccagcgga ctcactgagc gacgcgggcg ggctatgacc ccaggggcgc tgcttctgct
+       61 cctgctgggg gtgctggggg cacatctcgc cccgggcgcc cgcggctcgg aggcggaggg
+      121 ccgactccgc gagaaacttt tctcaggcta tgatagcacg gtgcggccgg cgcgggaggt
+      181 gggagaccgt gtctgggtca gcattggtct caccctggcg caactcatca gcctgaacga
+      241 gaaggatgag gagatgagca caaaagtcta cttagacctg gaatggactg actacaggct
+      301 cagctgggac cctgaggagc acgagggcat cgattcactc cgcatctcag cggaatccgt
+      361 gtggctaccc gacgtggtgc tcctaaacaa taacgatgga aattttgatg ttgctctgga
+      421 catcaacgtc gtggtgtcct ccgacggctc catgcgctgg cagcccccgg gcatctatcg
+      481 cagcagctgc agcatccagg tcacctactt cccctttgac tggcagaact gcaccatggt
+      541 gttcagttcc tatagctatg acagctcaga ggtcagcctg caaactggct tgagtcctga
+      601 ggggcaggag cggcaggaag tgtatattca tgaagggacc tttattgaga atggccaatg
+      661 ggagattatc cacaagcctt ctcggctaat tcagccttca gtggatccta ggggaggcgg
+      721 ggaaggacga cgtgaagaag tcaccttcta cctcatcatt cgccggaagc ctctctttta
+      781 cctggtcaac gtcattgccc catgcatcct catcactctc ctggccatct ttgtcttcta
+      841 cctgccaccg gatgcaggag agaagatggg gctctccatc tttgccctgt tgaccctcac
+      901 tgtgttcctg ctgctgctgg cagacaaagt acctgagacc tccctgtctg tccccatcat
+      961 tatcaagtac ctcatgttca ccatggtcct cgtcaccttc tcagtcatcc ttagtgttgt
+     1021 ggtcctcaac ttgcaccatc gctcacccca cacccaccaa atgccccttt gggttcgtca
+     1081 gatctttatc cacaaactcc ctctgtacct gggtctgaag aggcccaaac ctgagagaga
+     1141 ccagatgcag gagccacctt ccatagctcc cagggattct ccaggaagtg gctggggtcg
+     1201 gggaacagat gaatatttca tccgcaagcc accaaatgat tttctcttcc ccaaacccaa
+     1261 caggttccag cctgaactgt ctgctccaga cctgcggcga tttatcgatg gtccaaaccg
+     1321 ggctgtgggt ctccctcctg agctacggga ggtcgtttct tcgatcagct acatcgctcg
+     1381 acagctgcag gaacaggaag accatgacgt gctgaaggag gactggcaat ttgtggccat
+     1441 ggtagtggac cgcctcttcc tatggacctt catcatcttc acgagcgttg ggaccctcgt
+     1501 catctttctg gatgccacgt accacttgcc ccccgccgac ccttttcctt gaggctggga
+     1561 cgaaggtgga gatccagatc cttggccagg tgaattgaga gtttggcagg gctcttaagc
+     1621 cctgtacctt tctgcatctt aactccatca ctaggagtcc agttctctca tcatttcatt
+     1681 tctaaggagg gagcctaaat gggactaggc atttggggga cttgggccca cctgaaatgc
+     1741 actaacagtt tattattctt tggcttcttg aggaagctcc gttggatgtt aacacctatg
+     1801 ctggcaatga atggaacaaa cgacaagaac tagactgtat gccttctaag ggcagaaact
+     1861 ctgtcttgtt cactgtaata tcccgggcac ctagcacaga tcctaaccta tatggcagtt
+     1921 acctctggtt gaattaatag ggattttttt tttttttctg tgaggaaata cactaagtag
+     1981 tagtgctgaa gtttgcatgt tggtactagt gatcattttt tgtttttgcc tttctgcagt
+     2041 ttatcatatt ttgtaatatg taatatcttt aggattaaaa aagaaaaggt tatttctaaa
+     2101 aagatgcatt tgtaaagagg ataaaaagca cacttttaaa acttcaagtt ccagctttgg
+     2161 tgctcaaact ttggacaagc tactaaactg ctctatgcct cagtttcccc atctgtaaaa
+     2221 tgaagctaat attaacagta tttagaatct ggcccctaga ctgagcatca tataagaaaa
+     2281 caaaaacatt atacatcaga gttacacact gatatgtttt gtttggctca tgttgttggc
+     2341 caaaatttta aatctggttt gctactttta aaatgtaaaa caaacaaaaa aagactctcc
+     2401 tttggggtca tcctgccttc acacctcaag ggtgtactat cctttgttga ccgaataaaa
+     2461 ctctgagctg taaaaaaatt ataaataaat taaaatgtgg atatttcaca gag
+//

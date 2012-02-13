@@ -1,0 +1,40 @@
+LOCUS       X63474                   340 bp    DNA     linear   MAM 23-OCT-2008
+DEFINITION  B.taurus Alu-like repeat DNA.
+ACCESSION   X63474
+VERSION     X63474.1  GI:72
+KEYWORDS    Alu repeat; Alu-like repetitive sequence.
+SOURCE      Bos taurus (cattle)
+  ORGANISM  Bos taurus
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Laurasiatheria; Cetartiodactyla; Ruminantia;
+            Pecora; Bovidae; Bovinae; Bos.
+REFERENCE   1  (bases 1 to 340)
+  AUTHORS   Hubank,M., Carr,A., Ryan,A., Wardle,C. and Mayne,L.
+  TITLE     Alu sequences are rearranged in developing bovine brain
+  JOURNAL   Nucleic Acids Res. (1991) In press
+REFERENCE   2  (bases 1 to 340)
+  AUTHORS   Hubank,M.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (10-DEC-1991) M. Hubank, University of Sussex, Trafford
+            Centre for Medical Res, Falmer Brighton, Sussex BN1 9RY, UK
+FEATURES             Location/Qualifiers
+     source          1..340
+                     /mol_type="genomic DNA"
+                     /db_xref="taxon:9913"
+                     /organism="Bos taurus"
+     repeat_region   218..340
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /rpt_family="SINE"
+                     /rpt_type=DISPERSED
+                     /citation=[1]
+                     /note="Alu-like repeat cloned from fetal bovine
+                     extrachromosomal circular."
+ORIGIN      
+        1 gaattctgca tagagactgg ttgatcctgc tggagatccc tgagaggaag ctaccatatc
+       61 agtattctgg ctgagatcat gttaaccagt catcctggca cttactgtca ctttagagct
+      121 ggtcttgggt cactatgtag gtgtatttgt cttttcctat cattcttctt gtcatgagta
+      181 caggttagtt aaaatgaagt ttgcagatgg cctgggcttc ccttgtggtt cagctggtaa
+      241 agaatatgcc tgcaatgagg gagacctggg tttgatccct ggcttgggaa gatcccctgg
+      301 agaagggaaa ggctacccac tccagtattc tggcctggag
+//

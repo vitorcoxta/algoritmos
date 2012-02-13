@@ -1,0 +1,58 @@
+LOCUS       CAA38846                 646 aa            linear   MAM 11-JUN-1991
+DEFINITION  chromogranin B [Bos taurus].
+ACCESSION   CAA38846
+VERSION     CAA38846.1  GI:12
+DBSOURCE    embl accession X55027
+KEYWORDS    .
+SOURCE      Bos taurus (cattle)
+  ORGANISM  Bos taurus
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Laurasiatheria; Cetartiodactyla; Ruminantia;
+            Pecora; Bovidae; Bovinae; Bos.
+REFERENCE   1
+  AUTHORS   Bauer,J.W. and Fischer-Colbrie,R.
+  TITLE     Primary structure of bovine chromogranin B deduced from cDNA
+            sequence
+  JOURNAL   Biochim. Biophys. Acta 1089 (1), 124-126 (1991)
+   PUBMED   2025642
+REFERENCE   2  (residues 1 to 646)
+  AUTHORS   Bauer,J.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (12-NOV-1990) Bauer J., Department of Pharmacology,
+            University of Innsbruck, Peter-Mayrstr.1A, A-6020 Innsbruk,
+            Austria
+FEATURES             Location/Qualifiers
+     source          1..646
+                     /db_xref="taxon:9913"
+                     /clone="ChB73"
+                     /organism="Bos taurus"
+                     /clone_lib="okayama-berg"
+     Protein         1..646
+                     /product="chromogranin B"
+     sig_peptide     1..20
+     mat_peptide     21..646
+                     /product="chromogranin B"
+     Region          26..646
+                     /db_xref="CDD:201701"
+                     /region_name="Granin"
+                     /note="Granin (chromogranin or secretogranin); pfam01271"
+     CDS             1..646
+                     /db_xref="GOA:P23389"
+                     /db_xref="InterPro:IPR001819"
+                     /db_xref="InterPro:IPR001990"
+                     /db_xref="InterPro:IPR018054"
+                     /db_xref="UniProtKB/Swiss-Prot:P23389"
+                     /coded_by="X55027.1:127..2067"
+ORIGIN      
+        1 mqpaallgll gatvvaavss mpvdirnhne evvthciiev lsnallkssa ppitpecrqv
+       61 lkksgkelkn eeksenentr fevrllrdpa dtseapglss redsgegdaq vptvadtesg
+      121 ghsreragep pgsqvakeak trysksegqn reeemvkyqk rergevgsee rlsegpgkaq
+      181 taflnqrnqt pakkeelvsr ydtqsargle kshsrerssq esgeetksqe nwpqelqrhp
+      241 egqeapgese edaspevdkr hsrprhhhgr srpdrssqeg nppleeeshv gtgnsdeeka
+      301 rhpahfrale egaeygeevr rhsaaqapgd lqgarfggrg rgehqalrrp seesleqenk
+      361 rhglspdlnm aqgyseesee ergpapgpsy rarggeaaay stlgqtdekr flgethhrvq
+      421 esqrdkarrr lpgelrnyld ygeekgeeaa rgkwqpqgdp rdadenreea rlrgkqyaph
+      481 hitekrlgel lnpfydpsqw kssrferkdp mddsflegee engltlnekn ffpeynydww
+      541 ekkpfeedvn wgyekrnpvp kldlkrqydr vaeldqllhy rkksaefpdf ydseeqmspq
+      601 htaeneeeka gqgvlteeee kelenlaamd lelqkiaekf sgtrrg
+//
