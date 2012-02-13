@@ -571,26 +571,41 @@ sub generic_importation{
 
 
 #-----------------------This function verifies if the accession version already exists-----------------------------
-# It returns 0 if it exists, and 1 if it doesn't
+# It returns 0 if it doesn't exist, and if it exisits, returns the number of equal accessions
 # 1st argument - the accession_number (and the accession version)
 # 2nd argument - tells if it have to search with accession version or not
 sub verify_accession{
     my ($type, $with) = @_;     
     my ($sql,$result);
-    
+    my $flag = 0;
+    my $count = 0;
     if($with eq "with") {$sql = "SELECT accession_number FROM sequences WHERE accession_number='".$type."' and accession_version='".$type."';";}
     elsif($with eq "without") {$sql = "SELECT accession_number FROM sequences WHERE accession_number='".$type."';";}
     $result = $dbh->prepare($sql);
     $result->execute();
     if($result->fetchrow_hashref()){
-        return 0;
+        return 1;
     }
-    return 1;
+    return 0;
+}
+
+
+
+sub count_accession{
+    my ($accession_number) = @_;
+    my $count = 0;
+    my $sql = "SELECT id_sequence FROM sequences WHERE accession_number='".$accession_number."';";
+    my $result = $dbh->prepare($sql);
+    $result->execute();
+    while(my $row = $result->fetchrow_hashref()){
+        $count++;
+    }
+    return $count;
 }
 
 
 #---------------------This funtion verifies the accession version for the importation from a file-------------------------
-# It returns 0 if it exists, and 1 if it doesn't
+# It returns 1 if it exists, and 0 if it doesn't
 sub verify_accession_in_file{
     my ($file) = @_;     
     my ($sql,$result, $format);
@@ -603,9 +618,9 @@ sub verify_accession_in_file{
     $result = $dbh->prepare($sql);
     $result->execute();
     if($result->fetchrow_hashref()){
-        return 0;
+        return 1;
     }
-    return 1;
+    return 0;
 }
 
 
@@ -773,10 +788,11 @@ sub verify_version{
 #------------------------This funtion runs a remote blast------------------------------
 sub blast{
     my $option = interface("ask_choose_type", 1);
-    my ($acc_or_name, $id_sequence, $filename, $format, $seqio, $seq, $blast_type, $db, $blast, $result_blast);
+    my ($acc_or_name, $flag, $id_sequence, $filename, $format, $seqio, $seq, $blast_type, $db, $blast, $result_blast);
     if($option == 1) {
-        $acc_or_name = interface("ask_accession_number_no_check", 0);
-        $id_sequence = get_id_sequence($acc_or_name, "accession_number");
+        ($acc_or_name, $flag) = interface("ask_accession_number_no_check", 0);
+        if($flag) {$id_sequence = get_id_sequence($acc_or_name, "accession_number");}
+        else {$id_sequence = $acc_or_name;}
     }
     else {
         $acc_or_name = interface("ask_gene_name_no_check", 0);
@@ -953,18 +969,20 @@ sub display_match{
 #--------------------------This funtion will get the important info to get the statistics--------------------------------
 sub statistics{
     my $option = interface("ask_choose_type", 1);
-    my ($answer, $type, $id_sequence, $format, $filename, $seqio, $seq, $seq_stats);
+    my ($answer, $flag, $type, $id_sequence, $format, $filename, $seqio, $seq, $seq_stats);
     
     if($option == 1){
         $type = "accession_number";
-        $answer = interface("ask_accession_number_no_check", 1);
+        ($answer, $flag) = interface("ask_accession_number_no_check", 1);
+        if($flag) {$id_sequence = get_id_sequence($answer, $type);}
+        else {$id_sequence = $answer;}
     }
     elsif($option == 2){
         $type = "gene_name";
         $answer = interface("ask_gene_name_no_check", 1);
+        $id_sequence = get_id_sequence($answer, $type);
     }
     
-    $id_sequence = get_id_sequence($answer, $type);
     $format = get_format($dbm_seq{$id_sequence});
     if($format eq "genbank") {$filename = "statistics/".(substr $dbm_seq{$id_sequence}, 10, -2)."txt";}
     else {$filename = "statistics/".(substr $dbm_seq{$id_sequence}, 10, -5)."txt";}
@@ -1019,17 +1037,19 @@ sub get_statistics_into_file{
 #-------------------This funtion will add a new feature into a sequence-------------------------------
 sub features{
     my $option = interface("ask_choose_type", 1, 0);
-    my ($type, $answer, $id_sequence, $format, $filename, $seqio_read, $seqio_write, $seq);
+    my ($type, $answer, $flag, $id_sequence, $format, $filename, $seqio_read, $seqio_write, $seq);
     
     if($option == 1){
         $type = "accession_number";
-        $answer = interface("ask_accession_number_no_check", 1);
+        ($answer, $flag) = interface("ask_accession_number_no_check", 1);
+        if($flag) {$id_sequence = get_id_sequence($answer, $type);}
+        else {$id_sequence = $answer;}
     }
     elsif($option == 2){
         $type = "gene_name";
         $answer = interface("ask_gene_name_no_check", 1);
+        $id_sequence = get_id_sequence($answer, $type);
     }
-    $id_sequence = get_id_sequence($answer, $type);
     $format = get_format($dbm_seq{$id_sequence});
     if($format eq "fasta") {interface("error_feature", 1);}
     else{
@@ -1108,6 +1128,53 @@ sub translatione{
     
     return $seq->translate->seq;
 }
+
+sub display_accessions{
+    my ($accession_number) = @_;
+    my %accessions = get_accessions($accession_number);
+    
+    my ($sql, $result);
+    print "\nThere are more than 1 sequence with the indicated accession number:\n\n\tACCESSION NUMBERS TABLE\n\n";
+    foreach my $key (sort {$a <=> $b} (keys %accessions)){
+        print " $key:\n";
+        $sql = "SELECT accession_version, description, length FROM sequences WHERE id_sequence = '".$accessions{$key}."';";
+        my $result = $dbh->prepare($sql);
+        $result->execute();
+        while(my $row = $result->fetchrow_hashref()){
+            print "\tAccession version - ".$row->{accession_version}."\n\tDescription - ".$row->{description}."\n\tLength of the sequence - ".$row->{length}."\n";
+        }
+    }
+    
+    print "\nChoose a sequence: ";
+    my $answer = <>;
+    while($answer < 1 or $answer > scalar(keys %accessions)){
+        print "INVALID OPTION! Please choose a valid one: ";
+        $answer = <>;
+    }
+    chomp $answer;
+    return $accessions{$answer};
+}
+
+
+sub get_accessions{
+    my ($accession_number) = @_;
+    my $count = 0;
+    my %accessions;
+    
+    my $sql = "SELECT id_sequence FROM sequences WHERE accession_number = '".$accession_number."';";
+    my $result = $dbh->prepare($sql);
+    $result->execute();
+    
+    while(my $row = $result->fetchrow_hashref()){
+        $count++;
+        $accessions{$count} = $row->{id_sequence};
+    }
+    
+    return %accessions;
+}
+
+
+
 
 
 
@@ -1318,7 +1385,7 @@ sub interface {
         else {print "FILE NOT FOUND! Insert a valid file path: ";}
         $answer = <>;
         chomp $answer;
-        if(!verify_accession_in_file($answer)) {interface("ask_file_path", 0, 1)}
+        if(verify_accession_in_file($answer)) {interface("ask_file_path", 0, 1)}
         else {return $answer;}
     }
     
@@ -1345,7 +1412,7 @@ sub interface {
         $answer = <>;
         chomp $answer;
         $existe = verify_accession($answer, "with");             #Verifica de o accesion number já existe na Base de Dados
-        }while(!$existe);
+        }while($existe);
         return $answer;
     }
     
@@ -1474,14 +1541,20 @@ sub interface {
     
     
     elsif($type eq "ask_accession_number_no_check"){
+        #This part returns 2 values. The 2nd one is a boolean: if it is 1, then the 1st one is a accession_number; if it is 0, then the 1st one is a id_sequence
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "The accession number indicated doesn't exists on the database! Choose an existing one: "}
         else {print "Insert the accession number: ";}
         $answer = <>;
         chomp $answer;
-        if(!verify_accession($answer, "without")) {return $answer;}
+        if(verify_accession($answer, "without")){
+            my $accessions = count_accession($answer);
+            if($accessions == 1) {return ($answer, 1);}
+            elsif($accessions > 1) {return (display_accessions($answer), 0);}
+        }
         else {interface("ask_accession_number_no_check", 0, 1);}
     }
+    
     
     
     elsif($type eq "ask_gene_name_no_check"){
@@ -1494,6 +1567,9 @@ sub interface {
         else {interface("ask_gene_name_no_check", 0, 1);}
     }
     
+    
+    
+    
     elsif($type eq "ask_blast_type"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if ($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
@@ -1502,6 +1578,7 @@ sub interface {
         if($option == 1 or $option == 2 or $option == 3 or $option == 4 or $option == 5) {return $option;}
         else {interface("ask_blast_type", 0, 1);}
     }
+    
     
     
     elsif ($type eq "ask_database_protein"){
