@@ -11,16 +11,15 @@ use Bio::Root::Exception;
 use Bio::Tools::Run::RemoteBlast;
 use Bio::Tools::SeqStats;
 use Error qw(:try);
-
 #------------------------DATABASE CONNECTIONS ON JOAO'S PC!-----------------------------
-#my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
-#my %dbm_seq;
-#dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
+my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
+my %dbm_seq;
+dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
 
 #------------------------DATABASE CONNECTIONS ON VITOR'S PC!----------------------------
-my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
-my %dbm_seq;
-dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
+#my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
+#my %dbm_seq;
+#dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
 
 #------------------------DATABASE CONNECTIONS ON JOSE'S PC!----------------------------
 #my $dbh = DBI->connect('dbi:mysql:alg','root','') or die "Connection Error: $DBI::errstr\n";
@@ -46,6 +45,7 @@ sub main{
     my $option = interface("welcome", $clear, 0);
     if($option == 1){database_operations();}
     elsif($option == 2){bioinformatics_operations();}
+    elsif($option==3){search_operations();}    
     elsif($option == 9){
         interface("exit");
         dbmclose(%dbm_seq);
@@ -73,8 +73,22 @@ sub bioinformatics_operations{
     elsif($option == 2){motif();}
     elsif($option == 3){statistics();}
     elsif($option == 4){features();}
+    elsif($option == 5){translatee();}
     elsif($option == 9){main(1);}
 }
+
+#----------------------------This function will call the functions to perform searchs in the database--------------------------
+
+sub search_operations{
+    my $option = interface("search_operations",1,0);
+     if($option == 1){quick_search();}
+    elsif($option == 2){advanced_search();}
+    elsif($option == 3){view_species();}
+    elsif($option == 4){view_tags();}
+    elsif($option == 9){main(1);}
+}
+
+
 
 
 
@@ -1047,6 +1061,53 @@ sub features{
     main(1);
 }
 
+#sub display_sequences_by_acc{
+    
+   # my ($acce)=@_;
+    
+    #my $sql = "SELECT id_sequence,accession_number,accession_version,length,description FROM sequences WHERE accession_number = '".$acce."';";
+    #my $result = $dbh->prepare($sql);
+    #$result->execute();
+    #while(my $row = $result->fetchrow_hashref()){
+       # $id_sequence = $row->{id_sequence};
+    #}
+    
+    
+#}
+
+sub translatee{
+    
+    my $option = interface("ask_translate_type",1,0);
+    
+    if($option==2) {
+        
+        my $option2 = interface("insert_manual_seq");    
+        open FILE, ">translations/temp.txt";
+        print FILE translatione($option2);
+        system 'pg temp.txt';
+    
+    main(1);    
+    }
+    
+    if($option==1){
+        
+        my $option = interface("give_id_sequence");
+        
+        
+        
+        
+    }
+    
+    
+}
+
+sub translatione{
+    
+    my ($sequencia) = @_;
+    my $seq = Bio::Seq->new(-seq => $sequencia);
+    
+    return $seq->translate->seq;
+}
 
 
 
@@ -1089,9 +1150,9 @@ sub interface {
     elsif($type eq "bioinformatics_operations"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n"}
-        print "What do you want to do?\n\n 1 - Run a BLAST\n 2 - Search for a motif\n 3 - Obtain statistical information about a sequence\n 4 - Add a new feature in a sequence\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
+        print "What do you want to do?\n\n 1 - Run a BLAST\n 2 - Search for a motif\n 3 - Obtain statistical information about a sequence\n 4 - Add a new feature in a sequence\n 5 - Translate a sequence\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
         $option = <>;
-        if($option == 1 or $option == 2 or $option == 3 or $option == 4 or $option == 9) {return $option;}
+        if($option == 1 or $option == 2 or $option == 3 or $option == 4 or $option == 9 or $option == 5) {return $option;}
         else {interface("bioinformatics_operations", 1, 1);}
     }
     
@@ -1648,6 +1709,41 @@ sub interface {
         if ($option == 1 or $option == 2) {return $option;}
         else {interface("successful_feature", 0, 1);}
     }
+    
+    elsif($type eq "ask_translate_type"){
+        
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        print "Do you want to use a sequence from the Database or Mannualy insert one?\n 1 - From Database\n 2 - Mannualy\n\nAnswer: ";
+        $option=<>;
+        if ($option==2 or $option==1) {return $option;}
+        else {interface("ask_translate_type", 0, 1);}
+                 
+    }
+    
+    elsif($type eq "insert_manual_seq"){
+        
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID SEQUENCE! Please choose a valid one: ";}
+        print "Insert the Sequence: \nsequence: ";
+        $_=<>;
+        chomp $_;
+        if(/[^atgcATCG]/) {interface("insert_manual_seq",0,1);}
+        else {return $_;}
+        
+    }
+    
+    elsif($type eq  "give_id_sequence"){
+        
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID SEQUENCE! Please choose a valid one: ";}
+
+        
+        
+        
+        
+    }
+    
     
     
     
