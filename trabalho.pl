@@ -107,7 +107,7 @@ sub insertion {
         print "-------------------------------------------------------------------------------------------------------------------------\n";
         my $description = interface("ask_description", 0);
         print "-------------------------------------------------------------------------------------------------------------------------\n";
-        my $gene_name = interface("ask_gene_name", 0);
+        my $gene_name = interface("ask_gene_name_insertion", 0);
         print "-------------------------------------------------------------------------------------------------------------------------\n";
         my $date = interface("ask_date", 0);
         print "-------------------------------------------------------------------------------------------------------------------------\n";
@@ -336,14 +336,16 @@ sub insert_sequence{
 sub removal{
     my $option = interface("ask_removal_type", 1, 0);
     if($option == 1){
-        my $accession_number = interface("ask_accession_number", 1);
-        remove($accession_number, "accession_number");
+        my ($accession_number_or_id_sequence, $flag) = interface("ask_accession_number_no_check", 1);
+        if($flag) {remove($accession_number_or_id_sequence, "accession_number");}
+        else {remove($accession_number_or_id_sequence, "id_sequence");}
         interface("successful_removal", 1);
         main(1);
     }
     elsif($option == 2){
-        my $gene_name = interface("ask_gene_name", 1);
-        remove($gene_name, "gene_name");
+        my ($gene_name_or_id_sequence, $flag) = interface("ask_gene_name_no_check", 1);
+        if($flag) {remove($gene_name_or_id_sequence, "gene_name");}
+        else {remove($gene_name_or_id_sequence, "id_sequence");}
         interface("successful_removal", 1);
         main(1);
     }
@@ -479,7 +481,7 @@ sub display_modified{
     my (%modified) = @_;
     my $option = interface("ask_display_modified", 0, 0);
     my ($key, $answer);
-    if($option == 1){
+    while($option == 1){
         print "-------------------------------------------------------------------------------------------------------------------------\n";
         print "\n\tMODIFIED FILES TABLE\n\n";
         foreach $key (sort {$a <=> $b} (keys %modified)){
@@ -522,11 +524,11 @@ sub generic_importation{
         ##### Inserir Number para procura
         if ($option==1) {
             $flag = 1;
-            $option2=interface("ask_accession_number", 1);
+            $option2=interface("ask_accession_number_insertion", 1);
             print "-------------------------------------------------------------------------------------------------------------------------\n";
             
                 try {   
-                    $seq = $gb->get_Seq_by_acc($option2) || throw Bio::Root::Exception(print "ERRO: INVALID NUMBER!!");
+                    $seq = $gb->get_Seq_by_acc($option2) || throw Bio::Root::Exception(print "ERROR: INVALID NUMBER!!");
                 }catch Bio::Root::Exception with {$existe=2};    
                     
         }
@@ -539,7 +541,7 @@ sub generic_importation{
                                   
             if($existe==1){
                 try {
-                    $seq = $gb->get_Seq_by_version($option2) || throw Bio::Root::Exception(print "ERRO: INVALID NUMBER!!") # Vai buscar o number         
+                    $seq = $gb->get_Seq_by_version($option2) || throw Bio::Root::Exception(print "ERROR: INVALID NUMBER!!") # Vai buscar o number         
                 }catch Bio::Root::Exception with {$existe=2};  
             }
         }
@@ -591,10 +593,10 @@ sub verify_accession{
 
 
 
-sub count_accession{
-    my ($accession_number) = @_;
+sub count_accession_or_name{
+    my ($accession_number_or_gene_name, $type) = @_;
     my $count = 0;
-    my $sql = "SELECT id_sequence FROM sequences WHERE accession_number='".$accession_number."';";
+    my $sql = "SELECT id_sequence FROM sequences WHERE $type='".$accession_number_or_gene_name."';";
     my $result = $dbh->prepare($sql);
     $result->execute();
     while(my $row = $result->fetchrow_hashref()){
@@ -795,8 +797,9 @@ sub blast{
         else {$id_sequence = $acc_or_name;}
     }
     else {
-        $acc_or_name = interface("ask_gene_name_no_check", 0);
-        $id_sequence = get_id_sequence($acc_or_name, "gene_name");
+        ($acc_or_name, $flag) = interface("ask_gene_name_no_check", 0);
+        if($flag) {$id_sequence = get_id_sequence($acc_or_name, "gene_name");}
+        else {$id_sequence = $acc_or_name;}
     }
     print "-------------------------------------------------------------------------------------------------------------------------\n";
     $filename = $dbm_seq{$id_sequence};
@@ -979,8 +982,9 @@ sub statistics{
     }
     elsif($option == 2){
         $type = "gene_name";
-        $answer = interface("ask_gene_name_no_check", 1);
-        $id_sequence = get_id_sequence($answer, $type);
+        ($answer, $flag) = interface("ask_gene_name_no_check", 1);
+        if($flag) {$id_sequence = get_id_sequence($answer, $type);}
+        else {$id_sequence = $answer;}
     }
     
     $format = get_format($dbm_seq{$id_sequence});
@@ -1047,8 +1051,9 @@ sub features{
     }
     elsif($option == 2){
         $type = "gene_name";
-        $answer = interface("ask_gene_name_no_check", 1);
-        $id_sequence = get_id_sequence($answer, $type);
+        ($answer, $flag) = interface("ask_gene_name_no_check", 1);
+        if($flag) {$id_sequence = get_id_sequence($answer, $type);}
+        else {$id_sequence = $answer;}
     }
     $format = get_format($dbm_seq{$id_sequence});
     if($format eq "fasta") {interface("error_feature", 1);}
@@ -1129,48 +1134,53 @@ sub translatione{
     return $seq->translate->seq;
 }
 
-sub display_accessions{
-    my ($accession_number) = @_;
-    my %accessions = get_accessions($accession_number);
+
+
+sub display_accessions_or_names{
+    my ($accession_number_or_gene_name, $type) = @_;
+    my %accessions_or_names = get_accessions_or_names($accession_number_or_gene_name, $type);
     
     my ($sql, $result);
-    print "\nThere are more than 1 sequence with the indicated accession number:\n\n\tACCESSION NUMBERS TABLE\n\n";
-    foreach my $key (sort {$a <=> $b} (keys %accessions)){
+    if($type eq "accession_number") {print "\nThere are more than 1 sequence with the indicated accession number:\n\n\tACCESSION NUMBERS TABLE\n\n";}
+    elsif($type eq "gene_name") {print "\nThere are more than 1 sequence with the indicated gene name:\n\n\tGENE NAMES TABLE\n\n";}
+    foreach my $key (sort {$a <=> $b} (keys %accessions_or_names)){
         print " $key:\n";
-        $sql = "SELECT accession_version, description, length FROM sequences WHERE id_sequence = '".$accessions{$key}."';";
+        if($type eq "accession_number") {$sql = "SELECT accession_version, description, length, gene_name FROM sequences WHERE id_sequence = '".$accessions_or_names{$key}."';";}
+        elsif($type eq "gene_name") {$sql = "SELECT accession_number, accession_version, description, length FROM sequences WHERE id_sequence = '".$accessions_or_names{$key}."';";}
         my $result = $dbh->prepare($sql);
         $result->execute();
         while(my $row = $result->fetchrow_hashref()){
-            print "\tAccession version - ".$row->{accession_version}."\n\tDescription - ".$row->{description}."\n\tLength of the sequence - ".$row->{length}."\n";
+            if($type eq "accession_number") {print "\tAccession version - ".$row->{accession_version}."\n\tGene name - ".$row->{gene_name}."\n\tDescription - ".$row->{description}."\n\tLength of the sequence - ".$row->{length}."\n";}
+            elsif($type eq "gene_name") {print "\tAccession number - ".$row->{accession_number}."\n\tAccession version - ".$row->{accession_version}."\n\tDescription - ".$row->{description}."\n\tLength of the sequence - ".$row->{length}."\n";}
         }
     }
     
     print "\nChoose a sequence: ";
     my $answer = <>;
-    while($answer < 1 or $answer > scalar(keys %accessions)){
+    while($answer < 1 or $answer > scalar(keys %accessions_or_names)){
         print "INVALID OPTION! Please choose a valid one: ";
         $answer = <>;
     }
     chomp $answer;
-    return $accessions{$answer};
+    return $accessions_or_names{$answer};
 }
 
 
-sub get_accessions{
-    my ($accession_number) = @_;
+sub get_accessions_or_names{
+    my ($accession_number_or_gene_name, $type) = @_;
     my $count = 0;
-    my %accessions;
+    my %accessions_or_names;
     
-    my $sql = "SELECT id_sequence FROM sequences WHERE accession_number = '".$accession_number."';";
+    my $sql = "SELECT id_sequence FROM sequences WHERE $type = '".$accession_number_or_gene_name."';";
     my $result = $dbh->prepare($sql);
     $result->execute();
     
     while(my $row = $result->fetchrow_hashref()){
         $count++;
-        $accessions{$count} = $row->{id_sequence};
+        $accessions_or_names{$count} = $row->{id_sequence};
     }
     
-    return %accessions;
+    return %accessions_or_names;
 }
 
 
@@ -1194,10 +1204,17 @@ sub interface {
     if($type eq "welcome"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n"}
-        else {print "\t\t\tWELCOME TO CENASSAS. ALGUEM QUE ESCREVA ALGO AQUI, QUE TOU SEM IDEIAS!\n\n";}
+        else {print "\t\t\tWELCOME TO \"FETCH THE SEQUENCE\"! ENJOY THIS SOFTWARE!\n\n";}
         print "What do you want to do?\n\n 1 - Database operations\n 2 - Bioinformatics operations\n\n 8 - Help\n 9 - Exit\n\nAnswer: ";
         $option = <>;
-        if($option == 1 or $option == 2 or $option == 9) {return $option;}
+        if($option == 8){
+            system $^O eq 'MSWin32' ? 'cls' : 'clear';
+            print "HELP:\nThis is the main page of \"Fetch the Sequence\". This software is seperated in 2 types of operations: database operations and bioinformatics operations. In the first"
+                    ." one, you can do operations in the database, like insert new sequences, remove or modify sequences. In the second one, you can do bioinformatics operations, like run a "
+                    ."BLAST, search for a motif, obtain statistical information, add features to a sequence and translate a sequence.\n\n\n";
+            interface("welcome");
+        }
+        elsif($option == 1 or $option == 2 or $option == 9) {return $option;}
         else {interface("welcome", 1, 1);}
     }
     
@@ -1208,7 +1225,12 @@ sub interface {
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n"}
         print "What do you want to do?\n\n 1 - Insertion of a sequence\n 2 - Removal of a sequence\n 3 - Modification of a sequence\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
         $option = <>;
-        if($option == 1 or $option == 2 or $option == 3 or $option == 9) {return $option;}
+        if($option == 8){
+            system $^O eq 'MSWin32' ? 'cls' : 'clear';
+            print "HELP:\nHere you can choose the desired database operation: insert a new sequence, remove an existing sequence or modify an existing sequence.\n\n\n";
+            interface("database_operations");
+        }
+        elsif($option == 1 or $option == 2 or $option == 3 or $option == 9) {return $option;}
         else {interface("database_operations", 1, 1);}
     }
     
@@ -1219,7 +1241,12 @@ sub interface {
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n"}
         print "What do you want to do?\n\n 1 - Run a BLAST\n 2 - Search for a motif\n 3 - Obtain statistical information about a sequence\n 4 - Add a new feature in a sequence\n 5 - Translate a sequence\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
         $option = <>;
-        if($option == 1 or $option == 2 or $option == 3 or $option == 4 or $option == 9 or $option == 5) {return $option;}
+        if($option == 8){
+            system $^O eq 'MSWin32' ? 'cls' : 'clear';
+            print "HELP:\nHere you can choose the desired bioinformatic operation: run a BLAST, search for a motif, obtain statistical information, add a new feature or translate a sequence.\n\n\n";
+            interface("bioinformatics_operations");
+        }
+        elsif($option == 1 or $option == 2 or $option == 3 or $option == 4 or $option == 9 or $option == 5) {return $option;}
         else {interface("bioinformatics_operations", 1, 1);}
     }
     
@@ -1230,7 +1257,13 @@ sub interface {
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n";}
         print "Choose a way to insert a sequence: \n\n 1 - Manually\n 2 - From a file\n 3 - From a remote database\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
         $option = <>;
-        if($option == 1 or $option == 2 or $option == 3 or $option == 9) {return $option;}
+        if($option == 8){
+            system $^O eq 'MSWin32' ? 'cls' : 'clear';
+            print "HELP:\nHere you can choose the insertion type: you can insert a new sequence manually (the program will ask for useful information about the sequence), intert from a file"
+                    ." that you have on your machine (in the 'fasta', 'genbank' or 'swiss' format), or insert from a remote database (you have to be connected to the Internet).\n\n\n";
+            interface("ask_insertion_type");
+        }
+        elsif($option == 1 or $option == 2 or $option == 3 or $option == 9) {return $option;}
         else {interface("ask_insertion_type", 1, 1);}
     }
     
@@ -1268,14 +1301,24 @@ sub interface {
     
     
     
-    elsif($type eq "ask_gene_name"){
+    elsif($type eq "ask_gene_name_insertion"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "This gene name is already in use! Please choose an unused one: "}
         else {print "Insert the gene name: ";}
         $answer = <>;
         chomp $answer;
-        if (verify_gene_name($answer)) {interface("ask_gene_name", 0, 1);}
+        if (verify_gene_name($answer)) {interface("ask_gene_name_insertion", 0, 1);}
         else {return $answer;}
+    }
+    
+    
+    
+    elsif($type eq "ask_gene_name"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "Insert the gene name: ";
+        $answer = <>;
+        chomp $answer;
+        return $answer;
     }
     
     
@@ -1348,7 +1391,7 @@ sub interface {
         elsif($something eq "protein"){
             if(/[^avlipmfwgstcnqydekrhAVLIPMFWGSTCNQYDEKRH]/){interface("ask_sequence", 0, 1, $something);}
         }
-        return $answer;
+        return $_;
     }
     
     
@@ -1405,25 +1448,39 @@ sub interface {
     elsif($type eq "ask_removal_type"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n";}
-        print "Choose a way to remove the sequence (ATTENTION! If there are more than 1 sequence with the same accession number or with the same name, ".
-                "all of them will be deleted):\n\n 1 - By an accession number\n 2 - By a gene name\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
+        print "Choose a way to remove the sequence:\n\n 1 - By an accession number\n 2 - By a gene name\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
         $option = <>;
-        if($option == 1 or $option == 2 or $option == 9) {return $option;}
+        if($option == 8){
+            system $^O eq 'MSWin32' ? 'cls' : 'clear';
+            print "HELP:\nHere you can choose the removal type: you can remove by giving the accession number or giving the gene name.\n\n\n";
+            interface("ask_removal_type");
+        }
+        elsif($option == 1 or $option == 2 or $option == 9) {return $option;}
         else {interface("ask_removal_type",1, 1);}
     }
     
     
     
-    elsif($type eq "ask_accession_number"){
-        my $existe=1;
+    elsif($type eq "ask_accession_number_insertion"){
+        my $existe=0;
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         do{
-            if(!$existe) {print "\nERROR: EXISTING ACCESSION NUMBER IN DATABASE!!!\n"}
+            if($existe) {print "\nERROR: EXISTING ACCESSION NUMBER IN DATABASE!!!\n"}
+            print "Insert the accession number: ";
+            $answer = <>;
+            chomp $answer;
+            $existe = verify_accession($answer, "with");             #Verifica se o accesion number já existe na Base de Dados
+        }while($existe);
+        return $answer;
+    }
+    
+    
+    
+    elsif($type eq "ask_accession_number"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Insert the accession number: ";
         $answer = <>;
         chomp $answer;
-        $existe = verify_accession($answer, "with");             #Verifica de o accesion number já existe na Base de Dados
-        }while($existe);
         return $answer;
     }
     
@@ -1435,7 +1492,13 @@ sub interface {
         print "Choose a way to modify the sequence (ATTENTION: If there are more than 1 sequence with the same accession number or with the same name, ".
                 "you can modify whatever you want):\n\n 1 - By an accession number\n 2 - By a gene name\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";
         $option = <>;
-        if($option == 1 or $option == 2 or $option == 9) {return $option;}
+        if($option == 8){
+            system $^O eq 'MSWin32' ? 'cls' : 'clear';
+            print "HELP:\nHere you can choose the modification type: you can modify by giving the accession number or giving the gene name. If there are more than 1 sequence with the"
+                    ." same accession number or gene name, it will be possible to edit all of them, some of them or just one.\n\n\n";
+            interface("ask_modification_type");
+        }
+        elsif($option == 1 or $option == 2 or $option == 9) {return $option;}
         else {interface("ask_modification_type",1, 1);}
     }
     
@@ -1559,9 +1622,9 @@ sub interface {
         $answer = <>;
         chomp $answer;
         if(verify_accession($answer, "without")){
-            my $accessions = count_accession($answer);
+            my $accessions = count_accession_or_name($answer, "accession_number");
             if($accessions == 1) {return ($answer, 1);}
-            elsif($accessions > 1) {return (display_accessions($answer), 0);}
+            elsif($accessions > 1) {return (display_accessions_or_names($answer, "accession_number"), 0);}
         }
         else {interface("ask_accession_number_no_check", 0, 1);}
     }
@@ -1574,7 +1637,11 @@ sub interface {
         print "Insert the gene name: ";
         $answer = <>;
         chomp $answer;
-        if(verify_gene_name($answer)) {return $answer;}
+        if(verify_gene_name($answer)) {
+            my $names = count_accession_or_name($answer, "gene_name");
+            if($names == 1) {return ($answer, 1);}
+            elsif($names > 1) {return (display_accessions_or_names($answer, "gene_name"), 0);}
+        }
         else {interface("ask_gene_name_no_check", 0, 1);}
     }
     
@@ -1825,7 +1892,7 @@ sub interface {
     
     elsif($type eq "exit"){
         system $^O eq 'MSWin32' ? 'cls' : 'clear';
-        print "\t\n\nBioinformatics - \"Fetch the Sequence!\" \n\n Thank you for using our software! \n Have a nice day! :) \n\n\nPROPS PO PESSOAL!!!XD\n\n";
+        print "\t\n\nBioinformatics - \"Fetch the Sequence!\" \n\n Thank you for using our software! \n Have a nice day! :) \n\n";
 
     }
 }
