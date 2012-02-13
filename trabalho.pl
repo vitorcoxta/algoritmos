@@ -12,14 +12,14 @@ use Bio::Tools::Run::RemoteBlast;
 use Bio::Tools::SeqStats;
 use Error qw(:try);
 #------------------------DATABASE CONNECTIONS ON JOAO'S PC!-----------------------------
-my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
-my %dbm_seq;
-dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
+#my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
+#my %dbm_seq;
+#dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
 
 #------------------------DATABASE CONNECTIONS ON VITOR'S PC!----------------------------
-#my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
-#my %dbm_seq;
-#dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
+my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
+my %dbm_seq;
+dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
 
 #------------------------DATABASE CONNECTIONS ON JOSE'S PC!----------------------------
 #my $dbh = DBI->connect('dbi:mysql:alg','root','') or die "Connection Error: $DBI::errstr\n";
@@ -117,7 +117,7 @@ sub insertion {
         my $bool;
         ($bool, @keywords) = interface("ask_tag", 0);
         print "-------------------------------------------------------------------------------------------------------------------------\n";
-        my $sequence = interface("ask_sequence", 0);
+        my $sequence = interface("ask_sequence", 0, 0, $alphabet);
         print "-------------------------------------------------------------------------------------------------------------------------\n";
         my $seq_version = interface("ask_seq_version", 0);
         print "-------------------------------------------------------------------------------------------------------------------------\n";
@@ -1101,7 +1101,7 @@ sub translatee{
     
     if($option==2) {
         
-        my $option2 = interface("insert_manual_seq");    
+        my $option2 = interface("insert_manual_seq", 1);    
         open FILE, ">translations/temp.txt";
         print FILE translatione($option2);
         system 'pg temp.txt';
@@ -1333,10 +1333,21 @@ sub interface {
     
     
     elsif($type eq "ask_sequence"){
+        #Here, the $something will have the ALPHABET of the sequence
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
-        print "Insert the sequence: ";
-        $answer = <>;
-        chomp $answer;
+        if($invalid) {print "INVALID SEQUENCE! Please insert a valid one: "}
+        else {print "Insert the sequence: ";}
+        $_ = <>;
+        chomp;
+        if($something eq "dna") {
+            if(/[^atgcATCG]/){interface("ask_sequence", 0, 1, $something);}
+        }
+        elsif($something eq "rna"){
+            if(/[^augcAUCG]/){interface("ask_sequence", 0, 1, $something);}
+        }
+        elsif($something eq "protein"){
+            if(/[^avlipmfwgstcnqydekrhAVLIPMFWGSTCNQYDEKRH]/){interface("ask_sequence", 0, 1, $something);}
+        }
         return $answer;
     }
     
@@ -1791,7 +1802,7 @@ sub interface {
         
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
-        print "Do you want to use a sequence from the Database or Mannualy insert one?\n 1 - From Database\n 2 - Mannualy\n\nAnswer: ";
+        print "Do you want to use a sequence from the Database or Mannualy insert one?\n\n 1 - From Database\n 2 - Manually\n\nAnswer: ";
         $option=<>;
         if ($option==2 or $option==1) {return $option;}
         else {interface("ask_translate_type", 0, 1);}
@@ -1799,28 +1810,15 @@ sub interface {
     }
     
     elsif($type eq "insert_manual_seq"){
-        
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID SEQUENCE! Please choose a valid one: ";}
-        print "Insert the Sequence: \nsequence: ";
+        print "Insert the Sequence: ";
         $_=<>;
         chomp $_;
         if(/[^atgcATCG]/) {interface("insert_manual_seq",0,1);}
         else {return $_;}
         
     }
-    
-    elsif($type eq  "give_id_sequence"){
-        
-        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
-        if($invalid) {print "INVALID SEQUENCE! Please choose a valid one: ";}
-
-        
-        
-        
-        
-    }
-    
     
     
     
