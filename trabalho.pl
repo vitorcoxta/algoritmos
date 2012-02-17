@@ -12,14 +12,14 @@ use Bio::Tools::Run::RemoteBlast;
 use Bio::Tools::SeqStats;
 use Error qw(:try);
 #------------------------DATABASE CONNECTIONS ON JOAO'S PC!-----------------------------
-#my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
-#my %dbm_seq;
-#dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
+my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
+my %dbm_seq;
+dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
 
 #------------------------DATABASE CONNECTIONS ON VITOR'S PC!----------------------------
-my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
-my %dbm_seq;
-dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
+#my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
+#my %dbm_seq;
+#dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
 
 #------------------------DATABASE CONNECTIONS ON JOSE'S PC!----------------------------
 #my $dbh = DBI->connect('dbi:mysql:alg','root','') or die "Connection Error: $DBI::errstr\n";
@@ -80,13 +80,25 @@ sub bioinformatics_operations{
 #----------------------------This function will call the functions to perform searchs in the database--------------------------
 
 sub search_operations{
-    my $option = interface("search_operations",1,0);
-     if($option == 1){quick_search();}
-    elsif($option == 2){advanced_search();}
-    elsif($option == 3){view_species();}
-    elsif($option == 4){view_tags();}
+    my ($option,$opt2) = interface("search_operations",1,0);
+     if($option == 1){display_tags();}
+    elsif($option == 2){display_species();}
+    elsif($option == 3){display_sequences();}
+    elsif($option == 4){display_search_sequences($opt2);}
     elsif($option == 9){main(1);}
 }
+
+
+sub display_search_sequences{
+    
+    my $option = @_;
+    
+    my  $sql = "Select id_sequence,sequences.accession_number,accession_version,alphabet,gene_name,length,description where ";
+
+}
+
+
+
 
 
 
@@ -1109,20 +1121,42 @@ sub translatee{
         open FILE, ">translations/temp.txt";
         print FILE translatione($option2);
         system 'pg temp.txt';
-    
-    main(1);    
+        close FILE;
+        print "\nSUCCEFULL TRANSLATION!!!\n result on \"translation/temp.txt\" ";    
+        print("\n(Press Enter)");
+        <>;
     }
     
     if($option==1){
         
+        my $id;        
+        
         my $option = interface("give_id_sequence");
         
+        my ($number,$flag) = interface("ask_accession_number_no_check");
         
+        if($flag) {
+            $id = get_id_sequence($number,"accession_number");
+        }
+        else  {$id=$number;}
         
+        my $filename = $dbm_seq{$id};
         
+        my $format = get_format($filename);
+    
+        my $seqio = Bio::SeqIO->new(-file => $filename, -format => $format);
+        my $seq = $seqio->next_seq;
+        my $accession = $seq->accession();
+        $accession.="_$id";
+        open FILE, ">translations/$accession.txt";
+        print FILE translatione($seq->seq());
+        close FILE;
+        print "\nSUCCEFULL TRANSLATION!!!\n result on \"translation/$accession.txt\" ";    
+        print("\n(Press Enter)");
+        <>;
     }
     
-    
+      main(1);    
 }
 
 sub translatione{
@@ -1218,8 +1252,8 @@ sub interface {
     if($type eq "welcome"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one!\n\n"}
-        else {print "\t\t\tWELCOME TO \"FETCH THE SEQUENCE\"! ENJOY THIS SOFTWARE!\n\n";}
-        print "What do you want to do?\n\n 1 - Database operations\n 2 - Bioinformatics operations\n\n 8 - Help\n 9 - Exit\n\nAnswer: ";
+        else {print "\t\t\t===================WELCOME TO \"FETCH THE SEQUENCE\"!=================== \n\n\t\t\t\t\t\tEnjoy This Software! :D\n\n";}
+        print "What do you want to do?\n\n 1 - Database operations\n 2 - Bioinformatics operations\n 3 - Views and Searches\n\n 8 - Help\n 9 - Exit\n\nAnswer: ";
         $option = <>;
         if($option == 8){
             system $^O eq 'MSWin32' ? 'cls' : 'clear';
@@ -1228,7 +1262,7 @@ sub interface {
                     ."BLAST, search for a motif, obtain statistical information, add features to a sequence and translate a sequence.\n\n\n";
             interface("welcome");
         }
-        elsif($option == 1 or $option == 2 or $option == 9) {return $option;}
+        elsif($option == 1 or $option == 2 or  $option==3 or $option == 9) {return $option;}
         else {interface("welcome", 1, 1);}
     }
     
@@ -1901,9 +1935,27 @@ sub interface {
         
     }
     
-    
-    
-    
+    elsif($type eq "search_operations"){
+        
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID SEQUENCE! Please choose a valid one: ";}
+        print "Select the option you would like to do:\n\n 1- View Tags\n 2- View Species\n 3- View Sequences\n 4- Search Sequences\n\nAnswer: ";
+        $_=<>;
+        chomp $_;
+        if($_==1) {return (1,0);}
+        elsif($_== 2) {return (2,0);}
+        elsif($_==3) {return (3,0);}        
+        elsif ($_==4) {
+            
+            print "\n \nSelect the options which you want to use to search: \n 1- By tag\n 2- By Accession number\n 3- By Gene Name\n 4- By Specie\n\nAnswer: ";            
+            $_=<>;
+            return(4,$_);
+        }
+        
+        interface("search_operations",1,1);
+        
+    }
+        
     elsif($type eq "exit"){
         system $^O eq 'MSWin32' ? 'cls' : 'clear';
         print "\t\n\nBioinformatics - \"Fetch the Sequence!\" \n\n Thank you for using our software! \n Have a nice day! :) \n\n";
