@@ -1213,7 +1213,7 @@ sub display_accessions_or_names{
 }
 
 
-#--------------------------------------This function gets all the id_sequences with the same accession_numbers or with the same gene_name
+#--------------------------------------This function gets all the id_sequences with the same accession_numbers or with the same gene_name---------------------------
 sub get_accessions_or_names{
     my ($accession_number_or_gene_name, $type) = @_;
     my $count = 0;

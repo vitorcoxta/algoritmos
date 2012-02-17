@@ -550,11 +550,11 @@ The arguments are:
 
 =item - $match:
 
-Reference for an hash that has all the sequences where the motif was found;
+reference for an hash that has all the sequences where the motif was found;
 
 =item - $positions:
 
-Reference for an hash that has a list with all the positions where the motif was found for all the sequences in the hash before.
+reference for an hash that has a list with all the positions where the motif was found for all the sequences in the hash before.
 
 =back
 
@@ -580,14 +580,24 @@ The arguments are:
 
 =item - $filename:
 
-Reference for an hash that has all the sequences where the motif was found;
+string with the filename of the file where the statistics are going to be written;
 
 =item - $seq:
 
-Reference for an hash that has a list with all the positions where the motif was found for all the sequences in the hash before.
+Bio::Seq object with the information about the sequence.
 
 =back
 
+
+=head1 FEATURES
+
+This funtion adds a new feature into a sequence.
+
+B<USAGE:>
+features();
+
+
+=head1 
 
 
 
