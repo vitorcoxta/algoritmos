@@ -1,0 +1,26 @@
+LOCUS       A00002                   235 bp    DNA     linear   PAT 10-FEB-1993
+DEFINITION  B.taurus DNA sequence 1 from patent application EP0238993.
+ACCESSION   A00002
+VERSION     A00002.1  GI:2
+KEYWORDS    .
+SOURCE      Bos taurus (cattle)
+  ORGANISM  Bos taurus
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Laurasiatheria; Cetartiodactyla; Ruminantia;
+            Pecora; Bovidae; Bovinae; Bos.
+REFERENCE   1  (bases 1 to 194)
+  AUTHORS   Auerswald,E.A., Schroeder,W., Schnabel,E., Bruns,W., Reinhardt,G.
+            and Kotick,M.
+  TITLE     Aprotinin homologues produced by genetic engineering
+  JOURNAL   Patent: EP 0238993-A2 1 30-SEP-1987; BAYER AG
+FEATURES             Location/Qualifiers
+     source          1..194
+                     /mol_type="unassigned DNA"
+                     /db_xref="taxon:9913"
+                     /organism="Bos taurus"
+ORIGIN      
+        1 aaaaaaaaaa aaaaaaaaaa aaattttttt tttttttttt ttattcatgc gtccggactt
+       61 ctgcctcgag ccgccgtaca ctgggccctg caaagctcgt atcatccgtt acttctacaa
+      121 tgcaaaggca ggcctgtgtc agaccttcgt atacggcggt tgccgtgcta agcgtaacaa
+      181 cttcaaatcc gcggaagact gcgaacgtac ttgcggtggt ccttagtaaa gcttg
+//

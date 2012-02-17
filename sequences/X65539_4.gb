@@ -1,0 +1,74 @@
+LOCUS       X65539                  1165 bp    DNA     linear   MAM 18-APR-2005
+DEFINITION  B.taurus gene for trophoblast type I interferon.
+ACCESSION   X65539
+VERSION     X65539.1  GI:765
+KEYWORDS    interferon; pregnancy recognition; trophoblast interferon; trophoblast interferon type I; trophoblast protein 1.
+SOURCE      Bos taurus (cattle)
+  ORGANISM  Bos taurus
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Laurasiatheria; Cetartiodactyla; Ruminantia;
+            Pecora; Bovidae; Bovinae; Bos.
+REFERENCE   1  (bases 1 to 1165)
+  AUTHORS   Stewart,H.J., McCann,S.H. and Flint,A.P.
+  TITLE     Structure of an interferon-alpha 2 gene expressed in the bovine
+            conceptus early in gestation
+  JOURNAL   J. Mol. Endocrinol. 4 (3), 275-282 (1990)
+   PUBMED   2378676
+REFERENCE   2  (bases 1 to 1165)
+  AUTHORS   Stewart,H.J.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (13-APR-1992) H.J. Stewart, AFRC Research Group on
+            Hormones & Farm Animal Reproduction, Inst of Animal Physiology &
+            Genetic Research, Babraham Cambridge CB2 4AT, UK
+COMMENT     See also X07920 & M31556-8.
+FEATURES             Location/Qualifiers
+     source          1..1165
+                     /mol_type="genomic DNA"
+                     /db_xref="taxon:9913"
+                     /tissue_type="trophoblast"
+                     /organism="Bos taurus"
+                     /dev_stage="embryo"
+                     /clone_lib="genomic-lambda 2001"
+     TATA_signal     95..103
+     prim_transcript  121..>1165
+     mRNA            121..782
+     CDS             195..782
+                     /db_xref="GI:766"
+                     /db_xref="GOA:P15696"
+                     /db_xref="InterPro:IPR000471"
+                     /db_xref="InterPro:IPR009079"
+                     /db_xref="InterPro:IPR012351"
+                     /db_xref="UniProtKB/Swiss-Prot:P15696"
+                     /codon_start=1
+                     /protein_id="CAA46506.1"
+                     /translation="MAFVLSLLMALVLVSYGPGRSLGCYLSEDHMLGARENLRLLARM
+                     NRLSPHPCLQDRKDFGLPQEMVEGNQLQKDQAISVLHEMLQQCFNLFYTEHSSAAWNT
+                     TLLEQLCTGLQQQLEDLDACLGPVMGEKDSDMGRMGPILTVKKYFQGIHVYLKEKEYS
+                     DCAWEIIRMEMMRALSSSTTLQKRLRKMGGDLNSL"
+                     /product="trophoblast type I interferon gene"
+     sig_peptide     195..263
+     mat_peptide     264..779
+                     /product="trophoblast type I interferon gene"
+     feature         4..68
+ORIGIN      
+        1 tgactacatt tcctaggtca aacagaaaat atctaactga aaacacaaac aggaagtgag
+       61 agagaaattt tcggataatg agtaccgtct tccctattta aaagccttgc ttagaacgat
+      121 catcatcaga gaacctacct gaaggttcac ccagacccca tctcagccag cccagcagca
+      181 gccacatctt ccccatggcc ttcgtgctct ctctactgat ggccctggtg ctggtcagct
+      241 acggcccggg acgatctctg ggttgttacc tgtctgagga ccacatgcta ggtgccaggg
+      301 agaacctcag gctcctggcc cgaatgaaca gactctctcc tcatccctgt ctgcaggaca
+      361 gaaaagactt tggtcttcct caggagatgg tggagggcaa ccagctccag aaggatcagg
+      421 ctatctctgt gctccatgag atgctccagc agtgcttcaa cctcttctac acagagcact
+      481 cgtctgctgc ctggaacacc accctcctgg agcagctctg cactgggctc caacagcagc
+      541 tggaggacct ggacgcctgc ctgggcccag tgatgggaga gaaagactct gacatgggaa
+      601 ggatgggccc cattctgact gtgaagaagt acttccaggg catccatgtc tacctgaaag
+      661 aaaaagaata cagtgactgc gcctgggaaa tcatcagaat ggagatgatg agagccctct
+      721 cttcatcaac caccttgcaa aaaaggttaa gaaagatggg tggagatctg aactcacttt
+      781 gagatgactc tcgctgacta agatgccaca tcaccttcgt acactcacct gtgttcattt
+      841 cagaagactc tgatttctgc ttcagccacc gaattcattg aattacttta actgatactt
+      901 tgtcagcagc aataagcaag tagatataaa agtactcagc tgtaggggca taagtcctta
+      961 agtgatgcct gccctgatgt tatctgttgt tgatttatgt attccttctt gcatctaaca
+     1021 tacttaaaat gttaggaaat ttgtaaagtt acatttcatt tgtacatcta ttaaaatttc
+     1081 taaaacatgt ttaccatttt gtgttattaa atttgtcctt tgttctattt attaaatcaa
+     1141 agaaaatgag tttctttact caaaa
+//

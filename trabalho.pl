@@ -592,7 +592,7 @@ sub verify_accession{
 }
 
 
-
+#-----------------------------This function counts the number of sequences that have the same accession number or the same gene name---------------------------
 sub count_accession_or_name{
     my ($accession_number_or_gene_name, $type) = @_;
     my $count = 0;
@@ -604,7 +604,6 @@ sub count_accession_or_name{
     }
     return $count;
 }
-
 
 #---------------------This funtion verifies the accession version for the importation from a file-------------------------
 # It returns 1 if it exists, and 0 if it doesn't
@@ -628,7 +627,7 @@ sub verify_accession_in_file{
 
 #------------------This funtion verifies if the gene name already exists on the database----------------------
 # It returns 1 if it exists, and 0 if it doesn't
-sub verify_gene_name{
+sub verify_gene_name{   
     my ($gene_name) = @_;
     my $sql = "SELECT gene_name FROM sequences WHERE gene_name = '".$gene_name."'";
     my $result = $dbh->prepare($sql);
@@ -669,13 +668,13 @@ sub insert_specie_importation{
 #--------------------This function inserts the sequence for the insertion from remote databases------------------
 sub insert_sequence_importation {
         
-    my ($formato,$id_specie,$seq,$version)=@_;
+    my ($format,$id_specie,$seq,$version)=@_;
     my ($sql,$form);        
     my  $result;
     my @val;
    
-   if ($formato==1) {$form="fasta";}
-   elsif ($formato==2){$form ="genbank";}
+   if ($format==1) {$form="fasta";}
+   elsif ($format==2){$form ="genbank";}
    else {$form="swiss";}
    
    if($version) {
@@ -747,22 +746,22 @@ sub display_species{
 
 
 #--------------------This funtion inserts the keywords on the database------------------------
-sub insert_tag{
-    
-    my ($new_tag)=@_;
-    my (@val,$sql,$result);
-    
-    $sql = "INSERT INTO tags (tag) VALUES ('".$new_tag."');"; ## Inserir Nova tag
-    $dbh->do($sql);
-    
-    $sql = "SELECT id_tag FROM tags WHERE tag='".$new_tag."';";  ## Retorna o id da nova tag
-    $result = $dbh->prepare($sql);
-    $result->execute();    
-    
-    @val=$result->fetchrow_array();
-    
-    return $val[0];
-}
+#sub insert_tag{
+#    
+#    my ($new_tag)=@_;
+#    my (@val,$sql,$result);
+#    
+#    $sql = "INSERT INTO tags (tag) VALUES ('".$new_tag."');"; ## Inserir Nova tag
+#    $dbh->do($sql);
+#    
+#    $sql = "SELECT id_tag FROM tags WHERE tag='".$new_tag."';";  ## Retorna o id da nova tag
+#    $result = $dbh->prepare($sql);
+#    $result->execute();    
+#    
+#    @val=$result->fetchrow_array();
+#    
+#    return $val[0];
+#}
 
 
 
@@ -919,7 +918,7 @@ sub search_motif{
 }
 
 
-#-----------------This funtion displays the match table and the positions where the motif was found, and asks if the user want to see it with the 'pg' command
+#-----------------This funtion displays the match table and the positions where the motif was found, and asks if the user want to see it with the 'pg' command---------------------
 sub display_match{
     my ($match, $positions) = @_;
     my %match = %$match;
@@ -1136,6 +1135,20 @@ sub translatione{
 
 
 
+#------------------------------This funtion displays a table with the information about all the sequences on the database-----------------------------------------
+sub display_all_sequences{
+    my $sql = "SELECT accession_number, accession_version, gene_name, alphabet, description, length FROM sequences;";
+    my $result = $dbh->prepare($sql);
+    $result->execute();
+    print "\n\tSEQUENCES TABLE\n\n";
+    while (my $row = $result->fetchrow_hashref){
+        print "\tAccession number - ".$row->{accession_number}."\n\tAccession version - ".$row->{accession_version}."\n\tGene name - ".$row->{gene_name}.
+                "\n\tAlphabet - ".$row->{alphabet}."\n\tDescription - ".$row->{description}."\n\tLength - ".$row->{length}."\n\n";
+    }
+}
+
+
+#---------------------------This function displays all the accession numbers or all the gene names, if there are more that 1 sequence with the same accession number or gene name--------------------
 sub display_accessions_or_names{
     my ($accession_number_or_gene_name, $type) = @_;
     my %accessions_or_names = get_accessions_or_names($accession_number_or_gene_name, $type);
@@ -1166,6 +1179,7 @@ sub display_accessions_or_names{
 }
 
 
+#--------------------------------------This function gets all the id_sequences with the same accession_numbers or with the same gene_name
 sub get_accessions_or_names{
     my ($accession_number_or_gene_name, $type) = @_;
     my $count = 0;
@@ -1896,6 +1910,305 @@ sub interface {
 
     }
 }
+
+
+
+
+##############################-----------------PERLPOD-------------------------------###############################
+
+
+
+=head1 MAIN
+
+This is the main funtion of this software. This function indicates the right path according to what the users wants to do.
+
+B<USAGE:>
+main($clear);
+
+The argument that it receives is a flag to tell if it is suppose or not to clear the screen.
+
+
+=head1 DATABASE_OPERATIONS
+
+This funtion will call the functions that operate with the database.
+
+
+=head1 BIOINFORMATICS_OPERATIONS
+
+This function just calls the right funtions to perform a bioinformatics job.
+
+B<USAGE:>
+bioinformatics_operations();
+
+
+=head1 INSERTION
+
+This funtion inserts a sequence in the database: manually, from a file or from a remote database.
+
+B<USAGE:>
+insertion();
+
+
+=head1 GET_FORMAT
+
+This function is capable of obtain the format of a file.
+
+B<USAGE:>
+get_format($path);
+
+The argument that it receives is the filename/path to the file.
+
+B<RETURNS:>
+The file format.
+
+=head1 INSERT_SPECIE
+
+This function verifies if the inserted specie already exists on database. If it already exists, doesn't try to insert it.
+
+B<USAGE:>
+insert_specie($specie);
+
+The argument is a string with the specie to insert on the database.
+
+
+=head1 INSERT_SEQUENCE_DB
+
+This function inserts the sequence informations into the database.
+
+B<USAGE:>
+insert_sequence_db($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version, $accession_number);
+
+The arguments are:
+
+=over 12
+
+=item - $specie:
+ 
+string with the specie;
+
+=item - $alphabet:
+
+string with the alphabet of the sequence ("dna", "rna" or "protein");
+
+=item - $authority:
+
+string with the authority of the sequence;
+
+=item - $description:
+
+string with the description of the sequence;
+
+=item - $gene_name:
+
+string with the gene name;
+ 
+=item - $date:
+
+string with the date;
+ 
+=item - $is_circular:
+ 
+boolean to tell if the sequence is circular (1) or not (0);
+ 
+=item - $seq_length:
+ 
+int with the length of the sequence;
+ 
+=item - $format:
+
+string with the format of the sequence ("fasta", "genbank" or "swiss");
+ 
+=item - $seq_version:
+
+string with the version of the sequence;
+ 
+=item - $accession_number:
+
+string with the accession number of the sequence.
+
+=back
+
+
+=head1 INSERT_TAGS
+
+This function inserts the tags on the database, and returns id of the sequence (id auto incremented on the database).
+
+B<USAGE:>
+insert_tags($flag, @keywords);
+
+The arguments that this function receives are:
+
+=over 12
+
+=item - $flag:
+
+boolean to teel if the user wants to add keywords or not;
+ 
+=item - @keywords:
+
+list of strings, that are the key_words;
+
+=back
+
+B<RETURNS:>
+The id of the sequence (id auto incremented on the database).
+
+
+=head1 INSERT_SEQUENCE
+
+This function inserts the sequence on a DBM hash.
+
+B<USAGE:>
+insert_sequence($id_sequence, $seq, $format, $with_accession);
+
+The arguments are:
+
+=over 12
+
+=item - $id_sequence:
+
+int with the id of the sequence (id auto incremented on the database);
+ 
+=item -  $seq:
+
+Bio::Seq object, with the information aboout the sequence;
+ 
+=item - $format:
+
+string with the format of the sequence;
+ 
+=item - $with_accession:
+
+flag to tell if the sequence has an accession number (in other words, if it was inserted form a file or from a remote database, and in this case the sequence file name will have the accession number), or if it doesn't (in other words, if the sequence was inserted manually, and in this case the sequence file name will have the gene name).
+
+=back
+
+
+=head1 GENERIC_IMPORTATION
+
+This funtion inserts the sequence from a remote database.
+
+B<USAGE:>
+generic_importation($db);
+
+The argument is a string with the database where the sequence comes from.
+
+
+=head1 REMOVAL
+
+This function indicates the right path to remove data from the database, depending from the user's decision.
+
+B<USAGE:>
+removal();
+
+
+=head1 REMOVE
+
+This function deletes a sequence from the database and from the DBM hash (including from the folder 'sequences').
+
+B<USAGE:>
+remove($accession_number_or_gene_name, $type);
+
+The arguments are:
+
+=over 12
+
+=item - $accession_number_or_gene_name:
+
+string with the accession number or with the gene name (depending if the sequence has an accession number or a gene name);
+ 
+=item - $type:
+
+string that tells if the previous argument is an accession number (and it has the value "accession_number") or a gene name (and it has the value "gene_name").
+
+=back
+
+
+=head1 REMOVE_SEQ_TAGS
+
+This funtion will remove data from the table seq_tags on the database.
+
+B<USAGE:>
+remove_seq_tags($id_sequence);
+
+This funtion receives the id of the sequence on the database.
+
+
+=head1 MODIFICATION
+
+This function indicates the right path to modify data from the database, depending from the user's decision.
+
+B<USAGE:>
+modification();
+
+
+=head1 MODIFY
+
+This function modifies a sequence saved on the database.
+
+B<USAGE:>
+modify($accession_number_or_gene_name, $type);
+
+The arguments are:
+
+=over 12
+
+=item - $accession_number_or_gene_name:
+
+string with the accession number or with the gene name (depending if the sequence has an accession number or a gene name);
+ 
+=item - $type:
+
+string that tells if the previous argument is an accession number (and it has the value "accession_number") or a gene name (and it has the value "gene_name").
+
+=back
+
+B<RETURNS:>
+An hash with the name of the files to be modified.
+
+
+=head1 CREATE_FILE
+
+This function creates the file where the user will modify the data.
+
+B<USAGE:>
+create_file($current, $total, $row);
+
+The arguments are:
+
+=over 12
+
+=item - $current:
+
+int that indicates the current file (e.g. 1 (current) in 3 (total) files);
+ 
+=item - $total:
+
+int that indicates the total of files to be modified;
+
+=item - $row:
+
+Reference to an hash with the data that comes from the database.
+
+=back
+
+
+=head1 CREATE_FILE
+
+This funtion fetches the new information given by the user from the modified files.
+
+B<USAGE:>
+fetch_info($current, $total, $format);
+
+The arguments are:
+
+
+
+
+
+
+
+
 
 
 
