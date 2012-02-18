@@ -4,13 +4,16 @@ use Bio::Seq;
 use Bio::SeqIO;
 use Bio::Species;
 use strict;
-use warnings;
 use DBI();
 use DBD::mysql;
 use Bio::Root::Exception;
 use Bio::Tools::Run::RemoteBlast;
 use Bio::Tools::SeqStats;
 use Error qw(:try);
+use Bio::Restriction::EnzymeCollection;
+use Bio::Restriction::Analysis;
+
+
 #------------------------DATABASE CONNECTIONS ON JOAO'S PC!-----------------------------
 #my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
 #my %dbm_seq;
@@ -24,20 +27,21 @@ dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinform
 #------------------------DATABASE CONNECTIONS ON JOSE'S PC!----------------------------
 #my $dbh = DBI->connect('dbi:mysql:alg','root','') or die "Connection Error: $DBI::errstr\n";
 #my %dbm_seq;
-#dbmopen(%dbm_seq, 'METER AQUI O CAMINHO DESEJADO PARA A LOCALIZACAO DA HASH COM AS SEQUENCIAS', 0666);
+#dbmopen(%dbm_seq, 'C:\Program Files', 0666);
+
+
+#------------------------DATABASE CONNECTIONS ON TELMA'S PC!----------------------------
+#my $dbh = DBI->connect('dbi:mysql:alg','root','') or die "Connection Error: $DBI::errstr\n";
+#my %dbm_seq;
+#dbmopen(%dbm_seq, 'C:\Program Files', 0666);
 
 main(1);
 
 
 
+
 #------------------This is the main function------------------------------------
 sub main{
-    #my ($key, $val);
-    #
-    #while (($key, $val) = each %dbm_seq){
-    #    print "$key - $val\n";
-    #}
-    
     my ($clear) = @_;
     my $option = interface("welcome", $clear, 0);
     if($option == 1){database_operations();}
@@ -203,8 +207,8 @@ sub insertion{
     }
     elsif($option == 3){
         my $answer;    
-        $answer = interface("ask_database", 1);   # Escolher a Base de Dados
-        if ($answer ==1 or $answer ==2 or $answer ==3) { interface("generic_importation_begin",$answer); generic_importation($answer); }    # Escolheu :     GENBANK    
+        $answer = interface("ask_database", 1);   # Choose the database
+        if ($answer ==1 or $answer ==2 or $answer ==3) { interface("generic_importation_begin",$answer); generic_importation($answer); }
         else {insertion();}
     }
     elsif($option == 9){
@@ -251,7 +255,6 @@ sub insert_specie{
 
 
 #-------------------Insert the sequence----------------------
-        #The last argument tells if it has the accession number (insertion from a file or from a remote DB) or the gene name (manual insertion)
 sub insert_sequence_db{
     my ($specie, $alphabet, $authority, $description, $gene_name, $date, $is_circular, $seq_length, $format, $seq_version, $accession_number) = @_;
     my $sql = "SELECT id_specie FROM species WHERE specie='".$specie."'";
@@ -504,14 +507,14 @@ sub generic_importation{
     my($base)=@_;
     my ($option2, $format, $seq, $existe, $option, $gb, $seqio_obj, $result, $sql, $specie, $id_specie, $id_sequence, $id_tag, $form, $flag);         
     if ($base==2) {$option=1;}
-    else {$option = interface ("ask_import"); }  ## Escolher tipo de importação - "Acession Number ou Version Number"
+    else {$option = interface ("ask_import"); }  #hoose the type of importation - accession_number or accession_version
     
-    $format = interface ("ask_format", 1);  ## Escolher Fasta ou Genbank
+    $format = interface ("ask_format", 1);
     
-    ### CICLO PARA PROCURAR    
+    #Loop to search
     $existe=1;
     if ($base==1) {
-        $gb = Bio::DB::GenBank->new();      ## Iniciar ligação ao Genbank
+        $gb = Bio::DB::GenBank->new();
     }
     elsif ($base==2) {$gb=Bio::DB::SwissProt->new();}
     else {$gb=Bio::DB::RefSeq->new();}
@@ -520,7 +523,7 @@ sub generic_importation{
         if (!$existe)  {print "ERROR! Already existing Accession Number in DataBase!!\n\nPress Enter...";<>;$existe=1;}     
         if ($existe==2) {print "ERROR! Non existing Number in Remote DataBase!!\n\nPress Enter...";<>;$existe=1;}
 
-        ##### Inserir Number para procura
+        #Insert number to seach
         if ($option==1) {
             $flag = 1;
             $option2=interface("ask_accession_number_insertion", 1);
@@ -535,19 +538,18 @@ sub generic_importation{
             $flag = 0;
             $option2=interface("ask_version_number", 1);
             print "-------------------------------------------------------------------------------------------------------------------------\n";
-            chomp($option2); 
-        #    $existe = verify_version_number($option2);             #Verifica de o accesion number já existe na Base de Dados                                        
-                                  
+            chomp($option2);
+            
             if($existe==1){
                 try {
-                    $seq = $gb->get_Seq_by_version($option2) || throw Bio::Root::Exception(print "ERROR: INVALID NUMBER!!") # Vai buscar o number         
+                    $seq = $gb->get_Seq_by_version($option2) || throw Bio::Root::Exception(print "ERROR: INVALID NUMBER!!") # gets the number
                 }catch Bio::Root::Exception with {$existe=2};  
             }
         }
         
     }while(!$existe or $existe==2);
 
-    $specie = interface("ask_specie");   #pede especie e de seguida grava
+    $specie = interface("ask_specie");   #asks the specie and then save it
     print "-------------------------------------------------------------------------------------------------------------------------\n";
     $id_specie=insert_specie_importation($specie);
     if ($option==2) {$id_sequence = insert_sequence_importation($format,$id_specie,$seq,$option2);}
@@ -555,7 +557,7 @@ sub generic_importation{
 
     my @lista;
     my $bool;
-    ($bool, @lista) = interface("ask_tag", 0); #pergunta se quer tag, se quiser pode escolher uma das que já há, ou uma nova.
+    ($bool, @lista) = interface("ask_tag", 0); #asks if the user wants tag. if he does, he can choose some that exists or some new ones
     insert_tags($bool, @lista);
     if($format == 1) {$form = "fasta";}
     elsif($format == 2) {$form = "genbank";}
@@ -648,9 +650,9 @@ sub insert_specie_importation{
     my $result = $dbh->prepare($sql);
     $result->execute();
     if(!(@val=$result->fetchrow_array())){
-        $sql1 = "INSERT INTO species (specie) VALUES ('".$specie."');";   ## INSERÇÃO
+        $sql1 = "INSERT INTO species (specie) VALUES ('".$specie."');";   #insertion
         $dbh->do($sql1);
-        $result2 = $dbh->prepare($sql);  ## SELECT DO ID DA ESPECIE INSERIDA
+        $result2 = $dbh->prepare($sql);  #select of the id of the inserted specie
         $result2->execute();
         @val = $result2->fetchrow_array();
     }
@@ -677,34 +679,13 @@ sub insert_sequence_importation {
    $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, accession_number,accession_version,gene_name, date, is_circular, length, format, seq_version)
                   VALUES ('".$id_specie."', '".$seq->alphabet."', '".$seq->authority."', '".$seq->desc."', '".$seq->accession."', '".$seq->accession."','".$seq->display_name."', '".$seq->get_dates."', '".$seq->is_circular."', '".$seq->length."', '".$form."', '".$seq->seq_version."');";
    }
-   $dbh->do($sql);  ## INSERCAO NA BASE DADOS;
+   $dbh->do($sql);  #insertion on the database
    $sql = "SELECT LAST_INSERT_ID()";
-   $result = $dbh->prepare($sql);  ## SELECT DO ID DA ESPECIE INSERIDA
+   $result = $dbh->prepare($sql);  #select of the id of the inserted specie
    $result->execute();
-   @val = $result->fetchrow_array(); ## SELECT DO ID DA SEQUENCIA INSERIADA
-    #$dbm_seq{$val[0]} = $seq;        
+   @val = $result->fetchrow_array(); #select of the id of the inserted sequence
     return $val[0] ;  
 }
-
-
-
-#--------------------This function inserts the keywords on the database------------------------
-#sub insert_tag{
-#    
-#    my ($new_tag)=@_;
-#    my (@val,$sql,$result);
-#    
-#    $sql = "INSERT INTO tags (tag) VALUES ('".$new_tag."');"; ## Inserir Nova tag
-#    $dbh->do($sql);
-#    
-#    $sql = "SELECT id_tag FROM tags WHERE tag='".$new_tag."';";  ## Retorna o id da nova tag
-#    $result = $dbh->prepare($sql);
-#    $result->execute();    
-#    
-#    @val=$result->fetchrow_array();
-#    
-#    return $val[0];
-#}
 
 
 
@@ -809,19 +790,6 @@ sub motif{
     my ($match, $positions) = search_motif($motif);
     my %match = %$match;
     my %positions = %$positions;
-    #print "MATCH\n\n";
-    #while(my ($key, $val) = each %match){
-    #    print "$key - $val\n";
-    #}
-    #print "\n\nPOSITIONS\n\n";
-    #while(my ($key, $val) = each %positions){
-    #    print "$key - ";
-    #    for my $pos (@{$val}){
-    #        print "$pos ";
-    #    }
-    #    print "\n";
-    #}
-    #<>;
     display_match($match, $positions);
     main(1);
 }
@@ -1023,20 +991,6 @@ sub features{
     main(1);
 }
 
-#sub display_sequences_by_acc{
-    
-   # my ($acce)=@_;
-    
-    #my $sql = "SELECT id_sequence,accession_number,accession_version,length,description FROM sequences WHERE accession_number = '".$acce."';";
-    #my $result = $dbh->prepare($sql);
-    #$result->execute();
-    #while(my $row = $result->fetchrow_hashref()){
-       # $id_sequence = $row->{id_sequence};
-    #}
-    
-    
-#}
-
 
 
 
@@ -1048,17 +1002,22 @@ sub translatee{
     if($option == 2) {
         $filename_translation = "translations/temp.txt";
         my $option2 = interface("insert_manual_seq", 1);    
-        open FILE, ">$filename_translation";
-        print FILE translatione($option2);
-        close FILE;
+        write_translatione($option2, $filename_translation);
     }
     
     elsif($option == 1){
-        my $id;
-        #my $option = interface("give_id_sequence");
-        my ($number,$flag) = interface("ask_accession_number_no_check", 1);
-        if($flag) {$id = get_id_sequence($number,"accession_number");}
-        else{$id=$number;}
+        my $option = interface("ask_choose_type", 1);
+        my ($acc_or_name, $flag, $id);
+        if($option == 1) {
+            ($acc_or_name, $flag) = interface("ask_accession_number_no_check", 0);
+            if($flag) {$id = get_id_sequence($acc_or_name, "accession_number");}
+            else {$id = $acc_or_name;}
+        }
+        else {
+            ($acc_or_name, $flag) = interface("ask_gene_name_no_check", 0);
+            if($flag) {$id = get_id_sequence($acc_or_name, "gene_name");}
+            else {$id = $acc_or_name;}
+        }
         
         my $filename = $dbm_seq{$id};
         my $format = get_format($filename);
@@ -1067,9 +1026,7 @@ sub translatee{
         my $accession = $seq->accession();
         $accession .= "_$id";
         $filename_translation = "translations/$accession.txt";
-        open FILE, ">$filename_translation";
-        print FILE translatione($seq->seq());
-        close FILE;
+        write_translatione($seq->seq(), $filename_translation);
     }
     
     my $see = interface("successful_translation", 1, 0, $filename_translation);
@@ -1082,11 +1039,32 @@ sub translatee{
 
 
 
+#------------------------------This function writes the 6 ORF's in the translation file----------------------------------------
+sub write_translatione{
+    my ($sequence, $filename_translation) = @_;
+    open FILE, ">$filename_translation";
+    for (my $i = 0; $i < 3; $i++){
+        print FILE ($i+1)."ª ORF:\n";
+        print FILE translatione($sequence, 0, $i);
+        print FILE "\n\n";
+    }
+    for (my $i = 0; $i < 3; $i++){
+        print FILE ($i+4)."ª ORF:\n";
+        print FILE translatione($sequence, 1, $i);
+        print FILE "\n\n";
+    }
+    close FILE;
+}
+
+
+
+
 #-----------------------------------This function calls the 'translate' operation---------------------------------------
 sub translatione{
-    my ($sequencia) = @_;
+    my ($sequencia, $is_reversed, $i) = @_;
     my $seq = Bio::Seq->new(-seq => $sequencia);
-    return $seq->translate->seq;
+    if($is_reversed){return $seq->revcom->translate(-frame => $i)->seq;}
+    else {return $seq->translate(-frame => $i)->seq;}
 }
 
 
@@ -1171,7 +1149,9 @@ sub display_search_sequences{
 
 #---------------------------This function displays the sequences with a determined keyword----------------------------------------------
 sub display_sequences_by_keyword{
-    my $keyword = interface("ask_keyword", 1);
+    system $^O eq 'MSWin32' ? 'cls' : 'clear';
+    display_tags();
+    my $keyword = interface("ask_keyword");
     my  $sql = "SELECT sequences.id_sequence, accession_number, accession_version, gene_name, alphabet, description, length FROM sequences, tags, seq_tags WHERE tags.tag = '".
                       $keyword."' AND tags.id_tag = seq_tags.id_tag AND seq_tags.id_sequence = sequences.id_sequence;";
     my $result = $dbh->prepare($sql);
@@ -1207,7 +1187,7 @@ sub display_sequences_by_gene_name{
 
 #---------------------------This function displays the sequences with a determined specie----------------------------------------------
 sub display_sequences_by_specie{
-    my $specie = interface("ask_specie_no_display", 1);
+    my $specie = interface("ask_specie", 1);
     my  $sql = "SELECT id_sequence, accession_number, accession_version, gene_name, alphabet, description, length FROM sequences, species WHERE specie = '$specie' AND "
                       ."species.id_specie = sequences.id_specie;";
     my $result = $dbh->prepare($sql);
@@ -1509,18 +1489,8 @@ sub interface {
         chomp $answer;
         return $answer;
     }
-    
-    
-    
-    
-    elsif($type eq "ask_specie_no_display"){
-        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
-        print "Insert the specie: ";
-        $answer = <>;
-        chomp $answer;
-        return $answer;
-    }
-    
+
+
     
     
     elsif ($type eq "ask_format"){
@@ -1575,7 +1545,7 @@ sub interface {
             print "Insert the accession number: ";
             $answer = <>;
             chomp $answer;
-            $existe = verify_accession($answer, "with");             #Verifica se o accesion number já existe na Base de Dados
+            $existe = verify_accession($answer, "with");             #verifies if the accession_number already exists on the database
         }while($existe);
         return $answer;
     }
@@ -1656,7 +1626,6 @@ sub interface {
     
     
     elsif ($type eq "ask_import"){
-        ##system $^O eq 'MSWin32' ? 'cls' : 'clear';
         print "\n\nSelect the way you want to import:\n\n 1 - Accession Number\n 2 - Accession Version\n\nAnswer: ";    
         do{     
             $option = <>;
@@ -1699,13 +1668,12 @@ sub interface {
             if ($answer!=1 and $answer!=2) {$flag=0; $flag2=1;}
         }while(!$flag);
         
-        if ($answer==2) {return (0,0);} ## DONT WANT TO ADD TAG
+        if ($answer==2) {return (0,0);} #don't want to add tags
         
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         else {print "\n\n";}
         display_tags();  
         my @lista = interface('ask_keywords');
-        #insert_tags(@lista);
         return (1, @lista);
     }
     
@@ -1772,8 +1740,7 @@ sub interface {
             $option = <>;
             
             if ($option == 1 or $option == 2) {return $option;}
-            else {print "INVALID OPTION! Please choose a valid one: ";}    
-    
+            else {print "INVALID OPTION! Please choose a valid one: ";}
         } while(1);
     }
     
@@ -2597,12 +2564,54 @@ B<USAGE:>
 translatee();
 
 
-=head2 TRANSLATIONE
+=head2 WRITE_TRANSLATIONE
 
-This function calls the 'translate' operation.
+This function writes the 6 ORF's in the translation file.
 
 B<USAGE:>
-translatione();
+write_translatione($sequence, $filename_translation);
+
+The arguments are:
+
+=over 12
+
+=item - $sequence:
+
+string with the sequence to be translated;
+
+=item - $filename_translation:
+
+string with the translation filename.
+
+=back
+
+
+=head2 TRANSLATIONE
+
+This function calls the 'translate' operation for the 6 ORF's.
+
+B<USAGE:>
+translatione($sequence, $is_reversed, $i);
+
+The arguments are:
+
+=over 12
+
+=item - $sequence:
+
+string with the sequence to be translated;
+
+=item - $is_reversed:
+
+flag that tells if it is supposed to translate the reversed sequence;
+
+=item - $i:
+
+int with the frame, to translate with the correct ORF.
+
+=back
+
+
 
 
 
