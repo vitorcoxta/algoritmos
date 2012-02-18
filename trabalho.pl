@@ -12,22 +12,19 @@ use Bio::Tools::Run::RemoteBlast;
 use Bio::Tools::SeqStats;
 use Error qw(:try);
 #------------------------DATABASE CONNECTIONS ON JOAO'S PC!-----------------------------
-my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
-my %dbm_seq;
-dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
+#my $dbh = DBI->connect('dbi:mysql:alg','root','blabla1') or die "Connection Error: $DBI::errstr\n";
+#my %dbm_seq;
+#dbmopen(%dbm_seq, '/home/johnnovo/Documents/sequence', 0666);
 
 #------------------------DATABASE CONNECTIONS ON VITOR'S PC!----------------------------
-#my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
-#my %dbm_seq;
-#dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
+my $dbh = DBI->connect('dbi:mysql:alg','root','5D311NC8') or die "Connection Error: $DBI::errstr\n";
+my %dbm_seq;
+dbmopen(%dbm_seq, '/home/cof91/Documents/Mestrado/1º ano/1º semestre/Bioinformática - Ciências Biológicas/Algoritmos e Tecnologias da Bioinformática/Trabalho/algoritmos/database/sequences', 0666);
 
 #------------------------DATABASE CONNECTIONS ON JOSE'S PC!----------------------------
 #my $dbh = DBI->connect('dbi:mysql:alg','root','') or die "Connection Error: $DBI::errstr\n";
 #my %dbm_seq;
 #dbmopen(%dbm_seq, 'METER AQUI O CAMINHO DESEJADO PARA A LOCALIZACAO DA HASH COM AS SEQUENCIAS', 0666);
-
-#TODO: METER O HELP NA INTERFACE!
-#TODO: FALAR COM O JOAO SOBRE A CENA DA INSERÇAO REMOTA, DO ACCESSION NUMBER E VERSION
 
 main(1);
 
@@ -49,13 +46,12 @@ sub main{
     elsif($option == 9){
         interface("exit");
         dbmclose(%dbm_seq);
-        #$dbh->disconnect;
         exit(0);
     }
 }
 
 
-#----------------------This funtion will call the functions that operate with the database--------------------------------
+#----------------------This function will call the functions that operate with the database--------------------------------
 sub database_operations{
     my $option = interface("database_operations", 1, 0);
     if($option == 1){insertion();}
@@ -77,35 +73,26 @@ sub bioinformatics_operations{
     elsif($option == 9){main(1);}
 }
 
+
+
 #----------------------------This function will call the functions to perform searchs in the database--------------------------
-
 sub search_operations{
-    my ($option,$opt2) = interface("search_operations",1,0);
-     if($option == 1){display_tags();}
+    my $option = interface("search_operations",1,0);
+    system $^O eq 'MSWin32' ? 'cls' : 'clear';
+    if($option == 1){display_tags();}
     elsif($option == 2){display_species();}
-    elsif($option == 3){display_sequences();}
-    elsif($option == 4){display_search_sequences($opt2);}
+    elsif($option == 3){display_all_sequences();}
+    elsif($option == 4){display_search_sequences();}
     elsif($option == 9){main(1);}
-}
-
-
-sub display_search_sequences{
-    
-    my $option = @_;
-    
-    my  $sql = "Select id_sequence,sequences.accession_number,accession_version,alphabet,gene_name,length,description where ";
-
+    interface("waiting_enter");
+    main(1);
 }
 
 
 
 
-
-
-
-
-#-----------------------This funtion inserts a sequence in the database: manually, from a file or from a remote database----------------------
-sub insertion {
+#-----------------------This function inserts a sequence in the database: manually, from a file or from a remote database----------------------
+sub insertion{
     my $option = interface("ask_insertion_type", 1, 0);
     if($option == 1) {
         #----------Asks user for useful information---------------
@@ -387,7 +374,7 @@ sub remove{
 
 
 
-#-----------------------This funtion will remove data from the table seq_tags------------------------------
+#-----------------------This function will remove data from the table seq_tags------------------------------
 sub remove_seq_tags{
     my ($id_sequence) = @_;
     my $sql = "DELETE FROM seq_tags WHERE id_sequence = '".$id_sequence."'";
@@ -461,7 +448,7 @@ sub create_file{
 }
 
 
-#--------------------------This funtion will fetch the new information given by the user----------------------------------
+#--------------------------This function will fetch the new information given by the user----------------------------------
 sub fetch_info{
     my ($current, $total, $format) = @_;
     my $seqio;
@@ -477,7 +464,7 @@ sub fetch_info{
 }
 
 
-#------------------------This funtion will update the info in the database and the hash------------------------------------
+#------------------------This function will update the info in the database and the hash------------------------------------
 sub update_info{
     my ($seq, $id_sequence) = @_;
     my $sql = "UPDATE sequences SET gene_name='".$seq->display_id."', accession_number='".$seq->accession_number."', description='".$seq->desc."', alphabet='".
@@ -488,7 +475,7 @@ sub update_info{
 }
 
 
-#-----------------------------This funtion displays the modified sequences table, and asks if the user want to see it on the program (with the 'pg' command)----------------------
+#-----------------------------This function displays the modified sequences table, and asks if the user want to see it on the program (with the 'pg' command)----------------------
 sub display_modified{
     my (%modified) = @_;
     my $option = interface("ask_display_modified", 0, 0);
@@ -512,7 +499,7 @@ sub display_modified{
 }
 
 
-#-----------------------This funtion inserts the sequence from a remote database----------------------------------
+#-----------------------This function inserts the sequence from a remote database----------------------------------
 sub generic_importation{
     my($base)=@_;
     my ($option2, $format, $seq, $existe, $option, $gb, $seqio_obj, $result, $sql, $specie, $id_specie, $id_sequence, $id_tag, $form, $flag);         
@@ -617,12 +604,12 @@ sub count_accession_or_name{
     return $count;
 }
 
-#---------------------This funtion verifies the accession version for the importation from a file-------------------------
+#---------------------This function verifies the accession version for the importation from a file-------------------------
 # It returns 1 if it exists, and 0 if it doesn't
 sub verify_accession_in_file{
     my ($file) = @_;     
     my ($sql,$result, $format);
-    if(substr ($file, -5) eq "fasta") {return 1;}           #won't check because of the "unknown" accession_ numbers
+    if(substr ($file, -5) eq "fasta") {return 0;}           #won't check because of the "unknown" accession_ numbers
     elsif(substr ($file, -5) eq "swiss") {$format = "swiss";}
     elsif(substr ($file, -2) eq "gb") {$format = "genbank";}
     my $seqio = Bio::SeqIO->new(-file => "$file", -format => $format);
@@ -637,7 +624,7 @@ sub verify_accession_in_file{
 }
 
 
-#------------------This funtion verifies if the gene name already exists on the database----------------------
+#------------------This function verifies if the gene name already exists on the database----------------------
 # It returns 1 if it exists, and 0 if it doesn't
 sub verify_gene_name{   
     my ($gene_name) = @_;
@@ -660,18 +647,13 @@ sub insert_specie_importation{
     my $result2;
     my $result = $dbh->prepare($sql);
     $result->execute();
-    
     if(!(@val=$result->fetchrow_array())){
-   
         $sql1 = "INSERT INTO species (specie) VALUES ('".$specie."');";   ## INSERÇÃO
         $dbh->do($sql1);
-
         $result2 = $dbh->prepare($sql);  ## SELECT DO ID DA ESPECIE INSERIDA
         $result2->execute();
-    
         @val = $result2->fetchrow_array();
     }
-       
     return $val[0];
 }
 
@@ -679,24 +661,19 @@ sub insert_specie_importation{
 
 #--------------------This function inserts the sequence for the insertion from remote databases------------------
 sub insert_sequence_importation {
-        
     my ($format,$id_specie,$seq,$version)=@_;
     my ($sql,$form);        
     my  $result;
     my @val;
-   
    if ($format==1) {$form="fasta";}
    elsif ($format==2){$form ="genbank";}
    else {$form="swiss";}
    
    if($version) {
-   
    $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, accession_number,accession_version, gene_name, date, is_circular, length, format, seq_version)
                   VALUES ('".$id_specie."', '".$seq->alphabet."', '".$seq->authority."', '".$seq->desc."', '".$seq->accession."','".$version."', '".$seq->display_name."', '".$seq->get_dates."', '".$seq->is_circular."', '".$seq->length."', '".$form."', '".$seq->seq_version."');";
    }
-   
    else {
-   
    $sql = "INSERT INTO sequences (id_specie, alphabet, authority, description, accession_number,accession_version,gene_name, date, is_circular, length, format, seq_version)
                   VALUES ('".$id_specie."', '".$seq->alphabet."', '".$seq->authority."', '".$seq->desc."', '".$seq->accession."', '".$seq->accession."','".$seq->display_name."', '".$seq->get_dates."', '".$seq->is_circular."', '".$seq->length."', '".$form."', '".$seq->seq_version."');";
    }
@@ -704,60 +681,14 @@ sub insert_sequence_importation {
    $sql = "SELECT LAST_INSERT_ID()";
    $result = $dbh->prepare($sql);  ## SELECT DO ID DA ESPECIE INSERIDA
    $result->execute();
-
    @val = $result->fetchrow_array(); ## SELECT DO ID DA SEQUENCIA INSERIADA
-   
     #$dbm_seq{$val[0]} = $seq;        
-    
     return $val[0] ;  
 }
 
 
 
-#------------------This funtion displays the keywords table-----------------------------
-sub display_tags{
-    
-    my ($result,$sql,@val);
-
-    $sql = "Select * from tags ORDER BY id_tag;";    
-    
-    print "\tKEYWORDS TABLE\n\n";
-    
-    $result = $dbh->prepare($sql);
-    $result->execute();
-    
-    while(@val=$result->fetchrow_array()){  
-        print "  KEYWORD = $val[1]\n";
-    }
-
-    print "\n";
-    return;
-}
-
-
-
-#--------------------This funtion dysplays the species table-------------------------
-sub display_species{
-    
-    my ($sql,$result,@val);
-    
-    $sql = "Select * from species";
-    
-    print "\tSPECIES TABLE\n\n";
-
-    $result = $dbh->prepare($sql);
-    $result->execute();
-
-    while(@val=$result->fetchrow_array()){  
-        print "  KEYWORD = $val[1]\n";
-    }
-    print "\n";
-    return;
-}
-
-
-
-#--------------------This funtion inserts the keywords on the database------------------------
+#--------------------This function inserts the keywords on the database------------------------
 #sub insert_tag{
 #    
 #    my ($new_tag)=@_;
@@ -778,27 +709,22 @@ sub display_species{
 
 
 
-#---------------------------This funtion verifies the version------------------------------
+#---------------------------This function verifies the version------------------------------
 sub verify_version{
-    
     my ($version)=@_;
     my ($flag,$result,$sql,@val);
-    
-    $sql = "Select accession_version from sequences;";    
-    
+    $sql = "Select accession_version from sequences;";
     $result = $dbh->prepare($sql);
     $result->execute();
-    
     while(@val=$result->fetchrow_array()){  
         if($version eq $val[0]) {return 0;}
     }
-
     return 1;
 }
 
 
 
-#------------------------This funtion runs a remote blast------------------------------
+#------------------------This function runs a remote blast------------------------------
 sub blast{
     my $option = interface("ask_choose_type", 1);
     my ($acc_or_name, $flag, $id_sequence, $filename, $format, $seqio, $seq, $blast_type, $db, $blast, $result_blast);
@@ -877,7 +803,7 @@ sub get_id_sequence{
 }
 
 
-#----------------------This funtion gets the motif and calls the right funtions to serch it on the sequences on the database--------------------------
+#----------------------This function gets the motif and calls the right functions to serch it on the sequences on the database--------------------------
 sub motif{
     my $motif = interface("ask_motif", 1);
     my ($match, $positions) = search_motif($motif);
@@ -930,7 +856,7 @@ sub search_motif{
 }
 
 
-#-----------------This funtion displays the match table and the positions where the motif was found, and asks if the user want to see it with the 'pg' command---------------------
+#-----------------This function displays the match table and the positions where the motif was found, and asks if the user want to see it with the 'pg' command---------------------
 sub display_match{
     my ($match, $positions) = @_;
     my %match = %$match;
@@ -980,7 +906,7 @@ sub display_match{
 
 
 
-#--------------------------This funtion will get the important info to get the statistics--------------------------------
+#--------------------------This function will get the important info to get the statistics--------------------------------
 sub statistics{
     my $option = interface("ask_choose_type", 1);
     my ($answer, $flag, $type, $id_sequence, $format, $filename, $seqio, $seq, $seq_stats);
@@ -1016,7 +942,7 @@ sub statistics{
 
 
 
-#----------------------------This funtion will get the statistics into a file--------------------------------
+#----------------------------This function will get the statistics into a file--------------------------------
 sub get_statistics_into_file{
     my($filename, $seq) = @_;
     
@@ -1049,7 +975,7 @@ sub get_statistics_into_file{
 
 
 
-#-------------------This funtion will add a new feature into a sequence-------------------------------
+#-------------------This function will add a new feature into a sequence-------------------------------
 sub features{
     my $option = interface("ask_choose_type", 1, 0);
     my ($type, $answer, $flag, $id_sequence, $format, $filename, $seqio_read, $seqio_write, $seq);
@@ -1111,75 +1037,185 @@ sub features{
     
 #}
 
+
+
+
+#--------------------------------This function translates a DNA sequence-----------------------------------------
 sub translatee{
-    
     my $option = interface("ask_translate_type",1,0);
+    my $filename_translation;
     
-    if($option==2) {
-        
+    if($option == 2) {
+        $filename_translation = "translations/temp.txt";
         my $option2 = interface("insert_manual_seq", 1);    
-        open FILE, ">translations/temp.txt";
+        open FILE, ">$filename_translation";
         print FILE translatione($option2);
-        system 'pg temp.txt';
         close FILE;
-        print "\nSUCCEFULL TRANSLATION!!!\n result on \"translation/temp.txt\" ";    
-        print("\n(Press Enter)");
-        <>;
     }
     
-    if($option==1){
-        
-        my $id;        
-        
-        my $option = interface("give_id_sequence");
-        
-        my ($number,$flag) = interface("ask_accession_number_no_check");
-        
-        if($flag) {
-            $id = get_id_sequence($number,"accession_number");
-        }
-        else  {$id=$number;}
+    elsif($option == 1){
+        my $id;
+        #my $option = interface("give_id_sequence");
+        my ($number,$flag) = interface("ask_accession_number_no_check", 1);
+        if($flag) {$id = get_id_sequence($number,"accession_number");}
+        else{$id=$number;}
         
         my $filename = $dbm_seq{$id};
-        
         my $format = get_format($filename);
-    
         my $seqio = Bio::SeqIO->new(-file => $filename, -format => $format);
         my $seq = $seqio->next_seq;
         my $accession = $seq->accession();
-        $accession.="_$id";
-        open FILE, ">translations/$accession.txt";
+        $accession .= "_$id";
+        $filename_translation = "translations/$accession.txt";
+        open FILE, ">$filename_translation";
         print FILE translatione($seq->seq());
         close FILE;
-        print "\nSUCCEFULL TRANSLATION!!!\n result on \"translation/$accession.txt\" ";    
-        print("\n(Press Enter)");
-        <>;
     }
     
-      main(1);    
+    my $see = interface("successful_translation", 1, 0, $filename_translation);
+    if($see == 1) {
+        print "-------------------------------------------------------------------------------------------------------------------------\n";
+        system "pg $filename_translation";
+    }
+    main(1);    
 }
 
+
+
+#-----------------------------------This function calls the 'translate' operation---------------------------------------
 sub translatione{
-    
     my ($sequencia) = @_;
     my $seq = Bio::Seq->new(-seq => $sequencia);
-    
     return $seq->translate->seq;
 }
 
 
 
-#------------------------------This funtion displays a table with the information about all the sequences on the database-----------------------------------------
-sub display_all_sequences{
-    my $sql = "SELECT accession_number, accession_version, gene_name, alphabet, description, length FROM sequences;";
-    my $result = $dbh->prepare($sql);
+
+#------------------This function displays the keywords table-----------------------------
+sub display_tags{
+    my ($result,$sql,@val);
+    $sql = "Select * from tags ORDER BY id_tag;";
+    print "\tKEYWORDS TABLE\n\n";
+    $result = $dbh->prepare($sql);
     $result->execute();
+    while(@val=$result->fetchrow_array()){  
+        print "  KEYWORD = $val[1]\n";
+    }
+    print "\n";
+    return;
+}
+
+
+
+
+#--------------------This function dysplays the species table-------------------------
+sub display_species{
+    my ($sql,$result,@val);
+    $sql = "Select * from species";
+    print "\tSPECIES TABLE\n\n";
+    $result = $dbh->prepare($sql);
+    $result->execute();
+    while(@val=$result->fetchrow_array()){  
+        print "  KEYWORD = $val[1]\n";
+    }
+    print "\n";
+    return;
+}
+
+
+
+
+
+#--------------------This function dysplays the sequences table-------------------------
+sub display_sequences{
+    my ($result) = @_;
+    my $flag = 1;
     print "\n\tSEQUENCES TABLE\n\n";
     while (my $row = $result->fetchrow_hashref){
-        print "\tAccession number - ".$row->{accession_number}."\n\tAccession version - ".$row->{accession_version}."\n\tGene name - ".$row->{gene_name}.
-                "\n\tAlphabet - ".$row->{alphabet}."\n\tDescription - ".$row->{description}."\n\tLength - ".$row->{length}."\n\n";
+        $flag = 0;
+        print "\tID of the sequence - ".$row->{id_sequence}."\n\tAccession number - ".$row->{accession_number}."\n\tAccession version - ".$row->{accession_version}."\n\tGene name - "
+                .$row->{gene_name}."\n\tAlphabet - ".$row->{alphabet}."\n\tDescription - ".$row->{description}."\n\tLength - ".$row->{length}."\n\n";
+    }
+    if($flag){
+        print "There are no sequences on the database!\n\n"
     }
 }
+
+
+
+
+
+#------------------------------This function displays a table with the information about all the sequences on the database-----------------------------------------
+sub display_all_sequences{
+    my $sql = "SELECT id_sequence, accession_number, accession_version, gene_name, alphabet, description, length FROM sequences;";
+    my $result = $dbh->prepare($sql);
+    $result->execute();
+    display_sequences($result);
+}
+
+
+
+
+#-------------------------This function displays sequences that have a specific property, asking what kind of property--------------------------------------------------
+sub display_search_sequences{
+    my $option = interface("ask_search_option", 1);
+    
+    if($option == 1){display_sequences_by_keyword();}
+    elsif($option == 2){display_sequences_by_accession_number();}
+    elsif($option == 3){display_sequences_by_gene_name();}
+    elsif($option == 4){display_sequences_by_specie();}
+}
+
+
+
+#---------------------------This function displays the sequences with a determined keyword----------------------------------------------
+sub display_sequences_by_keyword{
+    my $keyword = interface("ask_keyword", 1);
+    my  $sql = "SELECT sequences.id_sequence, accession_number, accession_version, gene_name, alphabet, description, length FROM sequences, tags, seq_tags WHERE tags.tag = '".
+                      $keyword."' AND tags.id_tag = seq_tags.id_tag AND seq_tags.id_sequence = sequences.id_sequence;";
+    my $result = $dbh->prepare($sql);
+    $result->execute();
+    display_sequences($result);
+}
+
+
+
+#---------------------------This function displays the sequences with a determined accession number----------------------------------------------
+sub display_sequences_by_accession_number{
+    my $accession_number = interface("ask_accession_number", 1);
+    my  $sql = "SELECT id_sequence, accession_number, accession_version, gene_name, alphabet, description, length FROM sequences WHERE accession_number = '$accession_number';";
+    my $result = $dbh->prepare($sql);
+    $result->execute();
+    display_sequences($result);
+}
+
+
+
+
+#---------------------------This function displays the sequences with a determined gene name----------------------------------------------
+sub display_sequences_by_gene_name{
+    my $gene_name = interface("ask_gene_name", 1);
+    my  $sql = "SELECT id_sequence, accession_number, accession_version, gene_name, alphabet, description, length FROM sequences WHERE gene_name = '$gene_name';";
+    my $result = $dbh->prepare($sql);
+    $result->execute();
+    display_sequences($result);
+}
+
+
+
+
+#---------------------------This function displays the sequences with a determined specie----------------------------------------------
+sub display_sequences_by_specie{
+    my $specie = interface("ask_specie_no_display", 1);
+    my  $sql = "SELECT id_sequence, accession_number, accession_version, gene_name, alphabet, description, length FROM sequences, species WHERE specie = '$specie' AND "
+                      ."species.id_specie = sequences.id_specie;";
+    my $result = $dbh->prepare($sql);
+    $result->execute();
+    display_sequences($result);
+}
+
+
 
 
 #---------------------------This function displays all the accession numbers or all the gene names, if there are more that 1 sequence with the same accession number or gene name--------------------
@@ -1213,6 +1249,9 @@ sub display_accessions_or_names{
 }
 
 
+
+
+
 #--------------------------------------This function gets all the id_sequences with the same accession_numbers or with the same gene_name---------------------------
 sub get_accessions_or_names{
     my ($accession_number_or_gene_name, $type) = @_;
@@ -1227,10 +1266,8 @@ sub get_accessions_or_names{
         $count++;
         $accessions_or_names{$count} = $row->{id_sequence};
     }
-    
     return %accessions_or_names;
 }
-
 
 
 
@@ -1423,6 +1460,16 @@ sub interface {
     
     
     
+    elsif($type eq "ask_keyword"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        print "Insert the keyword: ";
+        $answer = <>;
+        chomp $answer;
+        return $answer;
+    }
+    
+    
+    
     elsif($type eq "ask_sequence"){
         #Here, the $something will have the ALPHABET of the sequence
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
@@ -1457,6 +1504,17 @@ sub interface {
     elsif($type eq "ask_specie"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         display_species();
+        print "Insert the specie: ";
+        $answer = <>;
+        chomp $answer;
+        return $answer;
+    }
+    
+    
+    
+    
+    elsif($type eq "ask_specie_no_display"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         print "Insert the specie: ";
         $answer = <>;
         chomp $answer;
@@ -1913,13 +1971,16 @@ sub interface {
         else {interface("successful_feature", 0, 1);}
     }
     
+    
+    
+    
     elsif($type eq "ask_translate_type"){
         
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
-        print "Do you want to use a sequence from the Database or Mannualy insert one?\n\n 1 - From Database\n 2 - Manually\n\nAnswer: ";
+        print "Do you want to use a sequence from the database or manually insert one?\n\n 1 - From database\n 2 - Manually\n\nAnswer: ";
         $option=<>;
-        if ($option==2 or $option==1) {return $option;}
+        if ($option==1 or $option==2) {return $option;}
         else {interface("ask_translate_type", 0, 1);}
                  
     }
@@ -1927,7 +1988,7 @@ sub interface {
     elsif($type eq "insert_manual_seq"){
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
         if($invalid) {print "INVALID SEQUENCE! Please choose a valid one: ";}
-        print "Insert the Sequence: ";
+        print "Insert the DNA sequence: ";
         $_=<>;
         chomp $_;
         if(/[^atgcATCG]/) {interface("insert_manual_seq",0,1);}
@@ -1935,26 +1996,58 @@ sub interface {
         
     }
     
-    elsif($type eq "search_operations"){
-        
+    
+    
+    elsif($type eq "successful_translation"){
+        #Here, the $something has the FILE NAME of the created translation file
         if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
-        if($invalid) {print "INVALID SEQUENCE! Please choose a valid one: ";}
-        print "Select the option you would like to do:\n\n 1- View Tags\n 2- View Species\n 3- View Sequences\n 4- Search Sequences\n\nAnswer: ";
-        $_=<>;
-        chomp $_;
-        if($_==1) {return (1,0);}
-        elsif($_== 2) {return (2,0);}
-        elsif($_==3) {return (3,0);}        
-        elsif ($_==4) {
-            
-            print "\n \nSelect the options which you want to use to search: \n 1- By tag\n 2- By Accession number\n 3- By Gene Name\n 4- By Specie\n\nAnswer: ";            
-            $_=<>;
-            return(4,$_);
-        }
-        
-        interface("search_operations",1,1);
-        
+        if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        else {print "Successful translation!!!\n\nThe file ".(substr $something, 13)." has been created on the 'translations' directory. Do you want to see this file?\n\n 1 - Yes, I do\n 2 - No, I don't\n\nAnswer: ";}
+        $option = <>;
+        if ($option == 1 or $option == 2) {return $option;}
+        else {interface("successful_blast", 0, 1);}
     }
+    
+    
+    
+    
+    elsif($type eq "search_operations"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        else {print "Select the option you would like to do:\n\n 1 - View keywords\n 2 - View species\n 3 - View sequences\n 4 - Search sequences\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";}
+        $option=<>;
+        if($option == 1 or $option == 2 or $option== 3 or $option == 4 or $option == 9) {return $option;}
+        elsif($option == 8){
+            system $^O eq 'MSWin32' ? 'cls' : 'clear';
+            print "HELP:\nHere, you can view some information from the database: you can view all the keywords, all species, all the sequences or some sequences with a specific property.\n\n\n";
+            interface("search_operations");
+        }
+        else {interface("search_operations",0,1);}
+    }
+    
+    
+    
+    elsif($type eq "ask_search_option"){
+        if($clear) {system $^O eq 'MSWin32' ? 'cls' : 'clear';}
+        if($invalid) {print "INVALID OPTION! Please choose a valid one: ";}
+        else {print "Select the options which you want to use to search:\n\n 1 - By keywords\n 2 - By accession number\n 3 - By gene name\n 4 - By specie\n\n 8 - Help\n 9 - Go to main page\n\nAnswer: ";}
+        $option=<>;
+        if($option == 1 or $option == 2 or $option == 3 or $option == 4 or $option == 9) {return $option;}
+        elsif($option == 8){
+            system $^O eq 'MSWin32' ? 'cls' : 'clear';
+            print "HELP:\nHere, you can view the sequences that have a specific property. You can select them choosing some keywords, accession number, gene name or by specie.\n\n\n";
+            interface("ask_search_option");
+        }
+        else {interface("ask_search_option", 0, 1);}
+    }
+    
+    
+    elsif($type eq "waiting_enter"){
+        print "\n\nPress Enter...";
+        <>;
+    }
+    
+    
         
     elsif($type eq "exit"){
         system $^O eq 'MSWin32' ? 'cls' : 'clear';
@@ -1966,13 +2059,14 @@ sub interface {
 
 
 
-##############################-----------------PERLPOD-------------------------------###############################
+__END__
 
 
+=head1 I<MAIN FUNCTIONS>
 
-=head1 MAIN
+=head2 MAIN
 
-This is the main funtion of this software. This function indicates the right path according to what the users wants to do.
+This is the main function of this software. This function indicates the right path according to what the users wants to do.
 
 B<USAGE:>
 main($clear);
@@ -1980,40 +2074,47 @@ main($clear);
 The argument that it receives is a flag to tell if it is suppose or not to clear the screen.
 
 
-=head1 DATABASE_OPERATIONS
+=head2 DATABASE_OPERATIONS
 
-This funtion will call the functions that operate with the database.
+This function calls the functions that operate with the database.
+
+B<USAGE:>
+database_operations();
 
 
-=head1 BIOINFORMATICS_OPERATIONS
+=head2 BIOINFORMATICS_OPERATIONS
 
-This function just calls the right funtions to perform a bioinformatics job.
+This function just calls the right functions to perform a bioinformatics job.
 
 B<USAGE:>
 bioinformatics_operations();
 
 
-=head1 INSERTION
+=head2 SEARCH_OPERATIONS
 
-This funtion inserts a sequence in the database: manually, from a file or from a remote database.
+This function calls the functions to perform searchs in the database.
+
+B<USAGE:>
+search_operations();
+
+
+
+
+
+
+
+
+=head1 I<INSERTION FUNCTIONS>
+
+=head2 INSERTION
+
+This function inserts a sequence in the database: manually, from a file or from a remote database.
 
 B<USAGE:>
 insertion();
 
 
-=head1 GET_FORMAT
-
-This function is capable of obtain the format of a file.
-
-B<USAGE:>
-get_format($path);
-
-The argument that it receives is the filename/path to the file.
-
-B<RETURNS:>
-The file format.
-
-=head1 INSERT_SPECIE
+=head2 INSERT_SPECIE
 
 This function verifies if the inserted specie already exists on database. If it already exists, doesn't try to insert it.
 
@@ -2023,7 +2124,7 @@ insert_specie($specie);
 The argument is a string with the specie to insert on the database.
 
 
-=head1 INSERT_SEQUENCE_DB
+=head2 INSERT_SEQUENCE_DB
 
 This function inserts the sequence informations into the database.
 
@@ -2081,7 +2182,7 @@ string with the accession number of the sequence.
 =back
 
 
-=head1 INSERT_TAGS
+=head2 INSERT_TAGS
 
 This function inserts the tags on the database, and returns id of the sequence (id auto incremented on the database).
 
@@ -2106,7 +2207,7 @@ B<RETURNS:>
 The id of the sequence (id auto incremented on the database).
 
 
-=head1 INSERT_SEQUENCE
+=head2 INSERT_SEQUENCE
 
 This function inserts the sequence on a DBM hash.
 
@@ -2121,7 +2222,7 @@ The arguments are:
 
 int with the id of the sequence (id auto incremented on the database);
  
-=item -  $seq:
+=item - $seq:
 
 Bio::Seq object, with the information aboout the sequence;
  
@@ -2136,9 +2237,9 @@ flag to tell if the sequence has an accession number (in other words, if it was 
 =back
 
 
-=head1 GENERIC_IMPORTATION
+=head2 GENERIC_IMPORTATION
 
-This funtion inserts the sequence from a remote database.
+This function inserts the sequence from a remote database.
 
 B<USAGE:>
 generic_importation($db);
@@ -2146,7 +2247,58 @@ generic_importation($db);
 The argument is a string with the database where the sequence comes from.
 
 
-=head1 REMOVAL
+=head2 INSERT_SPECIE_IMPORTATION
+
+This function inserts the specie for the insertion from remote databases.
+
+B<USAGE:>
+insert_specie_importation($specie);
+
+The argument is a string with the specie to be inserted.
+
+B<RETURNS:>
+The id of the sequence from the database.
+
+
+=head2 INSERT_SEQUENCE_IMPORTATION
+
+This function inserts the sequence for the insertion from remote databases.
+
+B<USAGE:>
+insert_sequence_importation($format,$id_specie,$seq,$version);
+
+The arguments are:
+
+=over 12
+
+=item - $format:
+
+string with the file format ("fasta", "genbank" or "swiss");
+ 
+=item - $id_specie:
+
+int with the id of the specie (id auto incremented on the database);
+
+=item - $seq:
+
+Bio::Seq object with the sequence information;
+ 
+=item - $version:
+
+flag that tells if the Bio::Seq has an accession version to be inserted (1) or not (0);
+
+=back
+
+
+
+
+
+
+
+
+=head1 I<REMOVAL FUNCTIONS>
+
+=head2 REMOVAL
 
 This function indicates the right path to remove data from the database, depending from the user's decision.
 
@@ -2154,7 +2306,7 @@ B<USAGE:>
 removal();
 
 
-=head1 REMOVE
+=head2 REMOVE
 
 This function deletes a sequence from the database and from the DBM hash (including from the folder 'sequences').
 
@@ -2176,17 +2328,24 @@ string that tells if the previous argument is an accession number (and it has th
 =back
 
 
-=head1 REMOVE_SEQ_TAGS
+=head2 REMOVE_SEQ_TAGS
 
-This funtion will remove data from the table seq_tags on the database.
+This function will remove data from the table seq_tags on the database.
 
 B<USAGE:>
 remove_seq_tags($id_sequence);
 
-This funtion receives the id of the sequence on the database.
+This function receives the id of the sequence on the database.
 
 
-=head1 MODIFICATION
+
+
+
+
+
+=head1 I<MODIFICATION FUNCTIONS>
+
+=head2 MODIFICATION
 
 This function indicates the right path to modify data from the database, depending from the user's decision.
 
@@ -2194,7 +2353,7 @@ B<USAGE:>
 modification();
 
 
-=head1 MODIFY
+=head2 MODIFY
 
 This function modifies a sequence saved on the database.
 
@@ -2219,7 +2378,7 @@ B<RETURNS:>
 An hash with the name of the files to be modified.
 
 
-=head1 CREATE_FILE
+=head2 CREATE_FILE
 
 This function creates the file where the user will modify the data.
 
@@ -2245,15 +2404,128 @@ Reference to an hash with the data that comes from the database.
 =back
 
 
-=head1 CREATE_FILE
+=head2 FETCH_INFO
 
-This funtion fetches the new information given by the user from the modified files.
+This function fetches the new information given by the user from the modified files.
 
 B<USAGE:>
 fetch_info($current, $total, $format);
 
 The arguments are:
 
+=over 12
+
+=item - $current:
+
+int that indicates the current file (e.g. 1 (current) in 3 (total) files);
+ 
+=item - $total:
+
+int that indicates the total of files to be modified;
+
+=item - $row:
+
+Reference to an hash with the data that comes from the database.
+
+=back
+
+B<RETURNS:>
+A Bio::Seq object with the information from the file.
+
+
+=head2 UPDATE_INFO
+
+This function updates the info modified by the user in the database and the DBM hash.
+
+B<USAGE:>
+update_info($seq, $id_sequence);
+
+The arguments are:
+
+=over 12
+
+=item - $seq:
+
+Bio::Seq object with the information about the sequence;
+
+=item - $id_sequence:
+
+int with the id of the sequence from the database.
+
+=back
+
+
+=head2 DISPLAY_MODIFIED
+
+This function displays the modified sequences table, and asks if the user want to see it on the program (with the 'pg' linux command).
+
+B<USAGE:>
+display_modified(%modified);
+
+The argument is an hash with the names of the files that are going to be modified.
+
+
+
+
+
+=head1 I<BLAST FUNCTIONS>
+
+=head2 BLAST
+
+This is the function that runs a remote blast. It can run a blastp, blastn, blastx, tblastn or tblastx.
+
+B<USAGE:>
+blast();
+
+
+
+
+
+
+
+=head1 I<MOTIF FUNCTIONS>
+
+=head2 MOTIF
+
+This function gets the motif and calls the right functions to serch it on the sequences on the database.
+
+B<USAGE:>
+motif();
+
+
+=head2 SEARCH_MOTIF
+
+This function searches for a motif in all the sequences of the database.
+
+B<USAGE:>
+search_motif($motif);
+
+The argument is a string with the motif (sequece) to be searched in all the sequences.
+
+B<RETURNS:>
+References for two hashes: one contains the sequences which the motif matches, and the other have a list with the positions where the motif was found for each sequence that had matched.
+
+
+=head2 DISPLAY_MATCH
+
+This function displays the match table and the positions where the motif was found, and asks if the user want to see it with the 'pg' linux command.
+
+B<USAGE:>
+display_match($match, $positions);
+
+The arguments are:
+
+=over 12
+
+=item - $match:
+
+reference for an hash that has all the sequences where the motif was found;
+
+=item - $positions:
+
+reference for an hash that has a list with all the positions where the motif was found for all the sequences in the hash before.
+
+=back
 
 
 
@@ -2262,6 +2534,36 @@ The arguments are:
 
 
 
+=head1 I<STATISTICS FUNCTIONS>
+
+=head2 STATISTICS
+
+This function will get the important information from the sequences to get some statistic information.
+
+B<USAGE:>
+statistics();
+
+
+=head2 GET_STATISTICS_INTO_FILE
+
+This function writes statistics into a file, so the user can use it for whatever he wants.
+
+B<USAGE:>
+get_statistics_into_file($filename, $seq);
+
+The arguments are:
+
+=over 12
+
+=item - $filename:
+
+string with the filename of the file where the statistics are going to be written;
+
+=item - $seq:
+
+Bio::Seq object with the information about the sequence.
+
+=back
 
 
 
@@ -2270,5 +2572,325 @@ The arguments are:
 
 
 
+=head1 I<FEATURES FUNCTIONS>
+
+=head2 FEATURES
+
+This function adds a new feature into a sequence.
+
+B<USAGE:>
+features();
 
 
+
+
+
+
+
+=head1 I<TRANSLATION FUNCTIONS>
+
+=head2 TRANSLATEE
+
+This function translates a DNA sequence.
+
+B<USAGE:>
+translatee();
+
+
+=head2 TRANSLATIONE
+
+This function calls the 'translate' operation.
+
+B<USAGE:>
+translatione();
+
+
+
+
+
+
+=head1 I<SEARCH FUNTIONS>
+
+
+=head2 DISPLAY_TAGS
+
+This function displays in the screen a keywords table.
+
+B<USAGE:>
+display_tags();
+
+
+=head2 DISPLAY_SPECIES
+
+This function dysplays in the screen a species table.
+
+B<USAGE:>
+display_species();
+
+
+=head2 DISPLAY_SEQUENCES
+
+This function dysplays in the screen a sequences table.
+
+B<USAGE:>
+display_sequences($result);
+
+The argument is the result from a SELECT statement, done againt the database.
+
+
+=head2 DISPLAY_ALL_SEQUENCES
+
+This function displays a table with the information about all the sequences on the database.
+
+B<USAGE:>
+display_all_sequences();
+
+
+=head2 DISPLAY_SEARCH_SEQUENCES
+
+This function displays sequences that have a specific property, asking what kind of property.
+
+B<USAGE:>
+display_search_sequences();
+
+
+=head2 DISPLAY_SEQUENCES_BY_KEYWORD
+
+This function displays the sequences with a determined keyword.
+
+B<USAGE:>
+display_sequences_by_keyword();
+
+
+=head2 DISPLAY_SEQUENCES_BY_ACCESSION_NUMBER
+
+This function displays the sequences with a determined accession number.
+
+B<USAGE:>
+display_sequences_by_accession_number();
+
+
+=head2 DISPLAY_SEQUENCES_BY_GENE_NAME
+
+This function displays the sequences with a determined gene name.
+
+B<USAGE:>
+display_sequences_by_gene_name();
+
+
+=head2 DISPLAY_SEQUENCES_BY_SPECIE
+
+This function displays the sequences with a determined specie.
+
+B<USAGE:>
+display_sequences_by_specie();
+
+
+=head2 DISPLAY_ACCESSIONS_OR_NAMES
+
+This function displays all the accession numbers or all the gene names, if there are more that 1 sequence with the same accession number or gene name.
+
+B<USAGE:>
+display_accessions_or_names();
+
+B<RETURNS:>
+The id of the sequence selected (auto incremented id from the database).
+
+
+
+
+
+=head1 I<AUXILIAR FUNCTIONS>
+
+=head2 GET_FORMAT
+
+This function is capable of obtain the format of a file.
+
+B<USAGE:>
+get_format($path);
+
+The argument that it receives is the filename/path to the file.
+
+B<RETURNS:>
+The file format.
+
+
+=head2 GET_ID_SEQUENCE
+
+This function will get the id of the sequence in the database.
+
+B<USAGE:>
+get_id_sequence($acc_or_name, $type);
+
+The arguments are:
+
+=over 12
+
+=item - $acc_or_name:
+
+string with the accession number or with the gene name (depending if the sequence has an accession number or a gene name);
+ 
+=item - $type:
+
+string that tells if the previous argument is an accession number (and it has the value "accession_number") or a gene name (and it has the value "gene_name").
+
+=back
+
+B<RETURNS:>
+The id of the sequence (auto incremented id from the database).
+
+
+=head2 VERIFY_ACCESSION
+
+This function verifies if the accession version already exists on the database.
+
+B<USAGE:>
+verify_accession($type, $with);
+
+The arguments are:
+
+=over 12
+
+=item - $type:
+
+string with the accession number or the accession version;
+
+=item - $with:
+
+string that says if it is to search by accession number AND accession version (and it has the value "with") or just to search by the accession number (and it has the value "wothout").
+
+=back
+
+B<RETURNS:>
+A boolean that tells if the accession number already existis (1) or not (0).
+
+
+=head2 VERIFY_VERSION
+
+This function verifies if an accession version already exists.
+
+B<USAGE:>
+verify_version($version);
+
+The argument is a string with the accession version already exists.
+
+B<RETURNS:>
+A boolean that tells if the accession version already exists (0) or not (1);
+
+
+=head2 COUNT_ACCESSION_OR_NAME
+
+This function counts the number of sequences that have the same accession number or the same gene name.
+
+B<USAGE:>
+count_accession_or_name($accession_number_or_gene_name, $type);
+
+The arguments are:
+
+=over 12
+
+=item - $accession_number_or_gene_name:
+
+string with the accession number or with the gene name (depending if the sequence has an accession number or a gene name);
+ 
+=item - $type:
+
+string that tells if the previous argument is an accession number (and it has the value "accession_number") or a gene name (and it has the value "gene_name").
+
+=back
+
+B<RETURNS:>
+int with the number of equals accession numbers or gene names.
+
+
+=head2 VERIFY_ACCESSION_IN_FILE
+
+This function verifies if the accession version already exists for the importation from a file.
+
+B<USAGE:>
+verify_accession_in_file($file);
+
+The argument is the filename/path to the file.
+
+B<RETURNS:>
+A boolean that tells if the accession number already existis (1) or not (0).
+
+
+=head2 VERIFY_GENE_NAME
+
+This function verifies if the gene name already exists on the database.
+
+B<USAGE:>
+verify_gene_name($gene_name);
+
+The argument is a string with the gene name.
+
+B<RETURNS:>
+A boolean that tells if the gene name already existis (1) or not (0).
+
+
+=head2 GET_ACCESSIONS_OR_NAMES
+
+This function gets all the id of the sequences with the same accession numbers or with the same gene name.
+
+B<USAGE:>
+get_accessions_or_names($accession_number_or_gene_name, $type)
+
+The arguments are:
+
+=over 12
+
+=item - $accession_number_or_gene_name:
+
+string with the accession number or with the gene name (depending if the sequence has an accession number or a gene name);
+ 
+=item - $type:
+
+string that tells if the previous argument is an accession number (and it has the value "accession_number") or a gene name (and it has the value "gene_name").
+
+=back
+
+B<RETURNS:>
+An hash with the id of the sequences with the same accession numbers or with the same gene name (auto incremented if from the database).
+
+
+=head2 INTERFACE
+
+This function has all the interface of the program.
+
+B<USAGE:>
+interface($type, $clear, $invalid, $something, $current, $total, $format);
+
+The arguments are:
+
+=over 12
+
+=item - $type:
+
+string with the type of the interface (e.g. "welcome", "ask_alphabet", etc.);
+ 
+=item - $clear:
+
+flag that tells if it is supposed to clear or not the screen;
+
+=item - $invalid:
+
+flag that tells if it should appear an invalid warning (like when choosing an invalid option.);
+ 
+=item - $something:
+
+value that can contain anything useful for the operation (e.g., for the interface "ask_sequence", this value has the alphabet of the sequence; fot the interface "successful_insertion", this value has the id of the sequence on the database; etc.);
+
+=item - $current:
+
+int that tells the current sequence (just for the ",modification" operation);
+ 
+=item - $total:
+
+int that tells the total number of sequences (just for the ",modification" operation);
+
+=item - $format:
+
+string with the sequence format (just for the ",modification" operation).
+
+=back
